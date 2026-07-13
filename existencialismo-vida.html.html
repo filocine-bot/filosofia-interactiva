@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Existencialismo para la Vida 🌌 — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, #0d1030 0%, #1a1f4d 45%, #12163a 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #c9b8ff; text-align: center; font-size: 25px; margin: 6px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #c9b8ff; text-align: center; font-size: 20px; margin: 6px 0; }
+  p.sub { color: #bcc4f0; text-align: center; font-size: 15px; line-height: 1.55; margin: 6px 0 10px; max-width: 480px; }
+  .tarjeta { background: rgba(255,255,255,0.97); color: #1a1f4d; border-radius: 18px; padding: 18px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+  .tarjeta.bajo-escena { border-radius: 0 0 18px 18px; }
+  input, textarea { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #b3b8e8; margin-top: 5px; font-family: inherit; outline: none; color: #1a1f4d; }
+  input:focus, textarea:focus { border-color: #c9b8ff; }
+  label { display: block; text-align: left; font-weight: bold; color: #3d4491; font-size: 14px; margin-top: 10px; }
+  .btn { display: inline-block; padding: 13px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #c9b8ff, #8f75e8); color: #1a1f4d; box-shadow: 0 5px 18px rgba(201,184,255,0.35); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.sec { background: rgba(0,0,0,0.35); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 18px; }
+  .opcion { display: block; width: 100%; padding: 13px 16px; margin-top: 9px; font-size: 15px; font-weight: 600; text-align: left; border-radius: 12px; cursor: pointer; border: 2px solid #b3b8e8; background: linear-gradient(135deg, #f0eefc, #e3e0f7); color: #1a1f4d; transition: all 0.2s; font-family: inherit; }
+  .opcion:hover { transform: translateX(4px); border-color: #8f75e8; }
+  .hud { display: flex; gap: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(201,184,255,0.35); border-radius: 26px; padding: 7px 16px; margin-bottom: 10px; font-size: 13px; margin-top: 34px; flex-wrap: wrap; justify-content: center; }
+  .hud b { color: #c9b8ff; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 60; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(201,184,255,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(201,184,255,0.3); }
+  .badge-tema { display: inline-block; background: linear-gradient(135deg, #1a1f4d, #3d4491); color: #c9b8ff; font-size: 12px; font-weight: bold; padding: 5px 14px; border-radius: 20px; margin-bottom: 8px; }
+  .herramienta { border-radius: 14px; padding: 12px 14px; margin-top: 10px; text-align: left; font-size: 14px; line-height: 1.55; background: #f0eefc; border: 2px solid #c3bbf0; }
+  .herramienta b { color: #5a48b0; display: block; margin-bottom: 3px; }
+  .para-vida { border-radius: 14px; padding: 12px 14px; margin-top: 12px; text-align: left; font-size: 14px; line-height: 1.55; background: #e8f8ef; border: 2px solid #8fd8ad; }
+  .para-vida b { color: #1d7a45; display: block; margin-bottom: 3px; }
+  .cuidado { border-radius: 14px; padding: 12px 14px; margin-top: 12px; text-align: left; font-size: 13px; line-height: 1.55; background: #fff4e0; border: 2px solid #f0c060; color: #7a5a10; }
+  .eco-linea { border-radius: 12px; padding: 10px 14px; margin-top: 10px; text-align: left; font-size: 14px; background: #eef4ff; border-left: 4px solid #8f75e8; font-style: italic; color: #3d4491; }
+  .estrella { position: fixed; color: #fff; z-index: 0; pointer-events: none; animation: titilar ease-in-out infinite; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #f0eefc; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  .contador-palabras { font-size: 12px; color: #6a70a8; text-align: right; margin-top: 3px; }
+  /* ===== ESCENA (paisaje animado) ===== */
+  .escena { position: relative; width: 100%; height: 175px; border-radius: 18px 18px 0 0; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+  .capa { position: absolute; pointer-events: none; }
+  .anim-flotar { animation: flotar 3.5s ease-in-out infinite; }
+  .anim-brillo { animation: titilar 2.2s ease-in-out infinite; }
+  .anim-pulso { animation: pulso 2.6s ease-in-out infinite; }
+  .anim-derivar { animation: derivar 9s ease-in-out infinite alternate; }
+  .anim-rodar { animation: rodar 7s linear infinite; }
+  .anim-caer { animation: caerEscena linear infinite; }
+  .anim-subir { animation: subirEscena linear infinite; }
+  .anim-rayo { animation: rayo 4s ease-in-out infinite; }
+  .titulo-escena { position: absolute; bottom: 8px; left: 12px; font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); letter-spacing: 1px; }
+  /* ===== CINE (intro tipo video) ===== */
+  #cine { display: none; position: fixed; inset: 0; z-index: 100; background: #000; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  #cine.activo { display: flex; animation: entrar 0.3s ease-out; }
+  .cine-marca { color: #8f75e8; font-size: 13px; letter-spacing: 4px; font-weight: 800; animation: cineAparecer 0.8s ease-out; }
+  .cine-num { color: #bcc4f0; font-size: 15px; letter-spacing: 3px; margin-top: 16px; animation: cineAparecer 0.8s ease-out 0.5s backwards; }
+  .cine-titulo { font-size: clamp(28px, 7vw, 46px); font-weight: 900; text-align: center; padding: 0 20px; margin-top: 8px;
+    background: linear-gradient(90deg, #ffc861, #f472b6, #c9b8ff); -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: cineZoom 1s ease-out 0.8s backwards; }
+  .cine-emoji { font-size: 62px; margin-top: 14px; animation: cineZoom 0.9s ease-out 1.2s backwards, flotar 3s ease-in-out 2s infinite; }
+  .cine-skip { color: #6a70a8; font-size: 12px; margin-top: 28px; animation: titilar 1.6s infinite; }
+  .cine-barra { position: absolute; left: 0; right: 0; height: 9vh; background: #000; border-bottom: 2px solid rgba(201,184,255,0.25); }
+  .cine-barra.abajo { bottom: 0; top: auto; border-bottom: none; border-top: 2px solid rgba(201,184,255,0.25); }
+  /* ===== TOAST INSIGNIA ===== */
+  .toast { position: fixed; top: 68px; left: 50%; transform: translateX(-50%); z-index: 90;
+    background: linear-gradient(135deg, #ffc861, #e89b2e); color: #1a1f4d; font-weight: 800; font-size: 15px;
+    padding: 12px 22px; border-radius: 40px; box-shadow: 0 8px 30px rgba(255,200,97,0.5); animation: toastAnim 2.2s ease-out forwards; text-align: center; }
+  .chip-insignia { display: inline-block; background: #fdf3d7; border: 2px solid #e8c26a; color: #7a5a10; font-size: 13px; font-weight: 700; padding: 7px 14px; border-radius: 20px; margin: 3px; animation: rebote 0.6s ease-out; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(201,184,255,0.5); } 50% { text-shadow: 0 0 26px rgba(201,184,255,1); } }
+  @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes titilar { 0%,100% { opacity: 0.25; } 50% { opacity: 1; } }
+  @keyframes pulso { 0%,100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255,255,255,0.3)); } 50% { transform: scale(1.15); filter: drop-shadow(0 0 16px rgba(255,255,255,0.8)); } }
+  @keyframes derivar { from { transform: translateX(0); } to { transform: translateX(70px); } }
+  @keyframes rodar { 0% { transform: translateX(-50px) rotate(0deg); } 100% { transform: translateX(560px) rotate(900deg); } }
+  @keyframes caerEscena { 0% { transform: translateY(-25px); opacity: 0; } 15% { opacity: 0.9; } 100% { transform: translateY(185px); opacity: 0.4; } }
+  @keyframes subirEscena { 0% { transform: translateY(180px); opacity: 0; } 15% { opacity: 0.95; } 100% { transform: translateY(-30px); opacity: 0; } }
+  @keyframes rayo { 0%, 88%, 94%, 100% { opacity: 0; } 90%, 92% { opacity: 1; } }
+  @keyframes rebote { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  @keyframes cineAparecer { from { opacity: 0; letter-spacing: 12px; } to { opacity: 1; } }
+  @keyframes cineZoom { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+  @keyframes toastAnim { 0% { transform: translateX(-50%) translateY(-30px) scale(0.6); opacity: 0; } 15% { transform: translateX(-50%) translateY(0) scale(1.05); opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-12px); } }
+</style>
+</head>
+<body>
+
+<div class="controles">
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+  <button class="ctrl-btn on" id="btnMusica" onclick="toggleMusica()">🎵</button>
+</div>
+
+<!-- ========== CINE (intro de cada estación) ========== -->
+<div id="cine" onclick="saltarCine()">
+  <div class="cine-barra"></div>
+  <div class="cine-marca">▶ FILOSOFIA PRESENTA</div>
+  <div class="cine-num" id="cineNum"></div>
+  <div class="cine-titulo" id="cineTitulo"></div>
+  <div class="cine-emoji" id="cineEmoji"></div>
+  <div class="cine-skip">toca para saltar ⏭️</div>
+  <div class="cine-barra abajo"></div>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:60px; animation:flotar 3.5s ease-in-out infinite;">🌌☕</div>
+  <h1>Existencialismo para la Vida</h1>
+  <p class="sub">Una <b style="color:#ffc861">mini-serie interactiva</b> en 7 episodios 🎬 Los existencialistas hablaron de <b style="color:#c9b8ff">tu libertad, tu ansiedad, tu búsqueda de sentido</b>. Sartre, Camus, Kierkegaard, Beauvoir y Frankl te acompañan por situaciones de tu vida real. Colecciona las <b style="color:#ffc861">7 insignias</b> 🏅.</p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>👤 Tu nombre</label>
+    <input id="inNombre" placeholder="Ej: Valentina" maxlength="40">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button class="btn sec" style="color:#3d4491; border-color:#b3b8e8; background:#f0eefc;" onclick="probarVoz()">🔊 Probar la voz</button>
+      <button class="btn" onclick="comenzar()">🎬 Iniciar episodio 1</button>
+    </div>
+  </div>
+  <div class="cuidado" style="max-width:480px;">
+    💛 <b>Antes de empezar:</b> aquí hablaremos de emociones reales como la ansiedad o la tristeza. La filosofía ayuda a pensarlas, pero no reemplaza el apoyo humano ni profesional. Si tú o alguien que conoces lo está pasando mal, hablar con un adulto de confianza, orientación escolar o la <b>Línea 106</b> (Colombia) es un acto de valentía.
+  </div>
+  <a href="index.html" class="btn sec" style="margin-top:10px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== ESTACIÓN ========== -->
+<div class="pantalla" id="p-estacion">
+  <div class="hud"><span>🎬 Episodio <b id="hudNum"></b> de 7</span><span>🏅 Insignias: <b id="hudInsignias">0</b></span><span>👤 <b id="hudNombre"></b></span></div>
+  <div class="escena" id="escenaEst"></div>
+  <div class="tarjeta bajo-escena">
+    <div class="badge-tema" id="estTema"></div>
+    <h2 style="color:#1a1f4d; font-size:18px; text-align:left;" id="estTitulo"></h2>
+    <p style="font-size:15px; line-height:1.6; margin-top:8px; text-align:left;" id="estHistoria"></p>
+    <button class="btn sec" style="color:#3d4491; border-color:#b3b8e8; background:#f0eefc; margin-top:8px;" onclick="leerEstacion()">🔊 Escuchar de nuevo</button>
+    <p style="font-weight:bold; margin-top:12px; color:#3d4491;" id="estPregunta"></p>
+    <div id="opciones"></div>
+  </div>
+</div>
+
+<!-- ========== HERRAMIENTAS ========== -->
+<div class="pantalla" id="p-revela">
+  <div class="hud"><span>🎬 Episodio <b id="hudNum2"></b> de 7</span></div>
+  <div class="escena" id="escenaRev" style="height:120px;"></div>
+  <div class="tarjeta bajo-escena">
+    <div class="eco-linea" id="ecoOpcion"></div>
+    <h2 style="color:#1a1f4d; font-size:17px;">🧰 La caja de herramientas existencialista</h2>
+    <div id="panelHerr"></div>
+    <div class="para-vida" id="paraVida"></div>
+    <div class="cuidado" id="notaCuidado" style="display:none;"></div>
+    <label style="margin-top:14px;" id="promptReflexion"></label>
+    <textarea id="inReflexion" rows="3" maxlength="700" oninput="contarPalabras()"></textarea>
+    <div class="contador-palabras" id="cuentaPal">0 palabras</div>
+    <button class="btn" id="btnSig" onclick="siguienteEstacion()" disabled>➡️ Siguiente episodio</button>
+  </div>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:60px; animation:rebote 0.8s ease-out;">🎬🌌</div>
+  <h1 style="font-size:22px;">¡Fin de temporada! Tu kit está completo</h1>
+  <p class="sub">"El hombre no es otra cosa que lo que él se hace." — Sartre. Hoy pensaste tu propia vida: eso ya es filosofar. ✨</p>
+  <div class="tarjeta" style="text-align:center;">
+    <div style="font-size:14px; color:#6a70a8; font-weight:bold;" id="finDatos"></div>
+    <div style="margin-top:12px;">
+      <div style="font-size:13px; color:#6a70a8; font-weight:bold; letter-spacing:1px;">🏅 TUS INSIGNIAS</div>
+      <div style="margin-top:8px;" id="finInsignias"></div>
+    </div>
+    <div style="color:#6a70a8; font-size:13px; letter-spacing:1px; margin-top:16px;">NOTA DE LA ACTIVIDAD</div>
+    <div id="finNota" style="font-size:50px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:23px; letter-spacing:3px;"></div>
+    <div id="finAlumno"></div>
+    <button class="btn sec" style="color:#3d4491; border-color:#b3b8e8; background:#f0eefc;" id="btnCopiar" onclick="copiarResumen()">📄 Copiar resumen para la profesora</button>
+  </div>
+  <div class="cuidado" style="max-width:480px;">💛 Recuerda: pedir ayuda es de valientes. Adulto de confianza · Orientación escolar · <b>Línea 106</b> (Colombia).</div>
+  <button class="btn" onclick="location.reload()">🔄 Volver a empezar</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<script>
+// ================= ESCENAS (paisajes animados) =================
+// a: flotar | brillo | pulso | derivar | rodar | caer | subir | rayo
+const cap = (e, x, y, s, a, d) => ({ e, x, y, s, a, d: d || 0 });
+const ESCENAS = {
+  cafe: { cielo: "linear-gradient(180deg,#0d1030,#2a2258 70%,#3d2c6e)", capas: [cap("🌙",78,8,34,"brillo"), cap("✨",15,14,14,"brillo",0.5), cap("✨",50,8,11,"brillo",1.2), cap("🏙️",2,52,52,"derivar"), cap("🏙️",62,50,58,"derivar",2), cap("☕",44,62,40,"pulso"), cap("💭",52,34,22,"subir 6s",0)] },
+  desierto: { cielo: "linear-gradient(180deg,#f7b267,#e8890c 55%,#a4530a)", capas: [cap("☀️",74,10,40,"pulso"), cap("🏔️",4,42,64,""), cap("🏔️",58,46,56,"",0), cap("🪨",0,68,38,"rodar"), cap("🌵",84,64,30,""), cap("🦅",30,18,18,"derivar",1)] },
+  tormenta: { cielo: "linear-gradient(180deg,#2c3350,#465178 60%,#333c5c)", capas: [cap("🌩️",20,8,38,"rayo"), cap("🌩️",65,12,30,"rayo",2), cap("☁️",5,10,44,"derivar"), cap("☁️",55,4,52,"derivar",1.5), cap("💧",18,0,15,"caer 2.2s",0), cap("💧",38,0,13,"caer 1.8s",0.6), cap("💧",58,0,16,"caer 2.5s",1.1), cap("💧",78,0,14,"caer 2s",0.3), cap("🌫️",30,62,50,"derivar",2)] },
+  ventana: { cielo: "linear-gradient(180deg,#141a3d,#243059 60%,#1a2142)", capas: [cap("🌙",10,10,30,"brillo"), cap("💧",30,0,13,"caer 2.4s",0), cap("💧",52,0,12,"caer 2s",0.8), cap("💧",72,0,14,"caer 2.7s",0.4), cap("🕯️",70,55,42,"pulso"), cap("🤝",34,58,38,"flotar"), cap("💛",46,36,18,"subir 5s",1)] },
+  neon: { cielo: "linear-gradient(135deg,#2b1055,#7597de00),linear-gradient(180deg,#3b1263,#a13670 70%,#4a1a5c)", capas: [cap("🌃",4,44,56,""), cap("🌃",62,42,60,""), cap("📱",42,52,46,"pulso"), cap("❤️",30,60,18,"subir 4s",0), cap("👍",58,60,17,"subir 4.6s",1), cap("💬",44,60,16,"subir 5.2s",2), cap("✨",18,14,13,"brillo",0.4), cap("✨",76,10,15,"brillo",1)] },
+  bosque: { cielo: "linear-gradient(180deg,#7ec8a9,#3d9970 55%,#1d6645)", capas: [cap("☀️",76,8,38,"pulso"), cap("🌳",4,42,56,"flotar"), cap("🌲",68,44,52,"flotar",1), cap("🌲",34,50,44,"flotar",0.5), cap("🦋",26,26,20,"derivar"), cap("🐦",54,16,17,"derivar",2), cap("🍃",40,0,15,"caer 4s",0.5), cap("🍃",64,0,13,"caer 5s",1.5)] },
+  amanecer: { cielo: "linear-gradient(180deg,#c9b8ff,#f0c9a0 55%,#e8a86a)", capas: [cap("🌅",38,30,52,"pulso"), cap("🕊️",14,18,26,"derivar"), cap("🕊️",60,26,20,"derivar",1.6), cap("🕯️",78,58,32,"pulso",0.5), cap("✨",28,10,14,"brillo",0.3), cap("⚖️",44,60,34,"flotar")] },
+};
+
+// ================= INSIGNIAS =================
+const INSIGNIAS = ["🗝️ Llave de la Libertad", "🪨 Roca de Sísifo", "🌀 Domador del Vértigo", "🕊️ Corazón que Acompaña", "💎 Sello de Autenticidad", "🌍 Guardián del Futuro", "⚖️ Mente que Debate"];
+
+// ================= ESTACIONES =================
+const ESTACIONES = [
+  {
+    escena: "cafe", emoji: "🗝️",
+    tema: "🗝️ Libertad y decisiones — Sartre y Beauvoir",
+    titulo: "La decisión que es tuya",
+    historia: "Estás en once. Tu familia espera que estudies medicina 'porque da estabilidad', tus amigos te dicen que sigas la corriente, y tú sueñas con algo distinto. Sientes un nudo en el estómago: la decisión definirá tu camino… y es TUYA.",
+    pregunta: "¿Cómo enfrentas la decisión?",
+    opciones: [
+      { txt: "Hago lo que mi familia dice: ellos saben más y así nadie se decepciona.", eco: "Elegiste dejar que otros decidan. Sartre llamaría a eso 'mala fe': fingir que no tenemos opción… cuando siempre la tenemos." },
+      { txt: "Decido yo: escucho consejos, me informo, pero asumo que la elección y sus riesgos son míos.", eco: "Elegiste la autenticidad: asumir tu libertad con sus riesgos. Sartre asentiría desde su mesa del café." },
+      { txt: "Aplazo la decisión indefinidamente: si no elijo, no me equivoco.", eco: "Ojo: para Sartre, no elegir TAMBIÉN es una elección… solo que hecha con los ojos cerrados." },
+    ],
+    herr: [
+      { fil: "Jean-Paul Sartre", txt: "\"Estamos condenados a ser libres\": nadie puede elegir por ti, y hasta no elegir es elegir. Llamó 'mala fe' a engañarnos diciendo 'yo no tengo opción', para no cargar con la responsabilidad." },
+      { fil: "Simone de Beauvoir", txt: "Tu existencia se construye con tus proyectos: no eres lo que otros planearon para ti, sino lo que decides hacer con tu vida. Y la libertad se ejercita como un músculo." },
+    ],
+    vida: "Pedir consejo NO es entregar tu libertad: escúchalos a todos, infórmate… y firma tú la decisión. Hacerte cargo de tus elecciones es el primer paso de la vida adulta.",
+    prompt: "✍️ ¿En qué decisión de tu vida sientes presión de otros? ¿Qué elegirías si la decisión fuera 100% tuya? (mínimo 12 palabras)",
+  },
+  {
+    escena: "desierto", emoji: "🪨",
+    tema: "🪨 El absurdo — Albert Camus",
+    titulo: "Domingo por la noche",
+    historia: "Es domingo en la noche y piensas: colegio, tareas, exámenes, levantarse, repetir… '¿Para qué tanto esfuerzo si al final todo se olvida?' A veces la rutina parece un ciclo sin sentido: como empujar una roca montaña arriba solo para verla caer de nuevo.",
+    pregunta: "¿Qué haces con esa sensación?",
+    opciones: [
+      { txt: "Dejo de esforzarme: si nada tiene sentido garantizado, nada importa.", eco: "Camus llamaría a eso rendirse ante el absurdo. Él propuso justo lo contrario: la rebelión." },
+      { txt: "Espero a que alguien (la sociedad, las redes, la suerte) me diga cuál es el sentido de mi vida.", eco: "El sentido no llega por domicilio: para los existencialistas, se construye. Nadie puede dártelo hecho." },
+      { txt: "Acepto que el sentido no viene dado… y decido construirlo yo con lo que amo y con quienes amo.", eco: "¡Esa es la rebelión de Camus! Crear sentido en un mundo que no lo trae incluido: el acto más valiente." },
+    ],
+    herr: [
+      { fil: "Albert Camus", txt: "El 'absurdo' es el choque entre nuestra sed de sentido y el silencio del universo. Su respuesta no fue rendirse, sino rebelarse: vivir con pasión de todas formas. Por eso escribió: \"Hay que imaginar a Sísifo feliz\" — hasta empujar la roca puede ser NUESTRA roca." },
+      { fil: "Viktor Frankl", txt: "Psiquiatra y sobreviviente de los campos nazis: descubrió que el sentido se encuentra en tres caminos: una obra que crear, un amor que cuidar, o una actitud digna ante lo inevitable." },
+    ],
+    vida: "Cuando la rutina pese, conecta lo que haces con algo que te importe: una meta, una persona, tu curiosidad. La misma tarea cambia cuando sabes tu 'para qué'.",
+    prompt: "✍️ ¿Cuál es tu 'roca' (eso rutinario que te pesa)? ¿Con qué 'para qué' podrías conectarla? (mínimo 12 palabras)",
+  },
+  {
+    escena: "tormenta", emoji: "🌀",
+    tema: "🌀 La angustia — Kierkegaard",
+    titulo: "El vértigo del futuro",
+    historia: "Se acercan las pruebas, las decisiones, la pregunta eterna de los adultos: '¿y tú qué vas a hacer con tu vida?'. Sientes ansiedad: el corazón acelerado, mil escenarios en la cabeza, el vértigo de tantas posibilidades abiertas.",
+    pregunta: "¿Cómo respondes a ese vértigo?",
+    opciones: [
+      { txt: "Evito pensar en el futuro: me distraigo 24/7 con el celular para no sentir.", eco: "Anestesiar la angustia no la resuelve: solo la aplaza. Kierkegaard diría que huyes de tu propia libertad." },
+      { txt: "Reconozco la ansiedad, la nombro… y doy UN paso pequeño y concreto hoy.", eco: "Sabia elección: nombrar lo que sientes le baja el volumen, y un paso pequeño le gana al vértigo." },
+      { txt: "Me exijo tener TODA mi vida resuelta ya mismo, o me declaro un fracaso.", eco: "Nadie tiene la vida resuelta a los 16… ni a los 60. Esa autoexigencia es el vértigo disfrazado de látigo." },
+    ],
+    herr: [
+      { fil: "Søren Kierkegaard", txt: "Llamó a la angustia \"el vértigo de la libertad\": la sentimos precisamente porque nuestra vida está ABIERTA y podemos elegir. Sentir angustia ante el futuro no es estar roto: es estar vivo y libre." },
+      { fil: "Martin Heidegger", txt: "La angustia, bien escuchada, nos despierta: nos saca del piloto automático y nos pregunta si estamos viviendo NUESTRA vida o la que 'se' espera de nosotros." },
+    ],
+    vida: "La ansiedad ocasional es humana y se maneja: respira lento, nombra lo que sientes, divide lo enorme en pasos pequeños y habla de ello con alguien.",
+    cuidado: "💛 Importante: si la ansiedad es muy intensa, constante o te impide dormir, comer o disfrutar, eso merece apoyo real: un adulto de confianza, orientación escolar o un profesional de la salud. En Colombia puedes llamar a la <b>Línea 106</b>. Pedir ayuda no es debilidad: es autocuidado inteligente.",
+    prompt: "✍️ ¿Qué situación te genera ansiedad y cuál sería UN paso pequeño que podrías dar esta semana? (mínimo 12 palabras)",
+  },
+  {
+    escena: "ventana", emoji: "🕊️",
+    tema: "🕊️ Sentido y cuidado — Viktor Frankl",
+    titulo: "Tu amiga ya no ríe",
+    historia: "Tu amiga de siempre está cambiada: se aísla, dice que 'todo le da igual', que 'no sirve para nada'. Ya no ríe como antes. Te preocupa de verdad… y no sabes qué hacer ni qué decir.",
+    pregunta: "¿Cómo la acompañas?",
+    opciones: [
+      { txt: "Le digo que ponga de su parte y sonría, que hay gente peor.", eco: "La intención es buena, pero frases así hacen sentir culpa, no alivio. La tristeza profunda no se cura con 'ánimo'." },
+      { txt: "La escucho sin juzgar, le digo que me importa, la animo a buscar apoyo de un adulto o profesional… y no la dejo sola en eso.", eco: "Eso es exactamente acompañar: presencia + escucha + puente hacia la ayuda. Puedes marcar una diferencia enorme." },
+      { txt: "No le digo nada para no incomodarla: ya se le pasará.", eco: "El silencio, aunque nazca del miedo a equivocarse, puede sentirse como abandono. Un 'estoy aquí' vale oro." },
+    ],
+    herr: [
+      { fil: "Viktor Frankl", txt: "Sobrevivió a los campos de concentración y fundó la logoterapia: descubrió que el ser humano puede resistir casi cualquier 'cómo' si encuentra un 'porqué'. Pero también enseñó que nadie debe atravesar el sufrimiento en soledad: el acompañamiento humano es parte de la sanación." },
+      { fil: "Simone de Beauvoir", txt: "La libertad no se vive en solitario: se realiza CON otros. Cuidar del otro, hacernos responsables de su fragilidad, es de las formas más altas de ser humanos." },
+    ],
+    vida: "La depresión NO es pereza, ni debilidad, ni falta de voluntad: es una condición real de salud que mejora con apoyo profesional. Tu papel como amigo no es curarla: es escuchar sin juzgar, estar presente y ayudar a construir el puente hacia un adulto de confianza o un profesional.",
+    cuidado: "💛 Si un amigo o amiga te habla de no querer seguir viviendo, tómalo SIEMPRE en serio: acompáñalo y avisa de inmediato a un adulto de confianza. No es traicionar un secreto: es proteger una vida. <b>Línea 106</b> (Colombia) — atención en salud mental.",
+    prompt: "✍️ ¿Qué le dirías a tu amiga usando lo que aprendiste? Escribe tus palabras reales. (mínimo 12 palabras)",
+  },
+  {
+    escena: "neon", emoji: "💎",
+    tema: "💎 Autenticidad — Heidegger, Sartre y Beauvoir",
+    titulo: "La vida en la vitrina",
+    historia: "Scrolleas antes de dormir: cuerpos perfectos, viajes, risas, éxito. Tu vida, comparada, parece 'poco'. Te descubres posando para parecer otra persona y contando likes como si midieran cuánto vales.",
+    pregunta: "¿Qué haces con esa comparación?",
+    opciones: [
+      { txt: "Me exijo aparentar esa vida perfecta: si no lo muestro, no cuenta.", eco: "Vivir para la vitrina es agotador: actúas un personaje… y el público nunca queda satisfecho." },
+      { txt: "Sigo usando redes, pero recordando que son vitrinas editadas: mi valor no se mide en likes.", eco: "Esa es la mirada lúcida: disfrutar la vitrina sin confundirla con la vida. Los existencialistas aplaudirían." },
+      { txt: "Culpo a los demás por mi malestar… y sigo scrolleando hasta las 2 a.m.", eco: "Identificar el problema es un inicio, pero sin cambiar nada, la comparación seguirá cobrando peaje cada noche." },
+    ],
+    herr: [
+      { fil: "Martin Heidegger", txt: "Habló del 'se' anónimo: vivir según lo que 'se' usa, 'se' dice, 'se' espera… una existencia inauténtica dirigida por nadie en particular. Despertar es preguntarte: ¿esto lo quiero YO, o lo quiere 'la gente'?" },
+      { fil: "Jean-Paul Sartre", txt: "\"El infierno son los otros\": no porque los demás sean malos, sino porque podemos quedar presos de su mirada, existiendo solo para ser vistos. La salida es recuperar tu propio proyecto." },
+      { fil: "Simone de Beauvoir", txt: "No naces siendo una imagen: te construyes. Tu identidad es un proyecto tuyo, no un producto para audiencias." },
+    ],
+    vida: "Cura tu feed (sigue cuentas que te sumen), mide tu semana por lo vivido y no por lo publicado, y recuerda: nadie postea sus lunes tristes — comparas tu detrás de cámaras con el tráiler de los demás.",
+    prompt: "✍️ ¿En qué momento te has sentido 'actuando para la vitrina'? ¿Qué harías distinto? (mínimo 12 palabras)",
+  },
+  {
+    escena: "bosque", emoji: "🌍",
+    tema: "🌍 Responsabilidad ambiental — Sartre y Hans Jonas",
+    titulo: "El planeta en tus manos (sí, las tuyas)",
+    historia: "Ves las noticias: incendios, ríos secos, calor récord. Sientes una mezcla de rabia, miedo e impotencia: '¿Qué puede hacer alguien de mi edad frente a algo tan gigante?'. A eso ya le pusieron nombre: eco-ansiedad.",
+    pregunta: "¿Qué haces con esa impotencia?",
+    opciones: [
+      { txt: "Nada: que lo arreglen los gobiernos y las empresas, que fueron los que dañaron todo.", eco: "Tienen la mayor responsabilidad, es cierto… pero esperar sentado convierte la rabia en resignación." },
+      { txt: "Consumo noticias catastróficas todo el día y colapso de angustia.", eco: "Informarse sí; intoxicarse no. La angustia sin acción solo te desgasta a ti… no al problema." },
+      { txt: "Convierto la preocupación en acción a mi escala: hábitos, proyectos escolares, y exigir cambios junto a otros.", eco: "De espectador a actor: exactamente lo que Sartre y Jonas propondrían. La acción es el antídoto de la eco-ansiedad." },
+    ],
+    herr: [
+      { fil: "Jean-Paul Sartre", txt: "\"Al elegirme, elijo a la humanidad\": cada acción tuya propone un modelo de mundo. Cuando decides cómo consumir, moverte o participar, estás diciendo 'así deberíamos vivir todos'." },
+      { fil: "Hans Jonas", txt: "Formuló el 'principio de responsabilidad' para la era tecnológica: obra de tal modo que los efectos de tus acciones sean compatibles con la vida futura en la Tierra. Somos la primera generación responsable de las que aún no nacen." },
+    ],
+    vida: "La eco-ansiedad baja cuando pasas de espectador a actor: una acción pequeña y CONSTANTE (y mejor si es colectiva) vale más que mil angustias frente a la pantalla.",
+    prompt: "✍️ Propón UNA acción ambiental concreta que podrías empezar en tu colegio o casa esta semana. (mínimo 12 palabras)",
+  },
+  {
+    escena: "amanecer", emoji: "⚖️",
+    tema: "🕊️ Dignidad y libertad — el gran debate",
+    titulo: "El debate de la eutanasia",
+    historia: "En clase estalla el debate: la eutanasia para pacientes con enfermedades terminales y sufrimiento extremo que la solicitan libremente. En Colombia está despenalizada bajo condiciones estrictas y sigue generando profundas discusiones. Unos hablan de 'muerte digna'; otros, de 'proteger la vida siempre'. No es un tema para respuestas rápidas: es para pensar en serio.",
+    pregunta: "¿Cuál postura quieres EXPLORAR? (ninguna es 'la correcta': el objetivo es pensar)",
+    opciones: [
+      { txt: "La autonomía: una persona con sufrimiento terminal debería poder decidir sobre el final de su propia vida.", eco: "Exploras el argumento de la libertad: la dignidad como ser autor de la propia existencia hasta el final." },
+      { txt: "La protección: la vida tiene un valor que la sociedad debe cuidar siempre; la respuesta son los cuidados paliativos.", eco: "Exploras el argumento del valor incondicional de la vida y del deber de aliviar el dolor sin terminar la vida." },
+      { txt: "El punto medio: regulación estrictísima, y siempre primero acompañamiento y cuidados paliativos.", eco: "Exploras la vía prudencial: tomar en serio las razones de ambos lados y exigir las máximas garantías." },
+    ],
+    herr: [
+      { fil: "Mirada existencialista (Sartre, Beauvoir)", txt: "Si somos libres y responsables de nuestra existencia, esa autoría podría incluir decisiones sobre su final ante un sufrimiento irreversible: para esta mirada, la dignidad está en poder seguir siendo sujeto de tu vida, no objeto del dolor." },
+      { fil: "Mirada del deber y del cuidado (Kant y otros)", txt: "La vida humana tiene un valor incondicional que no depende de sus circunstancias; el deber de la sociedad y la medicina sería aliviar el sufrimiento (cuidados paliativos) y acompañar, nunca terminar una vida. Tradiciones religiosas comparten esta preocupación." },
+      { fil: "Viktor Frankl", txt: "Testigo del sufrimiento extremo, sostuvo que incluso allí puede hallarse sentido, y que el acompañamiento genuino cambia lo que muchas personas desean. Su lección para el debate: antes de cualquier decisión, la sociedad debe garantizar que nadie sufra solo ni sin cuidados." },
+    ],
+    vida: "Los grandes debates éticos no se ganan gritando: se piensan escuchando las MEJORES razones del otro lado. Este debate trata de pacientes terminales y decisiones médicas estrictamente reguladas: pensarlo filosóficamente es lo contrario de tomarlo a la ligera.",
+    prompt: "✍️ Escribe tu postura con al menos UNA razón a favor y UNA en contra que respetes de la otra orilla. (mínimo 12 palabras)",
+  },
+];
+
+// ================= ESTADO =================
+let idx = 0, curso = "", nombre = "", vozOn = true, musicaOn = true;
+let respuestas = [], insignias = [];
+let audioCtx = null, musicaTimer = null, masterGain = null, cineTimer = null;
+
+// ================= AUDIO =================
+function ctx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+const ACORDES = [[220, 277.18, 329.63], [246.94, 293.66, 369.99], [196, 246.94, 293.66], [174.61, 220, 261.63]];
+function iniciarMusica() {
+  if (musicaTimer || !musicaOn) return;
+  try {
+    const c = ctx(); masterGain = c.createGain(); masterGain.gain.value = 0.012; masterGain.connect(c.destination);
+    let paso = 0;
+    musicaTimer = setInterval(() => {
+      try {
+        const t = c.currentTime, ac = ACORDES[Math.floor(paso / 4) % 4];
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = "sine"; o.frequency.value = ac[paso % 3];
+        g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.6, t + 0.08); g.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+        o.connect(g).connect(masterGain); o.start(t); o.stop(t + 1.4);
+        paso++;
+      } catch (e) {}
+    }, 650);
+  } catch (e) {}
+}
+function detenerMusica() { if (musicaTimer) clearInterval(musicaTimer); musicaTimer = null; if (masterGain) try { masterGain.disconnect(); } catch (e) {} masterGain = null; }
+function toggleMusica() { musicaOn = !musicaOn; if (musicaOn) iniciarMusica(); else detenerMusica(); const b = document.getElementById("btnMusica"); b.textContent = musicaOn ? "🎵" : "🔕"; b.classList.toggle("on", musicaOn); }
+function sndCine() {
+  try {
+    const c = ctx(), t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "sawtooth"; o.frequency.setValueAtTime(80, t); o.frequency.exponentialRampToValueAtTime(400, t + 1);
+    g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.07, t + 0.4); g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + 1.5);
+    [523.25, 659.25].forEach((f, i) => { const o2 = c.createOscillator(), g2 = c.createGain(); o2.type = "sine"; o2.frequency.value = f; g2.gain.setValueAtTime(0.001, t + 1 + i * 0.15); g2.gain.exponentialRampToValueAtTime(0.12, t + 1.05 + i * 0.15); g2.gain.exponentialRampToValueAtTime(0.001, t + 1.8 + i * 0.15); o2.connect(g2).connect(c.destination); o2.start(t + 1 + i * 0.15); o2.stop(t + 1.9 + i * 0.15); });
+  } catch (e) {}
+}
+function sndInsignia() {
+  try { const c = ctx(), t = c.currentTime;
+    [783.99, 987.77, 1318.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.001, t + i * 0.1); g.gain.exponentialRampToValueAtTime(0.2, t + i * 0.1 + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.6); o.connect(g).connect(c.destination); o.start(t + i * 0.1); o.stop(t + i * 0.1 + 0.7); });
+  } catch (e) {}
+}
+
+// ================= VOZ (reparada: por frases + reanudación) =================
+function vozES() {
+  const vs = speechSynthesis.getVoices();
+  return vs.find((v) => /es[-_]/i.test(v.lang || "")) || vs.find((v) => (v.lang || "").startsWith("es")) || null;
+}
+function hablar(txt, cancelar = true) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    if (cancelar) speechSynthesis.cancel();
+    // Dividir en frases cortas: los navegadores cortan los textos largos
+    const frases = (txt.match(/[^.!?…:]+[.!?…:]*/g) || [txt]).map((f) => f.trim()).filter(Boolean);
+    const v = vozES();
+    frases.forEach((f) => {
+      const u = new SpeechSynthesisUtterance(f);
+      u.lang = "es-ES"; u.rate = 0.97; u.pitch = 1.02;
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    });
+  } catch (e) {}
+}
+// Truco para Chrome: reanudar si se pausa solo
+setInterval(() => { try { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {} }, 4000);
+if ("speechSynthesis" in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+function probarVoz() { ctx(); hablar("¡Hola! Soy la voz de FilosofIA Interactiva. Si me escuchas, todo está listo para comenzar los episodios."); }
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+function limpiarEmoji(s) { return (s || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").replace(/<[^>]+>/g, "").trim(); }
+
+// ================= ESCENAS =================
+function pintarEscena(contId, nombreEsc, tituloEsc) {
+  const esc = ESCENAS[nombreEsc];
+  const c = document.getElementById(contId);
+  c.style.background = esc.cielo;
+  c.innerHTML = esc.capas.map((k) => {
+    const partes = (k.a || "").split(" ");
+    const anim = partes[0] ? "anim-" + partes[0] : "";
+    const dur = partes[1] ? `animation-duration:${partes[1]};` : "";
+    return `<div class="capa ${anim}" style="left:${k.x}%;top:${k.y}%;font-size:${k.s}px;animation-delay:${k.d}s;${dur}">${k.e}</div>`;
+  }).join("") + (tituloEsc ? `<div class="titulo-escena">🎬 ${tituloEsc}</div>` : "");
+}
+
+// ================= CINE =================
+function abrirCine(callback) {
+  const e = ESTACIONES[idx];
+  document.getElementById("cineNum").textContent = "— EPISODIO " + (idx + 1) + " DE 7 —";
+  document.getElementById("cineTitulo").textContent = e.titulo;
+  document.getElementById("cineEmoji").textContent = e.emoji;
+  const cine = document.getElementById("cine");
+  cine.classList.add("activo");
+  sndCine();
+  clearTimeout(cineTimer);
+  cine._callback = callback;
+  cineTimer = setTimeout(saltarCine, 3400);
+}
+function saltarCine() {
+  clearTimeout(cineTimer);
+  const cine = document.getElementById("cine");
+  if (!cine.classList.contains("activo")) return;
+  cine.classList.remove("activo");
+  if (cine._callback) { const cb = cine._callback; cine._callback = null; cb(); }
+}
+
+// ================= FLUJO =================
+function comenzar() {
+  ctx();
+  curso = document.getElementById("inCurso").value.trim();
+  nombre = document.getElementById("inNombre").value.trim() || "Estudiante";
+  document.getElementById("hudNombre").textContent = nombre;
+  iniciarMusica();
+  hablar("Bienvenida, bienvenido al café existencialista, " + nombre + ". Aquí la filosofía no está en los libros: está en tu vida. Siete episodios te esperan bajo las estrellas. ¡Que empiece la función!");
+  abrirCine(renderEstacion);
+}
+function renderEstacion() {
+  const e = ESTACIONES[idx];
+  document.getElementById("hudNum").textContent = idx + 1;
+  document.getElementById("hudInsignias").textContent = insignias.length;
+  pintarEscena("escenaEst", e.escena, e.titulo);
+  document.getElementById("estTema").textContent = e.tema;
+  document.getElementById("estTitulo").textContent = e.emoji + " " + e.titulo;
+  document.getElementById("estHistoria").textContent = e.historia;
+  document.getElementById("estPregunta").textContent = e.pregunta;
+  const cont = document.getElementById("opciones");
+  cont.innerHTML = "";
+  e.opciones.forEach((op, i) => {
+    const b = document.createElement("button");
+    b.className = "opcion";
+    b.textContent = String.fromCharCode(65 + i) + ") " + op.txt;
+    b.onclick = () => elegir(i);
+    cont.appendChild(b);
+  });
+  mostrar("p-estacion");
+  setTimeout(leerEstacion, 400);
+}
+function leerEstacion() {
+  const e = ESTACIONES[idx];
+  hablar("Episodio " + (idx + 1) + ". " + limpiarEmoji(e.titulo) + ". " + e.historia + " " + e.pregunta + " " + e.opciones.map((o, i) => "Opción " + "ABC"[i] + ": " + o.txt).join(" "));
+}
+function elegir(i) {
+  const e = ESTACIONES[idx];
+  const op = e.opciones[i];
+  respuestas.push({ estacion: e.titulo, opcion: op.txt, reflexion: "" });
+  document.getElementById("hudNum2").textContent = idx + 1;
+  pintarEscena("escenaRev", e.escena, "");
+  document.getElementById("ecoOpcion").textContent = "💬 " + op.eco;
+  document.getElementById("panelHerr").innerHTML = e.herr.map((h) => `<div class="herramienta"><b>🕯️ ${h.fil}</b>${h.txt}</div>`).join("");
+  document.getElementById("paraVida").innerHTML = "<b>💚 Para tu vida real</b>" + e.vida;
+  const nc = document.getElementById("notaCuidado");
+  if (e.cuidado) { nc.style.display = "block"; nc.innerHTML = e.cuidado; } else { nc.style.display = "none"; }
+  document.getElementById("promptReflexion").textContent = e.prompt;
+  document.getElementById("inReflexion").value = "";
+  document.getElementById("cuentaPal").textContent = "0 palabras";
+  const btn = document.getElementById("btnSig");
+  btn.disabled = true;
+  btn.textContent = idx + 1 < ESTACIONES.length ? "➡️ Siguiente episodio" : "🎬 Ver el gran final";
+  mostrar("p-revela");
+  hablar(op.eco + " Ahora, la caja de herramientas. " + e.herr.map((h) => limpiarEmoji(h.fil) + " dice: " + limpiarEmoji(h.txt)).join(" ") + " Para tu vida real: " + limpiarEmoji(e.vida));
+}
+function contarPalabras() {
+  const n = document.getElementById("inReflexion").value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById("cuentaPal").textContent = n + " palabras" + (n < 12 ? " (mínimo 12)" : " ✅");
+  document.getElementById("btnSig").disabled = n < 12;
+}
+function toast(html) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = html;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2300);
+}
+function siguienteEstacion() {
+  respuestas[respuestas.length - 1].reflexion = document.getElementById("inReflexion").value.trim();
+  insignias.push(INSIGNIAS[idx]);
+  sndInsignia();
+  toast("🏅 ¡Insignia ganada!<br>" + INSIGNIAS[idx]);
+  idx++;
+  setTimeout(() => {
+    if (idx < ESTACIONES.length) abrirCine(renderEstacion);
+    else finalizar();
+  }, 1200);
+}
+function notaFinal() {
+  const hechas = respuestas.filter((r) => r.reflexion).length;
+  const prom = hechas ? respuestas.reduce((s, r) => s + r.reflexion.split(/\s+/).filter(Boolean).length, 0) / hechas : 0;
+  let n = 1 + hechas * 0.5 + (prom >= 25 ? 0.5 : prom >= 16 ? 0.3 : 0);
+  return Math.max(1, Math.min(5, Math.round(n * 10) / 10));
+}
+function finalizar() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const nota = notaFinal();
+  document.getElementById("finDatos").textContent = (curso ? "🎓 " + curso + " · " : "") + "👤 " + nombre;
+  document.getElementById("finInsignias").innerHTML = insignias.map((i, k) => `<span class="chip-insignia" style="animation-delay:${k * 0.12}s">${i}</span>`).join("");
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML = [1, 2, 3, 4, 5].map((s) => `<span style="opacity:${nota >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("");
+  document.getElementById("finAlumno").innerHTML = `<div class="fila-alumno"><span>👤 ${nombre}</span><b style="color:${nEl.style.color}">${nota.toFixed(1)}</b></div>`;
+  mostrar("p-final");
+  hablar("¡Fin de temporada, " + nombre + "! Coleccionaste " + insignias.length + " insignias. Llevas contigo la libertad de Sartre, la rebelión de Camus, la angustia lúcida de Kierkegaard y el sentido de Frankl. Tu nota de la actividad es " + nota.toFixed(1).replace(".", " punto ") + ". Y recuerda: pedir ayuda es de valientes.");
+}
+function copiarResumen() {
+  const nota = notaFinal();
+  let txt = "🌌 EXISTENCIALISMO PARA LA VIDA — FilosofIA Interactiva\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "👤 Estudiante: " + nombre + " | 📋 Nota: " + nota.toFixed(1) + " | 🏅 Insignias: " + insignias.length + "/7\n\n--- RESPUESTAS Y REFLEXIONES ---\n";
+  respuestas.forEach((r, i) => { txt += (i + 1) + ". " + r.estacion + "\n   Eligió: " + r.opcion + "\n   Reflexión: " + r.reflexion + "\n"; });
+  const fin = () => { const b = document.getElementById("btnCopiar"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar resumen para la profesora"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+
+// ================= CIELO ESTRELLADO =================
+for (let i = 0; i < 26; i++) {
+  const s = document.createElement("div");
+  s.className = "estrella";
+  s.textContent = i % 5 === 0 ? "✦" : "·";
+  s.style.left = (i * 17 + 3) % 100 + "%";
+  s.style.top = (i * 13 + 5) % 90 + "%";
+  s.style.fontSize = 8 + (i % 4) * 5 + "px";
+  s.style.animationDuration = 2 + (i % 5) + "s";
+  s.style.animationDelay = i * 0.3 + "s";
+  document.body.appendChild(s);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartas de Batalla Filosófica 🃏 — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: radial-gradient(ellipse at 50% 0%, #3d1a4d 0%, #1d0d2e 55%, #12081f 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 600px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #ffb84d; text-align: center; font-size: 26px; margin: 6px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #ffb84d; text-align: center; font-size: 19px; margin: 6px 0; }
+  p.sub { color: #d8c3ee; text-align: center; font-size: 15px; line-height: 1.55; margin: 6px 0 10px; max-width: 480px; }
+  .tarjeta { background: rgba(255,255,255,0.97); color: #2d1440; border-radius: 18px; padding: 18px; width: 100%; max-width: 470px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; }
+  input { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #c3a8e0; margin-top: 5px; font-family: inherit; outline: none; color: #2d1440; }
+  label { display: block; text-align: left; font-weight: bold; color: #5a3388; font-size: 14px; margin-top: 10px; }
+  .btn { display: inline-block; padding: 13px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #ffb84d, #e8890c); color: #2d1440; box-shadow: 0 5px 18px rgba(255,184,77,0.4); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn.sec { background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 18px; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 60; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(255,184,77,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(255,184,77,0.3); }
+  .hud { display: flex; gap: 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,184,77,0.4); border-radius: 26px; padding: 8px 18px; margin: 34px 0 8px; font-size: 14px; flex-wrap: wrap; justify-content: center; }
+  .hud b { color: #ffb84d; }
+  /* ===== CARTAS ===== */
+  .carta-f {
+    width: 148px; min-height: 208px; border-radius: 14px; padding: 9px;
+    background: linear-gradient(160deg, var(--c1), var(--c2));
+    border: 2px solid rgba(255,255,255,0.5); position: relative; overflow: hidden;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.55); color: #fff; text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; flex-shrink: 0;
+  }
+  .carta-f::after { content: ""; position: absolute; top: -80%; left: -60%; width: 55%; height: 260%; transform: rotate(24deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); animation: holo 3.6s ease-in-out infinite; }
+  .carta-f:hover { transform: translateY(-8px) scale(1.04); box-shadow: 0 14px 32px rgba(255,184,77,0.4); }
+  .carta-f.mini { cursor: default; }
+  .carta-f.mini:hover { transform: none; }
+  .cf-era { font-size: 9px; font-weight: 800; letter-spacing: 1px; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 2px 8px; display: inline-block; }
+  .cf-emoji { font-size: 42px; margin: 4px 0 2px; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+  .cf-nombre { font-size: 14px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.6); }
+  .cf-frase { font-size: 9.5px; font-style: italic; opacity: 0.95; min-height: 26px; padding: 2px 2px; line-height: 1.3; }
+  .cf-stat { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.32); border-radius: 8px; padding: 3px 8px; margin-top: 4px; font-size: 11.5px; font-weight: 700; }
+  .cf-stat b { font-size: 14px; }
+  .cf-stat.destacada { background: #ffb84d; color: #2d1440; box-shadow: 0 0 12px #ffb84d; animation: pulsoStat 1.2s infinite; }
+  .dorso {
+    width: 148px; height: 208px; border-radius: 14px; flex-shrink: 0;
+    background: repeating-linear-gradient(45deg, #3d1a4d 0 12px, #2a1140 12px 24px);
+    border: 2px solid rgba(255,184,77,0.6); display: flex; align-items: center; justify-content: center;
+    font-size: 50px; box-shadow: 0 8px 22px rgba(0,0,0,0.55);
+  }
+  .mano { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; width: 100%; }
+  .duelo { display: flex; gap: 14px; align-items: center; justify-content: center; margin: 8px 0; min-height: 230px; }
+  .vs { font-size: 30px; font-weight: 900; color: #ffb84d; animation: pulsoStat 1s infinite; text-shadow: 0 0 18px #ffb84d; }
+  .banner-atributo {
+    padding: 10px 26px; border-radius: 30px; font-weight: 900; font-size: 18px; letter-spacing: 1px;
+    background: linear-gradient(135deg, #ffb84d, #e8890c); color: #2d1440;
+    animation: rebote 0.7s ease-out; box-shadow: 0 0 26px rgba(255,184,77,0.6); margin-bottom: 6px;
+  }
+  .resultado-choque { font-size: 19px; font-weight: 900; text-align: center; min-height: 28px; animation: rebote 0.6s ease-out; }
+  .esfinge-msj { background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,184,77,0.5); border-radius: 14px; padding: 9px 16px; font-size: 13.5px; font-style: italic; color: #e8d5f8; text-align: center; max-width: 440px; }
+  .opcion { display: block; width: 100%; padding: 12px 15px; margin-top: 8px; font-size: 14.5px; font-weight: 600; text-align: left; border-radius: 12px; cursor: pointer; border: 2px solid #c3a8e0; background: linear-gradient(135deg, #f5effc, #ebdff7); color: #2d1440; transition: all 0.2s; font-family: inherit; }
+  .opcion.correcta { background: linear-gradient(135deg, #b8f0c0, #8fe09d); border-color: #3cb85c; }
+  .opcion.incorrecta { background: linear-gradient(135deg, #f8c8c8, #f0a0a0); border-color: #d85050; animation: sacudir 0.4s; }
+  .marcador { display: flex; gap: 16px; justify-content: center; font-size: 15px; font-weight: 800; }
+  .marcador span { background: rgba(0,0,0,0.35); padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(255,184,77,0.4); }
+  .paso-instr { display: flex; gap: 12px; align-items: flex-start; text-align: left; background: #f5effc; border: 2px solid #c3a8e0; border-radius: 14px; padding: 12px 14px; margin-top: 10px; }
+  .paso-instr .num { font-size: 26px; flex-shrink: 0; }
+  .paso-instr div p { font-size: 13.5px; color: #2d1440; line-height: 1.5; }
+  .paso-instr div b { color: #5a3388; }
+  .antorcha { position: fixed; font-size: 32px; animation: pulsoStat 1.8s infinite; z-index: 0; pointer-events: none; }
+  .toast { position: fixed; top: 68px; left: 50%; transform: translateX(-50%); z-index: 90; background: linear-gradient(135deg, #ffb84d, #e8890c); color: #2d1440; font-weight: 800; font-size: 15px; padding: 12px 22px; border-radius: 40px; box-shadow: 0 8px 30px rgba(255,184,77,0.5); animation: toastAnim 2.2s ease-out forwards; text-align: center; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #f5effc; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  .volteada { animation: voltear 0.7s ease-out; }
+  .tiembla { animation: sacudir 0.4s; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(255,184,77,0.5); } 50% { text-shadow: 0 0 26px rgba(255,184,77,1); } }
+  @keyframes holo { 0%,100% { left: -60%; } 50% { left: 110%; } }
+  @keyframes pulsoStat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @keyframes rebote { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  @keyframes sacudir { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  @keyframes voltear { 0% { transform: rotateY(90deg) scale(0.8); } 100% { transform: rotateY(0) scale(1); } }
+  @keyframes toastAnim { 0% { transform: translateX(-50%) translateY(-30px) scale(0.6); opacity: 0; } 15% { transform: translateX(-50%) translateY(0) scale(1.05); opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes caer { 0% { transform: translateY(-60px) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0.8; } }
+</style>
+</head>
+<body>
+
+<div class="antorcha" style="left:3%; top:14%;">🔥</div>
+<div class="antorcha" style="right:3%; top:14%; animation-delay:0.8s;">🔥</div>
+
+<div class="controles">
+  <button class="ctrl-btn" onclick="verInstrucciones(true)" title="Instrucciones">❓</button>
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+  <button class="ctrl-btn on" id="btnMusica" onclick="toggleMusica()">🎵</button>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:58px; animation:pulsoStat 2.5s infinite;">🃏⚔️</div>
+  <h1>Cartas de Batalla Filosófica</h1>
+  <p class="sub">La <b style="color:#ffb84d">Esfinge de la Duda</b> 🗿 custodia la arena del pensamiento. Derrótala en <b style="color:#ffb84d">6 rondas</b> con tus cartas de filósofos… pero cuidado: cada victoria debe coronarse respondiendo bien. 👑</p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>👤 Tu nombre de duelista</label>
+    <input id="inNombre" placeholder="Ej: Sebastián" maxlength="40">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button class="btn sec" style="color:#5a3388; border-color:#c3a8e0; background:#f5effc;" onclick="probarVoz()">🔊 Probar la voz</button>
+      <button class="btn sec" style="color:#5a3388; border-color:#c3a8e0; background:#f5effc;" onclick="verInstrucciones(false)">📜 ¿Cómo se juega?</button>
+    </div>
+    <button class="btn" onclick="prepararBatalla()">⚔️ ¡Entrar a la arena!</button>
+  </div>
+  <a href="index.html" class="btn sec" style="margin-top:10px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== INSTRUCCIONES ========== -->
+<div class="pantalla" id="p-instr">
+  <div style="font-size:52px; margin-top:34px;">📜</div>
+  <h1 style="font-size:22px;">¿Cómo se juega?</h1>
+  <div class="tarjeta">
+    <div class="paso-instr"><div class="num">🎴</div><div><p><b>1. Tu mano.</b> Cada ronda tienes 3 cartas de filósofos. Cada carta tiene tres poderes: 🧠 <b>Lógica</b>, ⚖️ <b>Ética</b> y 🗣️ <b>Retórica</b> (de 1 a 10).</p></div></div>
+    <div class="paso-instr"><div class="num">⚔️</div><div><p><b>2. El poder en juego.</b> La Esfinge anuncia el poder de la ronda (por ejemplo: "¡Ronda de LÓGICA!"). Mira ese poder en tus cartas y elige tu mejor guerrero.</p></div></div>
+    <div class="paso-instr"><div class="num">💥</div><div><p><b>3. ¡El choque!</b> Tu carta se enfrenta a la de la Esfinge: el poder más alto gana el choque.</p></div></div>
+    <div class="paso-instr"><div class="num">🧠</div><div><p><b>4. Corona tu victoria.</b> Si ganas el choque, responde una pregunta sobre TU filósofo para ganar la corona 👑. Si la Esfinge gana, aún puedes <b>bloquearla</b> respondiendo bien una pregunta sobre SU filósofo.</p></div></div>
+    <div class="paso-instr"><div class="num">👑</div><div><p><b>5. La victoria.</b> Tras 6 rondas, gana quien tenga más coronas. Tu nota (1.0 a 5.0) sale de tus coronas y tus respuestas correctas. ¡Conocer a los filósofos es tu mejor arma!</p></div></div>
+    <button class="btn sec" style="color:#5a3388; border-color:#c3a8e0; background:#f5effc;" onclick="leerInstrucciones()">🔊 Escuchar instrucciones</button>
+    <button class="btn" onclick="salirInstrucciones()">✅ ¡Entendido!</button>
+  </div>
+</div>
+
+<!-- ========== BATALLA ========== -->
+<div class="pantalla" id="p-batalla">
+  <div class="hud"><span>⚔️ Ronda <b id="hudRonda"></b> de 6</span><span>👤 <b id="hudNombre"></b> 👑 <b id="hudCorJ">0</b></span><span>🗿 Esfinge 👑 <b id="hudCorE">0</b></span></div>
+  <div class="banner-atributo" id="bannerAtr"></div>
+  <div class="esfinge-msj" id="esfingeMsj"></div>
+  <div class="duelo" id="zonaDuelo" style="display:none;"></div>
+  <div class="resultado-choque" id="resChoque"></div>
+  <div id="zonaMano">
+    <p class="sub" style="margin-top:4px;">👇 Elige tu carta para esta ronda</p>
+    <div class="mano" id="mano"></div>
+  </div>
+  <div class="tarjeta" id="zonaQuiz" style="display:none; margin-top:10px;">
+    <div style="font-size:13px; font-weight:800; color:#8a5fc0;" id="quizContexto"></div>
+    <h2 style="color:#2d1440; font-size:16px; margin-top:6px;" id="quizPregunta"></h2>
+    <div id="quizOpciones"></div>
+  </div>
+  <button class="btn" id="btnSigRonda" style="display:none;" onclick="siguienteRonda()"></button>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:60px; animation:rebote 0.8s ease-out;" id="finEmoji">🏆</div>
+  <h1 style="font-size:23px;" id="finTitulo"></h1>
+  <p class="sub" id="finFrase"></p>
+  <div class="tarjeta">
+    <div style="font-size:14px; color:#8a5fc0; font-weight:bold;" id="finDatos"></div>
+    <div class="marcador" style="margin-top:10px;"><span>👤 <b id="finCorJ"></b> 👑</span><span>🗿 <b id="finCorE"></b> 👑</span></div>
+    <div style="display:flex; justify-content:center; gap:22px; margin:10px 0; flex-wrap:wrap; color:#2d1440;">
+      <div>🧠 Respuestas correctas<br><b style="font-size:22px;" id="finAciertos"></b></div>
+    </div>
+    <div style="color:#8a5fc0; font-size:13px; letter-spacing:1px;">NOTA DEL DUELO</div>
+    <div id="finNota" style="font-size:50px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:23px; letter-spacing:3px;"></div>
+    <div id="finAlumno"></div>
+    <button class="btn sec" style="color:#5a3388; border-color:#c3a8e0; background:#f5effc;" id="btnCopiar" onclick="copiarResumen()">📄 Copiar resumen para la profesora</button>
+  </div>
+  <button class="btn" onclick="location.reload()">🔄 ¡Revancha!</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<script>
+// ================= CARTAS =================
+// log/eti/ret de 1 a 10 · preguntas: 2 por filósofo (se usa 1 al azar)
+const CARTAS = [
+  { n: "Sócrates", e: "🧔", era: "🏛️ Antigua", c1: "#c98f2a", c2: "#7a4d0c", log: 9, eti: 10, ret: 9, frase: "\"Solo sé que nada sé\"",
+    pr: [{ q: "¿Cómo se llama el método de Sócrates de preguntar para 'dar a luz' ideas?", o: ["La mayéutica", "La duda metódica", "El empirismo"], c: 0 },
+         { q: "¿Cómo murió Sócrates?", o: ["En batalla", "Condenado a beber cicuta", "Desterrado en una isla"], c: 1 }] },
+  { n: "Platón", e: "🏛️", era: "🏛️ Antigua", c1: "#c98f2a", c2: "#7a4d0c", log: 10, eti: 8, ret: 8, frase: "\"Las Ideas son lo real\"",
+    pr: [{ q: "Según Platón, ¿qué existe más allá del mundo sensible?", o: ["Un mundo perfecto de Ideas", "Solo átomos y vacío", "Nada: todo es materia"], c: 0 },
+         { q: "¿Cómo se llama su famosa alegoría sobre prisioneros que ven sombras?", o: ["El mito del carro", "La alegoría de la caverna", "El anillo de Giges"], c: 1 }] },
+  { n: "Aristóteles", e: "📚", era: "🏛️ Antigua", c1: "#c98f2a", c2: "#7a4d0c", log: 10, eti: 9, ret: 7, frase: "\"Animal racional y político\"",
+    pr: [{ q: "¿Cómo definió Aristóteles al ser humano?", o: ["Animal racional y político", "Alma encerrada en un cuerpo", "Ser de puro instinto"], c: 0 },
+         { q: "¿Qué escuela fundó Aristóteles en Atenas?", o: ["La Academia", "El Liceo", "El Jardín"], c: 1 }] },
+  { n: "Heráclito", e: "🔥", era: "🏛️ Antigua", c1: "#c98f2a", c2: "#7a4d0c", log: 7, eti: 6, ret: 8, frase: "\"Todo fluye\"",
+    pr: [{ q: "¿Qué quiso decir Heráclito con 'nadie se baña dos veces en el mismo río'?", o: ["Que la realidad cambia constantemente", "Que los ríos son sagrados", "Que el agua es el arjé"], c: 0 },
+         { q: "¿Qué elemento era símbolo del cambio para Heráclito?", o: ["El agua", "El aire", "El fuego"], c: 2 }] },
+  { n: "Hipatia", e: "✨", era: "🏛️ Antigua", c1: "#c98f2a", c2: "#7a4d0c", log: 9, eti: 7, ret: 7, frase: "\"Defiende tu derecho a pensar\"",
+    pr: [{ q: "Hipatia fue una gran filósofa y matemática de la ciudad de…", o: ["Alejandría", "Atenas", "Roma"], c: 0 },
+         { q: "Además de filósofa, Hipatia destacó en…", o: ["La escultura", "Las matemáticas y la astronomía", "La medicina"], c: 1 }] },
+  { n: "San Agustín", e: "⛪", era: "⛪ Medieval", c1: "#4a6bc9", c2: "#22346e", log: 8, eti: 9, ret: 9, frase: "\"Cree para comprender\"",
+    pr: [{ q: "¿Qué buscaba unir San Agustín en su filosofía?", o: ["La fe y la razón", "El cuerpo y el dinero", "La guerra y la paz"], c: 0 },
+         { q: "Completa su frase: 'Cree para comprender…'", o: ["y duda para vivir", "comprende para creer", "y calla para saber"], c: 1 }] },
+  { n: "T. de Aquino", e: "📜", era: "⛪ Medieval", c1: "#4a6bc9", c2: "#22346e", log: 9, eti: 9, ret: 6, frase: "\"Cinco vías hacia Dios\"",
+    pr: [{ q: "¿Cuántas vías formuló Santo Tomás para demostrar la existencia de Dios?", o: ["Tres", "Cinco", "Siete"], c: 1 },
+         { q: "Santo Tomás unió el cristianismo con la filosofía de…", o: ["Aristóteles", "Nietzsche", "Descartes"], c: 0 }] },
+  { n: "Descartes", e: "🔭", era: "🔭 Moderna", c1: "#22a5a0", c2: "#0d5e5a", log: 10, eti: 6, ret: 7, frase: "\"Pienso, luego existo\"",
+    pr: [{ q: "¿Qué método usó Descartes para llegar a una certeza?", o: ["La duda metódica", "La mayéutica", "El experimento"], c: 0 },
+         { q: "'Pienso, luego existo' significa que su primera certeza fue…", o: ["Que Dios existe", "Que su propio pensamiento existe", "Que el mundo es real"], c: 1 }] },
+  { n: "Kant", e: "⚖️", era: "🔭 Moderna", c1: "#22a5a0", c2: "#0d5e5a", log: 10, eti: 10, ret: 5, frase: "\"Atrévete a pensar\"",
+    pr: [{ q: "¿Cómo se llama la ley moral universal de Kant?", o: ["El contrato social", "El imperativo categórico", "La voluntad de poder"], c: 1 },
+         { q: "Kant escribió una famosa 'Crítica de la…'", o: ["razón pura", "vida moderna", "sociedad injusta"], c: 0 }] },
+  { n: "Rousseau", e: "🌿", era: "🔭 Moderna", c1: "#22a5a0", c2: "#0d5e5a", log: 7, eti: 8, ret: 9, frase: "\"El contrato social\"",
+    pr: [{ q: "Según Rousseau, la sociedad se funda en…", o: ["El contrato social", "La lucha de clases", "El mundo de las Ideas"], c: 0 },
+         { q: "Rousseau creía que el ser humano nace…", o: ["Malvado por naturaleza", "Bueno, y la sociedad lo corrompe", "Sin ninguna tendencia"], c: 1 }] },
+  { n: "Nietzsche", e: "⚡", era: "🌆 Contemporánea", c1: "#c0409a", c2: "#5e1a4a", log: 8, eti: 6, ret: 10, frase: "\"Dios ha muerto\"",
+    pr: [{ q: "¿Qué ideal de ser humano propuso Nietzsche?", o: ["El santo", "El superhombre", "El filósofo rey"], c: 1 },
+         { q: "Con 'Dios ha muerto', Nietzsche anunciaba…", o: ["La crisis de los valores tradicionales", "Una guerra religiosa", "El fin del mundo"], c: 0 }] },
+  { n: "S. de Beauvoir", e: "💜", era: "🌆 Contemporánea", c1: "#c0409a", c2: "#5e1a4a", log: 9, eti: 9, ret: 9, frase: "\"No se nace mujer…\"",
+    pr: [{ q: "Completa la frase de Simone de Beauvoir: 'No se nace mujer…'", o: ["se llega a serlo", "se nace libre", "se hace fuerte"], c: 0 },
+         { q: "¿Cómo se llama su obra más famosa?", o: ["El segundo sexo", "El ser y la nada", "La náusea"], c: 0 }] },
+];
+const ATRIBUTOS = [{ k: "log", nom: "🧠 LÓGICA" }, { k: "eti", nom: "⚖️ ÉTICA" }, { k: "ret", nom: "🗣️ RETÓRICA" }];
+const TAUNTS = [
+  "La Esfinge ruge: '¿Ese es tu campeón? Mis milenios de sabiduría tiemblan… de risa.'",
+  "La Esfinge susurra: 'Conozco cada frase de cada filósofo. ¿Y tú?'",
+  "La Esfinge sonríe: 'El conocimiento es mi territorio, pequeño mortal.'",
+  "La Esfinge bosteza: 'He derrotado a mil estudiantes antes del recreo.'",
+  "La Esfinge desafía: '¡Demuestra que has leído más que memes!'",
+  "La Esfinge advierte: 'Esta ronda… será tu perdición.'",
+];
+
+// ================= ESTADO =================
+let curso = "", nombre = "", ronda = 0, corJ = 0, corE = 0, aciertos = 0, fallos = 0;
+let mazoJ = [], mazoE = [], mano = [], atributo = null, cartaJ = null, cartaE = null;
+let vozOn = true, musicaOn = true, audioCtx = null, musicaTimer = null, masterGain = null;
+let historial = [];
+
+// ================= AUDIO =================
+function ctx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+function iniciarMusica() {
+  if (musicaTimer || !musicaOn) return;
+  try {
+    const c = ctx(); masterGain = c.createGain(); masterGain.gain.value = 0.014; masterGain.connect(c.destination);
+    const notas = [146.83, 174.61, 196, 220, 196, 174.61];
+    let i = 0;
+    musicaTimer = setInterval(() => {
+      try {
+        const t = c.currentTime;
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle"; o.frequency.value = notas[i % notas.length] * (i % 12 < 6 ? 1 : 1.19);
+        g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.55, t + 0.05); g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+        o.connect(g).connect(masterGain); o.start(t); o.stop(t + 0.55);
+        i++;
+      } catch (e) {}
+    }, 300);
+  } catch (e) {}
+}
+function detenerMusica() { if (musicaTimer) clearInterval(musicaTimer); musicaTimer = null; if (masterGain) try { masterGain.disconnect(); } catch (e) {} masterGain = null; }
+function toggleMusica() { musicaOn = !musicaOn; if (musicaOn) iniciarMusica(); else detenerMusica(); const b = document.getElementById("btnMusica"); b.textContent = musicaOn ? "🎵" : "🔕"; b.classList.toggle("on", musicaOn); }
+function sndChoque() { try { const c = ctx(), t = c.currentTime; const o = c.createOscillator(), g = c.createGain(); o.type = "sawtooth"; o.frequency.setValueAtTime(400, t); o.frequency.exponentialRampToValueAtTime(60, t + 0.35); g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.45); } catch (e) {} }
+function sndOk() { try { const c = ctx(), t = c.currentTime; [880, 1108.7, 1318.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.001, t + i * 0.08); g.gain.exponentialRampToValueAtTime(0.22, t + i * 0.08 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.5); o.connect(g).connect(c.destination); o.start(t + i * 0.08); o.stop(t + i * 0.08 + 0.6); }); } catch (e) {} }
+function sndMal() { try { const c = ctx(), t = c.currentTime; const o = c.createOscillator(), g = c.createGain(); o.type = "triangle"; o.frequency.setValueAtTime(280, t); o.frequency.exponentialRampToValueAtTime(130, t + 0.35); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.45); } catch (e) {} }
+function sndFanfarria() { try { const c = ctx(), t = c.currentTime; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sawtooth"; o.frequency.value = f; const ini = t + i * 0.22, dur = i === 3 ? 0.9 : 0.2; g.gain.setValueAtTime(0.001, ini); g.gain.exponentialRampToValueAtTime(0.11, ini + 0.03); g.gain.exponentialRampToValueAtTime(0.001, ini + dur); o.connect(g).connect(c.destination); o.start(ini); o.stop(ini + dur + 0.1); }); } catch (e) {} }
+
+// ================= VOZ (por frases, con reanudación) =================
+function vozES() { const vs = speechSynthesis.getVoices(); return vs.find((v) => /es[-_]/i.test(v.lang || "")) || vs.find((v) => (v.lang || "").startsWith("es")) || null; }
+function hablar(txt, cancelar = true) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    if (cancelar) speechSynthesis.cancel();
+    const frases = (txt.match(/[^.!?…:]+[.!?…:]*/g) || [txt]).map((f) => f.trim()).filter(Boolean);
+    const v = vozES();
+    frases.forEach((f) => { const u = new SpeechSynthesisUtterance(f); u.lang = "es-ES"; u.rate = 0.98; u.pitch = 1.0; if (v) u.voice = v; speechSynthesis.speak(u); });
+  } catch (e) {}
+}
+setInterval(() => { try { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {} }, 4000);
+if ("speechSynthesis" in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+function probarVoz() { ctx(); hablar("¡Saludos, duelista! Soy la voz de la arena filosófica. Si me escuchas, la Esfinge ya sabe que vienes."); }
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+function limpiarEmoji(s) { return (s || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim(); }
+function toast(html) { const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html; document.body.appendChild(t); setTimeout(() => t.remove(), 2300); }
+
+// ================= INSTRUCCIONES =================
+let volverA = "p-inicio";
+function verInstrucciones(desdeControl) {
+  volverA = document.querySelector(".pantalla.activa").id;
+  if (volverA === "p-instr") return;
+  mostrar("p-instr");
+  leerInstrucciones();
+}
+function leerInstrucciones() {
+  hablar("¿Cómo se juega? Escucha bien, duelista. Uno: cada ronda tienes tres cartas de filósofos, y cada carta tiene tres poderes: lógica, ética y retórica. Dos: la Esfinge anuncia el poder de la ronda; elige tu mejor carta para ese poder. Tres: las cartas chocan, y el poder más alto gana el choque. Cuatro: si ganas el choque, responde una pregunta sobre tu filósofo para ganar la corona. Si la Esfinge gana, aún puedes bloquearla respondiendo bien una pregunta sobre su filósofo. Y cinco: tras seis rondas, gana quien tenga más coronas. Tu nota sale de tus coronas y tus respuestas correctas. ¡Conocer a los filósofos es tu mejor arma!");
+}
+function salirInstrucciones() { try { speechSynthesis.cancel(); } catch (e) {} mostrar(volverA); }
+
+// ================= UTILIDADES DE CARTA =================
+function mezclar(a) { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function htmlCarta(c, destacar, mini) {
+  return `<div class="carta-f ${mini ? "mini" : ""}" style="--c1:${c.c1};--c2:${c.c2}">
+    <div class="cf-era">${c.era}</div>
+    <div class="cf-emoji">${c.e}</div>
+    <div class="cf-nombre">${c.n}</div>
+    <div class="cf-frase">${c.frase}</div>
+    <div class="cf-stat ${destacar === "log" ? "destacada" : ""}">🧠 Lógica <b>${c.log}</b></div>
+    <div class="cf-stat ${destacar === "eti" ? "destacada" : ""}">⚖️ Ética <b>${c.eti}</b></div>
+    <div class="cf-stat ${destacar === "ret" ? "destacada" : ""}">🗣️ Retórica <b>${c.ret}</b></div>
+  </div>`;
+}
+
+// ================= BATALLA =================
+function prepararBatalla() {
+  ctx();
+  curso = document.getElementById("inCurso").value.trim();
+  nombre = document.getElementById("inNombre").value.trim() || "Duelista";
+  document.getElementById("hudNombre").textContent = nombre;
+  mazoJ = mezclar(CARTAS);
+  mazoE = mezclar(CARTAS);
+  mano = [mazoJ.pop(), mazoJ.pop(), mazoJ.pop()];
+  ronda = 0; corJ = 0; corE = 0; aciertos = 0; fallos = 0; historial = [];
+  iniciarMusica();
+  hablar("¡Bienvenido a la arena, " + nombre + "! Yo soy la Esfinge de la Duda, guardiana del conocimiento. Seis rondas decidirán tu destino. ¡Que comience el duelo filosófico!");
+  nuevaRonda();
+  mostrar("p-batalla");
+}
+function nuevaRonda() {
+  ronda++;
+  while (mano.length < 3 && mazoJ.length) mano.push(mazoJ.pop());
+  atributo = ATRIBUTOS[Math.floor(Math.random() * ATRIBUTOS.length)];
+  document.getElementById("hudRonda").textContent = ronda;
+  document.getElementById("hudCorJ").textContent = corJ;
+  document.getElementById("hudCorE").textContent = corE;
+  document.getElementById("bannerAtr").textContent = "⚔️ RONDA " + ronda + ": " + atributo.nom + " ⚔️";
+  const taunt = TAUNTS[Math.floor(Math.random() * TAUNTS.length)];
+  document.getElementById("esfingeMsj").textContent = "🗿 " + taunt;
+  document.getElementById("zonaDuelo").style.display = "none";
+  document.getElementById("resChoque").textContent = "";
+  document.getElementById("zonaQuiz").style.display = "none";
+  document.getElementById("btnSigRonda").style.display = "none";
+  document.getElementById("zonaMano").style.display = "block";
+  const m = document.getElementById("mano");
+  m.innerHTML = "";
+  mano.forEach((c, i) => {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = htmlCarta(c, atributo.k, false);
+    wrap.firstChild.onclick = () => jugarCarta(i);
+    m.appendChild(wrap.firstChild);
+  });
+  hablar("Ronda " + ronda + ". El poder en juego es: " + limpiarEmoji(atributo.nom) + ". " + taunt + " Elige tu carta, " + nombre + ".");
+}
+function jugarCarta(i) {
+  if (document.getElementById("zonaDuelo").style.display !== "none") return;
+  cartaJ = mano.splice(i, 1)[0];
+  cartaE = mazoE.pop();
+  document.getElementById("zonaMano").style.display = "none";
+  const duelo = document.getElementById("zonaDuelo");
+  duelo.style.display = "flex";
+  duelo.innerHTML = `<div class="volteada">${htmlCarta(cartaJ, atributo.k, true)}</div><div class="vs">VS</div><div class="dorso" id="dorsoE">🗿</div>`;
+  hablar("Juegas a " + cartaJ.n + ". La Esfinge prepara su carta…");
+  setTimeout(() => {
+    sndChoque();
+    document.getElementById("dorsoE").outerHTML = `<div class="volteada">${htmlCarta(cartaE, atributo.k, true)}</div>`;
+    duelo.classList.add("tiembla");
+    setTimeout(resolverChoque, 700);
+  }, 1600);
+}
+function resolverChoque() {
+  const vJ = cartaJ[atributo.k], vE = cartaE[atributo.k];
+  const res = document.getElementById("resChoque");
+  let quien;
+  if (vJ > vE) { quien = "J"; res.textContent = "💥 ¡Tu " + cartaJ.n + " (" + vJ + ") supera a " + cartaE.n + " (" + vE + ")!"; res.style.color = "#7ee89d"; }
+  else if (vE > vJ) { quien = "E"; res.textContent = "💥 La Esfinge gana el choque: " + cartaE.n + " (" + vE + ") contra " + vJ + "."; res.style.color = "#ff9f9f"; }
+  else { quien = "T"; res.textContent = "⚡ ¡Empate de poder! (" + vJ + " contra " + vE + ") Todo se decide con sabiduría…"; res.style.color = "#ffb84d"; }
+  historial.push({ ronda, atributo: atributo.nom, cJ: cartaJ.n, cE: cartaE.n, vJ, vE });
+  const habla = quien === "J" ? "¡Ganas el choque! Pero para coronar la victoria debes responder sobre " + cartaJ.n + "."
+    : quien === "E" ? "La Esfinge gana el choque… pero puedes bloquearla si respondes bien sobre " + cartaE.n + "."
+    : "¡Empate de poder! La corona se decidirá con una pregunta sobre " + cartaJ.n + ".";
+  hablar(res.textContent.replace(/[💥⚡]/g, "") + " " + habla);
+  setTimeout(() => mostrarQuiz(quien), 1500);
+}
+function mostrarQuiz(quien) {
+  const carta = quien === "E" ? cartaE : cartaJ;
+  const preg = carta.pr[Math.floor(Math.random() * carta.pr.length)];
+  const zona = document.getElementById("zonaQuiz");
+  zona.style.display = "block";
+  document.getElementById("quizContexto").textContent =
+    quien === "J" ? "👑 ¡Corona tu victoria! Pregunta sobre " + carta.n
+    : quien === "E" ? "🛡️ ¡Bloquea a la Esfinge! Pregunta sobre " + carta.n
+    : "⚡ ¡Desempate de sabiduría! Pregunta sobre " + carta.n;
+  document.getElementById("quizPregunta").textContent = preg.q;
+  const ops = document.getElementById("quizOpciones");
+  ops.innerHTML = "";
+  preg.o.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.className = "opcion"; b.textContent = o;
+    b.onclick = () => responderQuiz(i, preg, quien, b);
+    ops.appendChild(b);
+  });
+  hablar(preg.q + " Las opciones son: " + preg.o.join(". "), false);
+}
+function responderQuiz(i, preg, quien, btnEl) {
+  if (document.getElementById("btnSigRonda").style.display !== "none") return;
+  const correcto = i === preg.c;
+  document.querySelectorAll("#quizOpciones .opcion").forEach((b, j) => { if (j === preg.c) b.classList.add("correcta"); });
+  let msj;
+  if (correcto) {
+    aciertos++; sndOk();
+    if (quien === "J") { corJ++; msj = "👑 ¡CORONA GANADA! Sabiduría confirmada."; toast("👑 ¡Corona para " + nombre + "!"); }
+    else if (quien === "E") { msj = "🛡️ ¡BLOQUEO PERFECTO! La Esfinge se queda sin corona."; toast("🛡️ ¡Bloqueaste a la Esfinge!"); }
+    else { corJ++; msj = "⚡👑 ¡Desempate ganado con sabiduría!"; toast("👑 ¡Corona por sabiduría!"); }
+  } else {
+    fallos++; sndMal(); btnEl.classList.add("incorrecta");
+    if (quien === "J") { msj = "💨 Ganaste el choque… pero sin la respuesta, la corona se esfuma."; }
+    else if (quien === "E") { corE++; msj = "🗿 La Esfinge ruge victoriosa y toma la corona."; }
+    else { msj = "💨 Empate sin dueño: la corona se pierde en la niebla."; }
+  }
+  document.getElementById("hudCorJ").textContent = corJ;
+  document.getElementById("hudCorE").textContent = corE;
+  const btn = document.getElementById("btnSigRonda");
+  btn.style.display = "inline-block";
+  btn.textContent = ronda < 6 ? "➡️ Ronda " + (ronda + 1) : "🏆 Ver el resultado del duelo";
+  document.getElementById("resChoque").textContent = msj;
+  document.getElementById("resChoque").style.color = correcto ? "#7ee89d" : "#ff9f9f";
+  hablar(limpiarEmoji(msj) + (correcto ? "" : " La respuesta correcta era: " + preg.o[preg.c] + "."));
+}
+function siguienteRonda() {
+  if (ronda < 6) nuevaRonda();
+  else finalizar();
+}
+function notaFinal() {
+  let n = 1 + corJ * 0.45 + aciertos * 0.22;
+  return Math.max(1, Math.min(5, Math.round(n * 10) / 10));
+}
+function finalizar() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  sndFanfarria();
+  const gane = corJ > corE, empate = corJ === corE;
+  document.getElementById("finEmoji").textContent = gane ? "🏆" : empate ? "🤝" : "🗿";
+  document.getElementById("finTitulo").textContent = gane ? "¡Derrotaste a la Esfinge!" : empate ? "¡Empate legendario!" : "La Esfinge venció… esta vez";
+  document.getElementById("finFrase").textContent = gane
+    ? "\"El conocimiento fue tu espada.\" La Esfinge inclina la cabeza ante ti. ⚔️"
+    : empate ? "Ni la Esfinge pudo contigo, ni tú con ella. El duelo continúa otro día…"
+    : "\"Vuelve cuando hayas leído más\", ruge la Esfinge. ¡La revancha te espera!";
+  document.getElementById("finDatos").textContent = (curso ? "🎓 " + curso + " · " : "") + "👤 " + nombre;
+  document.getElementById("finCorJ").textContent = corJ;
+  document.getElementById("finCorE").textContent = corE;
+  document.getElementById("finAciertos").textContent = aciertos + " de " + (aciertos + fallos);
+  const nota = notaFinal();
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML = [1, 2, 3, 4, 5].map((s) => `<span style="opacity:${nota >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("");
+  document.getElementById("finAlumno").innerHTML = `<div class="fila-alumno"><span>👤 ${nombre}</span><b style="color:${nEl.style.color}">${nota.toFixed(1)}</b></div>`;
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement("div");
+    d.textContent = gane ? ["👑", "⭐", "🃏", "✨"][i % 4] : ["🍂", "🪨", "🌫️"][i % 3];
+    d.style.cssText = `position:fixed;left:${(i * 29 + 7) % 100}%;top:-60px;font-size:${16 + (i % 4) * 7}px;animation:caer ${4 + (i % 5)}s linear infinite;animation-delay:${i * 0.6}s;pointer-events:none;z-index:1;`;
+    document.body.appendChild(d);
+  }
+  mostrar("p-final");
+  hablar((gane ? "¡Increíble, " + nombre + "! Has derrotado a la Esfinge de la Duda con " + corJ + " coronas contra " + corE + "."
+    : empate ? "Empate legendario: " + corJ + " coronas para cada uno."
+    : "La Esfinge venció con " + corE + " coronas contra " + corJ + ". ¡Pero todo duelista merece su revancha!")
+    + " Respondiste correctamente " + aciertos + " preguntas. Tu nota del duelo es " + nota.toFixed(1).replace(".", " punto ") + ".");
+}
+function copiarResumen() {
+  const nota = notaFinal();
+  let txt = "🃏 CARTAS DE BATALLA FILOSÓFICA — FilosofIA Interactiva\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "👤 Estudiante: " + nombre + " | 👑 " + corJ + " vs Esfinge " + corE + " | 🧠 Aciertos: " + aciertos + "/" + (aciertos + fallos) + " | 📋 Nota: " + nota.toFixed(1) + "\n\n--- RONDAS ---\n";
+  historial.forEach((h) => { txt += "R" + h.ronda + " [" + limpiarEmoji(h.atributo) + "] " + h.cJ + " (" + h.vJ + ") vs " + h.cE + " (" + h.vE + ")\n"; });
+  const fin = () => { const b = document.getElementById("btnCopiar"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar resumen para la profesora"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+</script>
+</body>
+</html>
