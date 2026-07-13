@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Room Filosófico — La Caverna de Platón</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, #1a0f2e 0%, #2d1b4e 40%, #1f1435 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; animation: entrar 0.6s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #ffb84d; text-align: center; font-size: 26px; margin: 8px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #ffb84d; text-align: center; font-size: 21px; margin: 6px 0; }
+  p.sub { color: #cbb8e8; text-align: center; font-size: 15px; line-height: 1.5; margin: 6px 0 14px; }
+  .tarjeta {
+    background: rgba(255,255,255,0.96); color: #2d1b4e;
+    border-radius: 18px; padding: 20px; width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center;
+  }
+  input, textarea {
+    width: 100%; padding: 12px 14px; font-size: 16px; border-radius: 12px;
+    border: 2px solid #b89ce0; margin-top: 6px; font-family: inherit; outline: none;
+  }
+  input:focus, textarea:focus { border-color: #ffb84d; }
+  label { display: block; text-align: left; font-weight: bold; color: #4a2d7a; font-size: 14px; margin-top: 10px; }
+  .btn {
+    display: inline-block; padding: 13px 30px; font-size: 17px; font-weight: bold;
+    border: none; border-radius: 40px; cursor: pointer; margin-top: 14px;
+    background: linear-gradient(135deg, #ffb84d, #e8890c); color: #2d1b4e;
+    box-shadow: 0 5px 18px rgba(255,184,77,0.4); transition: transform 0.15s;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn.sec { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); box-shadow: none; font-size: 14px; padding: 9px 20px; }
+  .opcion {
+    display: block; width: 100%; padding: 13px 16px; margin-top: 9px; font-size: 15px;
+    font-weight: 600; text-align: left; border-radius: 12px; cursor: pointer;
+    border: 2px solid #cbb8e8; background: linear-gradient(135deg, #f3edfc, #e6dbf7); color: #2d1b4e;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .opcion.correcta { background: linear-gradient(135deg, #b8f0c0, #8fe09d); border-color: #3cb85c; }
+  .opcion.incorrecta { background: linear-gradient(135deg, #f8c8c8, #f0a0a0); border-color: #d85050; animation: sacudir 0.4s; }
+  .hud {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,184,77,0.4);
+    border-radius: 30px; padding: 8px 18px; margin-bottom: 12px; font-size: 14px; z-index: 2;
+  }
+  .hud b { color: #ffb84d; }
+  .emoji-grande { font-size: 76px; animation: flotar 3s ease-in-out infinite; margin: 6px 0; }
+  .candado-input {
+    font-size: 34px; letter-spacing: 14px; text-align: center; font-weight: 900;
+    max-width: 220px; border: 3px solid #ffb84d; color: #2d1b4e;
+  }
+  .digito-chip {
+    display: inline-block; background: linear-gradient(135deg, #ffb84d, #e8890c);
+    color: #2d1b4e; font-weight: 900; font-size: 22px; padding: 8px 16px;
+    border-radius: 12px; margin: 4px; animation: aparecer 0.6s ease-out;
+    box-shadow: 0 0 16px rgba(255,184,77,0.7);
+  }
+  .puerta { font-size: 100px; margin: 10px 0; cursor: default; user-select: none; }
+  .puerta.abierta { animation: abrirse 1.2s ease-out forwards; }
+  .progreso { display: flex; gap: 8px; margin-bottom: 10px; z-index: 2; }
+  .sala-punto {
+    width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 18px; background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.25); opacity: 0.5;
+  }
+  .sala-punto.activa { opacity: 1; border-color: #ffb84d; box-shadow: 0 0 14px rgba(255,184,77,0.8); }
+  .sala-punto.completa { opacity: 1; background: rgba(60,184,92,0.4); border-color: #3cb85c; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 20; }
+  .ctrl-btn {
+    width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer;
+    border: 2px solid rgba(255,184,77,0.5); background: rgba(0,0,0,0.45); color: #fff;
+  }
+  .ctrl-btn.on { background: rgba(255,184,77,0.3); }
+  .mensaje-error { color: #ff9f9f; font-weight: bold; margin-top: 8px; min-height: 22px; font-size: 14px; }
+  .pista-caja { background: #fff6e3; border: 2px dashed #e8890c; border-radius: 12px; padding: 10px 14px; margin-top: 10px; color: #7a4d0c; font-size: 14px; display: none; }
+  .estudiante-fila { display: flex; justify-content: space-between; background: #f3edfc; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  .antorcha { position: fixed; font-size: 30px; animation: parpadear 1.8s infinite; z-index: 0; pointer-events: none; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(255,184,77,0.5); } 50% { text-shadow: 0 0 28px rgba(255,184,77,1); } }
+  @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes sacudir { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  @keyframes aparecer { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+  @keyframes abrirse { 0% { transform: scale(1); filter: none; } 50% { transform: scale(1.15); filter: drop-shadow(0 0 30px #ffb84d); } 100% { transform: scale(1.05) translateY(-6px); filter: drop-shadow(0 0 40px #ffd700); } }
+  @keyframes parpadear { 0%,100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+  @keyframes caer { 0% { transform: translateY(-60px) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0.8; } }
+</style>
+</head>
+<body>
+
+<div class="antorcha" style="left:4%; top:16%;">🔥</div>
+<div class="antorcha" style="right:4%; top:16%; animation-delay:0.7s;">🔥</div>
+
+<div class="controles">
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()" title="Voz">🗣️</button>
+  <button class="ctrl-btn on" id="btnMusica" onclick="toggleMusica()" title="Música">🎵</button>
+</div>
+
+<!-- ============ INICIO ============ -->
+<div class="pantalla activa" id="p-inicio">
+  <div class="emoji-grande">🕯️</div>
+  <h1>Escape Room Filosófico</h1>
+  <p class="sub">⛓️ Han despertado encadenados en la <b style="color:#ffb84d">Caverna de Platón</b>, viendo solo sombras en la pared. La capitana Enadis les envía un mensaje: <i>"Solo la sabiduría de los filósofos abrirá los candados. ¡Resuelvan los enigmas de cada sala y escapen hacia la luz del conocimiento!"</i></p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>🛡️ Nombre del equipo</label>
+    <input id="inEquipo" placeholder="Ej: Los Prisioneros de la Luz" maxlength="30">
+    <label>👥 Tripulantes (separados por coma)</label>
+    <textarea id="inTrip" rows="2" placeholder="Ana, Luis, María…" maxlength="200"></textarea>
+    <button class="btn" onclick="comenzar()">⛓️ ¡Comenzar el escape!</button>
+  </div>
+  <p class="sub" style="font-size:13px;">🗣️ La voz en off leerá cada sala y enigma. ⏱️ El tiempo corre desde el inicio.</p>
+</div>
+
+<!-- ============ SALA (INTRO) ============ -->
+<div class="pantalla" id="p-sala">
+  <div class="progreso" id="progSala"></div>
+  <div class="hud"><span>⏱️ <b id="tiempo1">00:00</b></span><span>❌ Errores: <b id="err1">0</b></span><span>💡 Pistas: <b id="pis1">0</b></span></div>
+  <div class="emoji-grande" id="salaEmoji">🕯️</div>
+  <h2 id="salaNombre"></h2>
+  <div class="tarjeta">
+    <p id="salaIntro" style="line-height:1.6; font-size:15px;"></p>
+    <button class="btn sec" onclick="leerSalaActual()">🔊 Escuchar de nuevo</button>
+  </div>
+  <button class="btn" onclick="irAcertijo()">🔍 Buscar los enigmas</button>
+</div>
+
+<!-- ============ ACERTIJO ============ -->
+<div class="pantalla" id="p-acertijo">
+  <div class="progreso" id="progAcertijo"></div>
+  <div class="hud"><span>⏱️ <b id="tiempo2">00:00</b></span><span>❌ Errores: <b id="err2">0</b></span><span>🔑 Claves: <span id="clavesHud"></span></span></div>
+  <div class="tarjeta">
+    <div style="font-size:13px; font-weight:bold; color:#8a6fc0;" id="acertijoTitulo"></div>
+    <h2 id="acertijoTexto" style="color:#2d1b4e; font-size:17px; margin:10px 0;"></h2>
+    <button class="btn sec" style="color:#4a2d7a; border-color:#b89ce0;" onclick="leerAcertijoActual()">🔊 Escuchar de nuevo</button>
+    <div id="opciones"></div>
+    <div id="revelacion" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- ============ CANDADO ============ -->
+<div class="pantalla" id="p-candado">
+  <div class="progreso" id="progCandado"></div>
+  <div class="hud"><span>⏱️ <b id="tiempo3">00:00</b></span><span>❌ Errores: <b id="err3">0</b></span></div>
+  <div class="puerta" id="puerta">🚪</div>
+  <h2>🔒 El candado de la sala</h2>
+  <p class="sub">Ingresen el código de <b style="color:#ffb84d" id="numDigitos">2</b> dígitos que revelaron los enigmas.</p>
+  <div class="tarjeta">
+    <div id="clavesGanadas" style="margin-bottom:8px;"></div>
+    <input class="candado-input" id="inCodigo" inputmode="numeric" maxlength="2" placeholder="••">
+    <div class="mensaje-error" id="errCodigo"></div>
+    <div class="pista-caja" id="cajaPista"></div>
+    <button class="btn" onclick="probarCodigo()">🔓 Abrir candado</button>
+    <br>
+    <button class="btn sec" style="color:#4a2d7a; border-color:#b89ce0;" onclick="usarPista()">💡 Pedir pista (−0.25 en la nota)</button>
+  </div>
+</div>
+
+<!-- ============ FINAL ============ -->
+<div class="pantalla" id="p-final">
+  <div class="emoji-grande">🌅</div>
+  <h1>¡Escaparon de la Caverna!</h1>
+  <p class="sub" id="fraseFinal">Han salido de las sombras hacia la luz del conocimiento, como enseñó Platón. 🕊️</p>
+  <div class="tarjeta">
+    <div style="font-size:14px; color:#8a6fc0; font-weight:bold;" id="finCursoEquipo"></div>
+    <div style="display:flex; justify-content:center; gap:24px; margin:10px 0; flex-wrap:wrap;">
+      <div>⏱️ Tiempo<br><b style="font-size:22px;" id="finTiempo"></b></div>
+      <div>❌ Errores<br><b style="font-size:22px;" id="finErrores"></b></div>
+      <div>💡 Pistas<br><b style="font-size:22px;" id="finPistas"></b></div>
+    </div>
+    <div style="color:#8a6fc0; font-size:13px; letter-spacing:1px;">CALIFICACIÓN DEL EQUIPO</div>
+    <div id="finNota" style="font-size:52px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:24px; letter-spacing:3px;"></div>
+    <div id="finAlumnos" style="margin-top:10px;"></div>
+    <button class="btn sec" style="color:#4a2d7a; border-color:#b89ce0;" onclick="copiarResumen()" id="btnCopiar">📄 Copiar resumen para la profesora</button>
+  </div>
+  <button class="btn" onclick="location.reload()">🔄 Jugar de nuevo</button>
+</div>
+
+<script>
+// ================== DATOS ==================
+const SALAS = [
+  {
+    nombre: "Sala 1 · La Caverna de las Sombras",
+    emoji: "🕯️",
+    epoca: "Filosofía Antigua",
+    intro: "Filosofía Antigua, siglos sexto antes de Cristo al quinto después de Cristo. Están en lo más profundo de la caverna de Platón: solo ven sombras proyectadas en la pared. Los primeros filósofos griegos abandonaron los mitos y usaron la razón para buscar el origen de todas las cosas. Sus enigmas guardan los números del primer candado.",
+    acertijos: [
+      { titulo: "Enigma de Tales de Mileto", q: "«Sin mí no hay vida: fluyo en ríos y mares, y según Tales soy el arjé, el principio de todas las cosas.» ¿Qué soy?", opts: ["El fuego", "El agua", "El aire", "Los números"], correct: 1, digito: 4 },
+      { titulo: "Enigma de Sócrates", q: "En el muro está escrito: «Solo sé que nada sé… y con mi método ayudo a dar a luz las ideas mediante preguntas.» ¿Cómo se llama ese método?", opts: ["La mayéutica", "La duda metódica", "El empirismo", "La dialéctica hegeliana"], correct: 0, digito: 7 },
+    ],
+    codigo: "47",
+    pista: "El primer número lo reveló el agua de Tales; el segundo, la mayéutica de Sócrates. Revisen las claves doradas que ganaron.",
+  },
+  {
+    nombre: "Sala 2 · La Abadía Medieval",
+    emoji: "⛪",
+    epoca: "Filosofía Medieval",
+    intro: "Filosofía Medieval, siglos quinto al quince. Han entrado a una abadía iluminada por velas. Aquí la filosofía navega junto a la fe: San Agustín, Santo Tomás de Aquino y Guillermo de Ockham buscaron unir la razón con la religión. Sus manuscritos esconden el código.",
+    acertijos: [
+      { titulo: "Manuscrito de Santo Tomás", q: "«Tantas son mis vías para demostrar la existencia de Dios como el número que buscan.» ¿Cuántas vías formuló Santo Tomás de Aquino?", opts: ["Tres", "Cinco", "Siete", "Diez"], correct: 1, digito: 5 },
+      { titulo: "La navaja de Ockham", q: "La navaja de Ockham corta las explicaciones enredadas. ¿Qué frase la resume?", opts: ["La explicación más simple suele ser la mejor", "La fe está por encima de todo", "El mundo es pura ilusión", "El saber es poder"], correct: 0, digito: 1 },
+    ],
+    codigo: "51",
+    pista: "Cuenten las vías de Santo Tomás… y recuerden que para Ockham la mejor explicación es UNA sola, la más simple.",
+  },
+  {
+    nombre: "Sala 3 · El Laboratorio Moderno",
+    emoji: "🔭",
+    epoca: "Filosofía Moderna",
+    intro: "Filosofía Moderna, siglos dieciséis al dieciocho. Un laboratorio lleno de telescopios y mapas. La razón y la ciencia toman el timón: Descartes duda de todo para hallar una certeza, y Kant busca una ley moral universal. Sus instrumentos marcan los números.",
+    acertijos: [
+      { titulo: "La duda de Descartes", q: "Descartes dudó de todo hasta encontrar una primera certeza. ¿Cuál fue?", opts: ["«Dios ha muerto»", "«Pienso, luego existo»", "«Todo fluye»", "«El saber es poder»"], correct: 1, digito: 3 },
+      { titulo: "La balanza de Kant", q: "Kant propuso una ley moral que vale para todos, siempre. ¿Cómo se llama?", opts: ["La voluntad de poder", "El contrato social", "El imperativo categórico", "El utilitarismo"], correct: 2, digito: 8 },
+    ],
+    codigo: "38",
+    pista: "La certeza de Descartes guarda el primer número; la ley moral de Kant, el segundo. Miren sus claves doradas.",
+  },
+  {
+    nombre: "Sala 4 · La Ciudad Contemporánea",
+    emoji: "🌆",
+    epoca: "Filosofía Contemporánea",
+    intro: "Filosofía Contemporánea, del siglo diecinueve hasta hoy. La última sala: una ciudad de luces y voces críticas. Nietzsche, Marx, Sartre y Simone de Beauvoir cuestionan la moral, la sociedad y la libertad. Tras esta puerta… ¡la salida de la caverna!",
+    acertijos: [
+      { titulo: "El grito de Nietzsche", q: "Nietzsche proclamó «Dios ha muerto» y propuso un nuevo ideal de ser humano. ¿Cuál?", opts: ["El superhombre", "El santo", "El filósofo rey", "El ciudadano del mundo"], correct: 0, digito: 9 },
+      { titulo: "Las palabras de Simone", q: "Simone de Beauvoir escribió en 'El segundo sexo': «No se nace mujer…»", opts: ["…se llega a serlo", "…se nace libre", "…se hace fuerte por naturaleza", "…se aprende a soñar"], correct: 0, digito: 2 },
+    ],
+    codigo: "92",
+    pista: "El ideal de Nietzsche les dio el primer número, y la frase de Simone de Beauvoir el segundo.",
+  },
+];
+
+// ================== ESTADO ==================
+let salaIdx = 0, acertijoIdx = 0, errores = 0, pistas = 0;
+let clavesSala = [], inicioT = null, timerInt = null;
+let vozOn = true, musicaOn = true, musicaTimer = null, masterGain = null;
+let curso = "", equipo = "", trip = "";
+let audioCtx = null;
+
+// ================== AUDIO ==================
+function ctx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function hablar(txt, cancelar = true) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    if (cancelar) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = "es-ES"; u.rate = 0.95; u.pitch = 1.0;
+    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith("es"));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function toggleVoz() {
+  vozOn = !vozOn;
+  if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {}
+  const b = document.getElementById("btnVoz");
+  b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn);
+}
+const ACORDES = [[220, 261.63, 329.63], [196, 246.94, 293.66], [174.61, 220, 261.63], [164.81, 196, 246.94]];
+function iniciarMusica() {
+  if (musicaTimer || !musicaOn) return;
+  try {
+    const c = ctx();
+    masterGain = c.createGain(); masterGain.gain.value = 0.014; masterGain.connect(c.destination);
+    let paso = 0;
+    musicaTimer = setInterval(() => {
+      try {
+        const t = c.currentTime, ac = ACORDES[Math.floor(paso / 4) % 4], f = ac[paso % 3];
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.5, t + 0.06);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+        o.connect(g).connect(masterGain); o.start(t); o.stop(t + 1.2);
+        paso++;
+      } catch (e) {}
+    }, 600);
+  } catch (e) {}
+}
+function detenerMusica() {
+  if (musicaTimer) clearInterval(musicaTimer); musicaTimer = null;
+  if (masterGain) try { masterGain.disconnect(); } catch (e) {}
+  masterGain = null;
+}
+function toggleMusica() {
+  musicaOn = !musicaOn;
+  if (musicaOn) iniciarMusica(); else detenerMusica();
+  const b = document.getElementById("btnMusica");
+  b.textContent = musicaOn ? "🎵" : "🔕"; b.classList.toggle("on", musicaOn);
+}
+function sndOk() {
+  try { const c = ctx(), t = c.currentTime;
+    [880, 1108.7, 1318.5].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.001, t + i * 0.08); g.gain.exponentialRampToValueAtTime(0.22, t + i * 0.08 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.5);
+      o.connect(g).connect(c.destination); o.start(t + i * 0.08); o.stop(t + i * 0.08 + 0.6);
+    });
+  } catch (e) {}
+}
+function sndError() {
+  try { const c = ctx(), t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "triangle"; o.frequency.setValueAtTime(280, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.35);
+    g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.45);
+  } catch (e) {}
+}
+function sndCandado() {
+  try { const c = ctx(), t = c.currentTime;
+    [523, 1244, 1867, 2794].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "square"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.16 / (i + 1), t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.1 - i * 0.12);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + 1.2);
+    });
+    const o2 = c.createOscillator(), g2 = c.createGain();
+    o2.type = "sawtooth"; o2.frequency.setValueAtTime(170, t + 0.15); o2.frequency.linearRampToValueAtTime(300, t + 0.65);
+    g2.gain.setValueAtTime(0.045, t + 0.15); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+    o2.connect(g2).connect(c.destination); o2.start(t + 0.15); o2.stop(t + 0.8);
+  } catch (e) {}
+}
+function sndFanfarria() {
+  try { const c = ctx(), t = c.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "sawtooth"; o.frequency.value = f;
+      const ini = t + i * 0.22, dur = i === 3 ? 0.9 : 0.2;
+      g.gain.setValueAtTime(0.001, ini); g.gain.exponentialRampToValueAtTime(0.11, ini + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, ini + dur);
+      o.connect(g).connect(c.destination); o.start(ini); o.stop(ini + dur + 0.1);
+    });
+  } catch (e) {}
+}
+
+// ================== NAVEGACIÓN ==================
+function mostrar(id) {
+  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.getElementById(id).classList.add("activa");
+  window.scrollTo(0, 0);
+}
+function pintarProgreso(elId) {
+  const el = document.getElementById(elId);
+  el.innerHTML = SALAS.map((s, i) =>
+    `<div class="sala-punto ${i < salaIdx ? "completa" : i === salaIdx ? "activa" : ""}">${i < salaIdx ? "✅" : s.emoji}</div>`
+  ).join("") + `<div class="sala-punto ${salaIdx >= SALAS.length ? "completa" : ""}">🌅</div>`;
+}
+function fmt(seg) {
+  const m = Math.floor(seg / 60), s = seg % 60;
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+function actualizarHud() {
+  const seg = inicioT ? Math.floor((Date.now() - inicioT) / 1000) : 0;
+  ["tiempo1", "tiempo2", "tiempo3"].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = fmt(seg); });
+  ["err1", "err2", "err3"].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = errores; });
+  const p = document.getElementById("pis1"); if (p) p.textContent = pistas;
+}
+
+// ================== FLUJO ==================
+function comenzar() {
+  curso = document.getElementById("inCurso").value.trim();
+  equipo = document.getElementById("inEquipo").value.trim() || "Equipo Filosófico";
+  trip = document.getElementById("inTrip").value.trim();
+  inicioT = Date.now();
+  timerInt = setInterval(actualizarHud, 1000);
+  iniciarMusica();
+  hablar("¡Bienvenidos al escape room filosófico! La capitana del Barco Enadis les da la bienvenida, equipo " + equipo + ". Han quedado atrapados en la caverna de Platón. Resuelvan los enigmas de los filósofos, abran los candados de cada sala, y escapen hacia la luz del conocimiento. ¡El tiempo corre!");
+  mostrarSala();
+}
+function mostrarSala() {
+  const s = SALAS[salaIdx];
+  clavesSala = [];
+  acertijoIdx = 0;
+  document.getElementById("salaEmoji").textContent = s.emoji;
+  document.getElementById("salaNombre").textContent = s.nombre;
+  document.getElementById("salaIntro").textContent = s.intro;
+  pintarProgreso("progSala");
+  actualizarHud();
+  mostrar("p-sala");
+  hablar((salaIdx === 0 ? "" : "¡Candado abierto! Avanzan a la siguiente sala. ") + s.nombre + ". " + s.intro, salaIdx !== 0);
+}
+function leerSalaActual() { const s = SALAS[salaIdx]; hablar(s.nombre + ". " + s.intro); }
+function irAcertijo() { pintarAcertijo(); mostrar("p-acertijo"); leerAcertijoActual(); }
+function pintarAcertijo() {
+  const s = SALAS[salaIdx], a = s.acertijos[acertijoIdx];
+  document.getElementById("acertijoTitulo").textContent = s.epoca + " · Enigma " + (acertijoIdx + 1) + " de " + s.acertijos.length;
+  document.getElementById("acertijoTexto").textContent = a.q;
+  document.getElementById("clavesHud").innerHTML = clavesSala.map(d => "🔑" + d).join(" ") || "—";
+  document.getElementById("revelacion").innerHTML = "";
+  pintarProgreso("progAcertijo");
+  actualizarHud();
+  const cont = document.getElementById("opciones");
+  cont.innerHTML = "";
+  a.opts.forEach((op, i) => {
+    const b = document.createElement("button");
+    b.className = "opcion"; b.textContent = op;
+    b.onclick = () => responder(i, b);
+    cont.appendChild(b);
+  });
+}
+function leerAcertijoActual() {
+  const s = SALAS[salaIdx], a = s.acertijos[acertijoIdx];
+  hablar(a.titulo + ". " + a.q + " Las opciones son: " + a.opts.join(". "));
+}
+function responder(i, btnEl) {
+  const s = SALAS[salaIdx], a = s.acertijos[acertijoIdx];
+  if (document.getElementById("revelacion").innerHTML !== "") return;
+  if (i === a.correct) {
+    sndOk();
+    btnEl.classList.add("correcta");
+    clavesSala.push(a.digito);
+    document.getElementById("clavesHud").innerHTML = clavesSala.map(d => "🔑" + d).join(" ");
+    const esUltimo = acertijoIdx + 1 >= s.acertijos.length;
+    document.getElementById("revelacion").innerHTML =
+      '<div class="digito-chip">🔑 Clave revelada: ' + a.digito + "</div><br>" +
+      '<button class="btn" onclick="' + (esUltimo ? "irCandado()" : "siguienteAcertijo()") + '">' +
+      (esUltimo ? "🔒 Ir al candado" : "➡️ Siguiente enigma") + "</button>";
+    hablar("¡Correcto! Han revelado la clave número " + a.digito + ".");
+  } else {
+    errores++;
+    sndError();
+    btnEl.classList.add("incorrecta");
+    btnEl.disabled = true;
+    actualizarHud();
+    hablar("Respuesta incorrecta. Piensen de nuevo, filósofos.");
+  }
+}
+function siguienteAcertijo() { acertijoIdx++; pintarAcertijo(); leerAcertijoActual(); }
+function irCandado() {
+  const s = SALAS[salaIdx];
+  document.getElementById("numDigitos").textContent = s.codigo.length;
+  document.getElementById("inCodigo").value = "";
+  document.getElementById("inCodigo").maxLength = s.codigo.length;
+  document.getElementById("errCodigo").textContent = "";
+  document.getElementById("cajaPista").style.display = "none";
+  document.getElementById("puerta").className = "puerta";
+  document.getElementById("puerta").textContent = "🚪";
+  document.getElementById("clavesGanadas").innerHTML =
+    "Sus claves: " + clavesSala.map(d => '<span class="digito-chip" style="font-size:17px; padding:5px 12px;">🔑 ' + d + "</span>").join(" ");
+  pintarProgreso("progCandado");
+  actualizarHud();
+  mostrar("p-candado");
+  hablar("Han llegado al candado de la sala. Ingresen el código de " + s.codigo.length + " dígitos usando las claves que revelaron, en orden.");
+}
+function usarPista() {
+  const s = SALAS[salaIdx];
+  const caja = document.getElementById("cajaPista");
+  if (caja.style.display !== "block") { pistas++; actualizarHud(); }
+  caja.style.display = "block";
+  caja.textContent = "💡 " + s.pista;
+  hablar("Pista: " + s.pista);
+}
+function probarCodigo() {
+  const s = SALAS[salaIdx];
+  const val = document.getElementById("inCodigo").value.trim();
+  if (val === s.codigo) {
+    sndCandado();
+    document.getElementById("puerta").textContent = "🌟";
+    document.getElementById("puerta").classList.add("abierta");
+    document.getElementById("errCodigo").textContent = "";
+    setTimeout(() => {
+      salaIdx++;
+      if (salaIdx < SALAS.length) mostrarSala();
+      else finalizar();
+    }, 1400);
+  } else {
+    errores++;
+    sndError();
+    actualizarHud();
+    document.getElementById("errCodigo").textContent = "⛓️ Código incorrecto… el candado no cede.";
+    document.getElementById("inCodigo").value = "";
+    hablar("Código incorrecto. El candado no cede. Revisen sus claves.");
+  }
+}
+function notaFinal() {
+  return Math.max(1, Math.round((5 - errores * 0.25 - pistas * 0.25) * 10) / 10);
+}
+function finalizar() {
+  clearInterval(timerInt);
+  const seg = Math.floor((Date.now() - inicioT) / 1000);
+  const nota = notaFinal();
+  sndFanfarria();
+  // Lluvia de estrellas
+  for (let i = 0; i < 16; i++) {
+    const d = document.createElement("div");
+    d.textContent = ["✨", "🌟", "💫", "🌅", "🕊️"][i % 5];
+    d.style.cssText = "position:fixed; left:" + ((i * 31 + 9) % 100) + "%; top:-60px; font-size:" + (16 + (i % 4) * 8) + "px; animation:caer " + (4 + (i % 5)) + "s linear infinite; animation-delay:" + (i * 0.5) + "s; pointer-events:none; z-index:1;";
+    document.body.appendChild(d);
+  }
+  document.getElementById("finCursoEquipo").textContent = (curso ? "🎓 " + curso + " · " : "") + "🛡️ " + equipo;
+  document.getElementById("finTiempo").textContent = fmt(seg);
+  document.getElementById("finErrores").textContent = errores;
+  document.getElementById("finPistas").textContent = pistas;
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML =
+    [1, 2, 3, 4, 5].map(x => '<span style="opacity:' + (nota >= x - 0.25 ? 1 : 0.2) + '">⭐</span>').join("");
+  const alumnos = trip.split(",").map(x => x.trim()).filter(Boolean);
+  document.getElementById("finAlumnos").innerHTML = alumnos.length
+    ? alumnos.map(a => '<div class="estudiante-fila"><span>👤 ' + a + '</span><b style="color:' + nEl.style.color + '">' + nota.toFixed(1) + "</b></div>").join("")
+    : "";
+  mostrar("p-final");
+  hablar("¡Lo lograron! Han escapado de la caverna de Platón hacia la luz del conocimiento. Tiempo: " + fmt(seg).replace(":", " minutos con ") + " segundos. Errores: " + errores + ". La calificación del equipo " + equipo + " es: " + nota.toFixed(1).replace(".", " punto ") + ". ¡Felicitaciones, filósofos!");
+}
+function copiarResumen() {
+  const seg = Math.floor((Date.now() - inicioT) / 1000);
+  const nota = notaFinal();
+  const alumnos = trip.split(",").map(x => x.trim()).filter(Boolean);
+  let txt = "🕯️ ESCAPE ROOM FILOSÓFICO — La Caverna de Platón\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "🛡️ Equipo: " + equipo + "\n⏱️ Tiempo: " + fmt(seg) + " | ❌ Errores: " + errores + " | 💡 Pistas: " + pistas + "\n";
+  txt += "📋 Nota del equipo: " + nota.toFixed(1) + "\n";
+  alumnos.forEach(a => { txt += "   • " + a + ": " + nota.toFixed(1) + "\n"; });
+  const fin = () => {
+    const b = document.getElementById("btnCopiar");
+    b.textContent = "✅ ¡Copiado!";
+    setTimeout(() => (b.textContent = "📄 Copiar resumen para la profesora"), 2500);
+  };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(() => fin()); } catch (e) { fin(); }
+}
+if ("speechSynthesis" in window) speechSynthesis.getVoices();
+</script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FilosofIA Interactiva — Pensamiento crítico para nuevas mentes</title>
+<meta name="description" content="Aprende filosofía jugando: escape rooms, retos por equipos y aventuras con inteligencia artificial. FilosofIA Interactiva para el pensamiento crítico.">
+<style>
+  :root {
+    --fondo: #0b0518;
+    --morado: #7c3aed;
+    --violeta: #a855f7;
+    --cian: #22d3ee;
+    --dorado: #fbbf24;
+    --rosa: #f472b6;
+    --texto: #e9e2f7;
+    --texto-suave: #b3a5d6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    overflow-x: hidden;
+  }
+  /* ===== Fondo animado ===== */
+  .fondo-gradiente {
+    position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124,58,237,0.35), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 20%, rgba(34,211,238,0.18), transparent 60%),
+      radial-gradient(ellipse 90% 70% at 50% 100%, rgba(244,114,182,0.14), transparent 60%);
+    animation: respirar 10s ease-in-out infinite alternate;
+  }
+  @keyframes respirar { from { opacity: 0.8; } to { opacity: 1; } }
+  .particula {
+    position: fixed; z-index: -1; opacity: 0.5; pointer-events: none;
+    animation: flotarP linear infinite;
+    filter: drop-shadow(0 0 8px rgba(168,85,247,0.7));
+  }
+  @keyframes flotarP {
+    0% { transform: translateY(105vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.55; }
+    90% { opacity: 0.55; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== Nav ===== */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 6vw;
+    background: rgba(11,5,24,0.7);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(168,85,247,0.25);
+  }
+  .logo { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
+  .logo .ia { background: linear-gradient(90deg, var(--cian), var(--violeta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .nav-links { display: flex; gap: 22px; font-size: 14px; }
+  .nav-links a { color: var(--texto-suave); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--cian); }
+  @media (max-width: 640px) { .nav-links { display: none; } }
+
+  /* ===== Hero ===== */
+  header {
+    min-height: 88vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 40px 6vw 60px; position: relative;
+  }
+  .insignia {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(168,85,247,0.14); border: 1px solid rgba(168,85,247,0.45);
+    color: var(--violeta); padding: 8px 18px; border-radius: 40px;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    animation: subirSuave 0.8s ease-out;
+  }
+  h1.titulo {
+    font-size: clamp(40px, 8vw, 84px); font-weight: 900; line-height: 1.05;
+    margin: 22px 0 10px; animation: subirSuave 0.9s ease-out 0.1s backwards;
+  }
+  h1 .grad {
+    background: linear-gradient(90deg, var(--dorado), var(--rosa), var(--violeta), var(--cian));
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: arcoiris 6s linear infinite;
+  }
+  @keyframes arcoiris { to { background-position: 300% 0; } }
+  .subtitulo {
+    max-width: 640px; color: var(--texto-suave); font-size: clamp(16px, 2.4vw, 20px);
+    line-height: 1.6; animation: subirSuave 1s ease-out 0.2s backwards;
+  }
+  .frase-caja {
+    margin-top: 26px; min-height: 58px; max-width: 560px;
+    font-size: clamp(15px, 2.2vw, 18px); font-style: italic; color: var(--cian);
+    animation: subirSuave 1s ease-out 0.3s backwards;
+  }
+  .frase-autor { color: var(--dorado); font-style: normal; font-weight: 700; font-size: 14px; display: block; margin-top: 6px; }
+  .hero-botones { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 30px; animation: subirSuave 1s ease-out 0.4s backwards; }
+  .btn {
+    padding: 15px 34px; border-radius: 44px; font-size: 17px; font-weight: 800;
+    text-decoration: none; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+  }
+  .btn-primario {
+    background: linear-gradient(135deg, var(--dorado), #f59e0b);
+    color: #1a0f2e; box-shadow: 0 8px 30px rgba(251,191,36,0.35);
+  }
+  .btn-primario:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 40px rgba(251,191,36,0.5); }
+  .btn-secundario {
+    background: rgba(34,211,238,0.1); color: var(--cian);
+    border: 2px solid rgba(34,211,238,0.5);
+  }
+  .btn-secundario:hover { transform: translateY(-3px); background: rgba(34,211,238,0.2); }
+  .flecha-abajo { margin-top: 44px; font-size: 26px; animation: rebotar 1.8s infinite; opacity: 0.7; }
+  @keyframes rebotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+  @keyframes subirSuave { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== Secciones ===== */
+  section { padding: 70px 6vw; max-width: 1180px; margin: 0 auto; }
+  .titulo-seccion { font-size: clamp(28px, 5vw, 42px); font-weight: 900; text-align: center; margin-bottom: 8px; }
+  .sub-seccion { text-align: center; color: var(--texto-suave); max-width: 620px; margin: 0 auto 44px; font-size: 16px; line-height: 1.6; }
+
+  /* ===== Cómo funciona ===== */
+  .pasos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+  .paso {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(168,85,247,0.25);
+    border-radius: 22px; padding: 26px 22px; text-align: center;
+    backdrop-filter: blur(8px); transition: transform 0.25s, border-color 0.25s;
+  }
+  .paso:hover { transform: translateY(-6px); border-color: var(--cian); }
+  .paso .icono { font-size: 42px; margin-bottom: 12px; display: inline-block; animation: flotarIcono 3s ease-in-out infinite; }
+  @keyframes flotarIcono { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .paso h3 { font-size: 18px; margin-bottom: 8px; color: var(--dorado); }
+  .paso p { font-size: 14px; color: var(--texto-suave); line-height: 1.55; }
+
+  /* ===== Actividades ===== */
+  .grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
+  .carta {
+    position: relative; border-radius: 26px; padding: 28px 24px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px); overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .carta::before {
+    content: ""; position: absolute; inset: -2px; border-radius: 26px; z-index: -1;
+    background: linear-gradient(135deg, transparent 40%, var(--brillo, rgba(168,85,247,0.5)));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .carta:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 20px 50px rgba(124,58,237,0.3); }
+  .carta:hover::before { opacity: 1; }
+  .carta .emoji { font-size: 52px; margin-bottom: 12px; }
+  .carta h3 { font-size: 21px; margin-bottom: 8px; }
+  .carta p { font-size: 14px; color: var(--texto-suave); line-height: 1.6; flex-grow: 1; }
+  .etiquetas { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+  .etiqueta {
+    font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+    background: rgba(34,211,238,0.12); color: var(--cian); border: 1px solid rgba(34,211,238,0.3);
+  }
+  .etiqueta.oro { background: rgba(251,191,36,0.12); color: var(--dorado); border-color: rgba(251,191,36,0.35); }
+  .etiqueta.rosa { background: rgba(244,114,182,0.12); color: var(--rosa); border-color: rgba(244,114,182,0.35); }
+  .carta .btn { text-align: center; margin-top: 4px; font-size: 15px; padding: 12px 24px; }
+  .carta.pronto { opacity: 0.75; }
+  .cinta-pronto {
+    position: absolute; top: 16px; right: -34px; transform: rotate(38deg);
+    background: linear-gradient(90deg, var(--rosa), var(--violeta));
+    color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    padding: 6px 40px; box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+
+  /* ===== Épocas ===== */
+  .epocas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .epoca {
+    border-radius: 20px; padding: 22px 18px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04);
+    transition: transform 0.25s, background 0.25s;
+  }
+  .epoca:hover { transform: scale(1.04); background: rgba(255,255,255,0.08); }
+  .epoca .icono { font-size: 38px; }
+  .epoca h4 { color: var(--dorado); margin: 8px 0 4px; font-size: 16px; }
+  .epoca span { font-size: 12px; color: var(--cian); font-weight: 700; }
+  .epoca p { font-size: 13px; color: var(--texto-suave); margin-top: 6px; line-height: 1.5; }
+
+  /* ===== Footer ===== */
+  footer {
+    margin-top: 40px; padding: 40px 6vw; text-align: center;
+    border-top: 1px solid rgba(168,85,247,0.25); background: rgba(0,0,0,0.3);
+  }
+  footer .logo { font-size: 24px; margin-bottom: 10px; }
+  footer p { color: var(--texto-suave); font-size: 14px; margin: 4px 0; }
+  .capitana { font-size: 40px; display: inline-block; animation: flotarIcono 3s ease-in-out infinite; }
+
+  .aparece { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+  .aparece.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="fondo-gradiente"></div>
+
+<nav>
+  <div class="logo">🧠 Filosof<span class="ia">IA</span> Interactiva</div>
+  <div class="nav-links">
+    <a href="#como">¿Cómo funciona?</a>
+    <a href="#actividades">Actividades</a>
+    <a href="#epocas">Épocas</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header>
+  <div class="insignia">⚡ APRENDE JUGANDO · CON INTELIGENCIA ARTIFICIAL</div>
+  <h1 class="titulo">Filosof<span class="grad">IA</span><br>Interactiva</h1>
+  <p class="subtitulo">
+    Pensamiento crítico para nuevas mentes 🚀 Escapa de la Caverna de Platón, compite en barcos del conocimiento
+    y descubre 2 500 años de grandes ideas… <b style="color:var(--dorado)">jugando</b>.
+  </p>
+  <div class="frase-caja">
+    <span id="fraseTexto">"Solo sé que nada sé."</span>
+    <span class="frase-autor" id="fraseAutor">— Sócrates</span>
+  </div>
+  <div class="hero-botones">
+    <a class="btn btn-primario" href="#actividades">🎮 Ver actividades</a>
+    <a class="btn btn-secundario" href="#como">✨ ¿Cómo funciona?</a>
+  </div>
+  <div class="flecha-abajo">⬇️</div>
+</header>
+
+<!-- ================= CÓMO FUNCIONA ================= -->
+<section id="como">
+  <h2 class="titulo-seccion aparece">¿Cómo <span style="color:var(--cian)">funciona</span>? 🤔</h2>
+  <p class="sub-seccion aparece">Nada de clases aburridas: aquí la filosofía se vive en equipo, con retos, voz en off, música y calificación automática.</p>
+  <div class="pasos">
+    <div class="paso aparece"><span class="icono">👥</span><h3>1. Arma tu equipo</h3><p>Registra tu curso, el nombre de tu equipo y sus tripulantes. ¡La aventura es mejor acompañada!</p></div>
+    <div class="paso aparece"><span class="icono">🗺️</span><h3>2. Elige tu aventura</h3><p>Escape rooms, competencias de barcos, dilemas y duelos filosóficos. Cada actividad enseña una época distinta.</p></div>
+    <div class="paso aparece"><span class="icono">🧩</span><h3>3. Piensa y resuelve</h3><p>Enigmas con voz en off y pistas. Cada acierto te da tesoros, claves y puntos. Equivocarse también enseña.</p></div>
+    <div class="paso aparece"><span class="icono">🏆</span><h3>4. Gana tu nota</h3><p>Al final recibes tu calificación de 1.0 a 5.0 con estrellas, fanfarria y lluvia de joyas. ¡Directo al registro de la profe!</p></div>
+  </div>
+</section>
+
+<!-- ================= ACTIVIDADES ================= -->
+<section id="actividades">
+  <h2 class="titulo-seccion aparece">🎮 Las <span style="color:var(--rosa)">aventuras</span></h2>
+  <p class="sub-seccion aparece">Cada actividad es un mundo. Tócala y empieza a jugar. Nuevas aventuras se desbloquean pronto…</p>
+  <div class="grilla">
+
+    <div class="carta aparece" style="--brillo: rgba(251,191,36,0.55);">
+      <div class="emoji">🕯️</div>
+      <h3>Escape Room: La Caverna de Platón</h3>
+      <p>Despiertas encadenado viendo solo sombras. Resuelve los enigmas de 4 salas —Antigua, Medieval, Moderna y Contemporánea—, descubre los códigos y escapa hacia la luz del conocimiento.</p>
+      <div class="etiquetas">
+        <span class="etiqueta oro">⏱️ Contra el tiempo</span>
+        <span class="etiqueta">🔐 4 candados</span>
+        <span class="etiqueta rosa">🗣️ Voz en off</span>
+      </div>
+      <a class="btn btn-primario" href="escape-room.html">🗝️ ¡Escapar ahora!</a>
+    </div>
+
+    <div class="carta aparece" style="--brillo: rgba(34,211,238,0.55);">
+      <div class="emoji">🏴‍☠️</div>
+      <h3>El Baúl de la Sabiduría</h3>
+      <p>Dos barcos compiten navegando de puerto en puerto por la historia de la filosofía. Cada acierto da un tesoro, y al final el baúl se abre con lluvia de joyas y las calificaciones de cada tripulación.</p>
+      <div class="etiquetas">
+        <span class="etiqueta">⛵ 2 equipos</span>
+        <span class="etiqueta oro">💎 Tesoros</span>
+        <span class="etiqueta rosa">🗺️ Mapa de puertos</span>
+      </div>
+      <a class="btn btn-primario" href="baul-sabiduria.html">⚓ ¡Zarpar!</a>
+    </div>
+
+    <div class="carta aparece" style="--brillo: rgba(244,114,182,0.5);">
+      <div class="emoji">💬</div>
+      <h3>Diálogo con Sócrates</h3>
+      <p>Entra al ágora de Atenas y conversa con el maestro de la mayéutica: no te dará respuestas, te hará preguntas hasta que tus ideas salgan a la luz. ¿Sobrevivirás sin contradecirte?</p>
+      <div class="etiquetas"><span class="etiqueta rosa">🤖 Con IA</span><span class="etiqueta">🧠 Pensamiento crítico</span><span class="etiqueta oro">🦉 Mayéutica</span></div>
+      <a class="btn btn-primario" href="dialogo-socrates.html">🏛️ ¡Entrar al ágora!</a>
+    </div>
+
+    <div class="carta aparece" style="--brillo: rgba(168,85,247,0.5);">
+      <div class="emoji">⚖️</div>
+      <h3>Dilemas Morales</h3>
+      <p>El tranvía, el anillo de Giges, la verdad que duele… Decide qué harías en 6 dilemas sin respuesta fácil, descubre qué dirían Kant, Mill y Aristóteles, y conoce tu brújula moral 🧭.</p>
+      <div class="etiquetas"><span class="etiqueta">🧭 Brújula moral</span><span class="etiqueta oro">✍️ Reflexión escrita</span><span class="etiqueta rosa">🗣️ Voz en off</span></div>
+      <a class="btn btn-primario" href="dilemas-morales.html">⚖️ ¡Enfrentar los dilemas!</a>
+    </div>
+
+    <div class="carta aparece" style="--brillo: rgba(34,211,238,0.5);">
+      <div class="emoji">🌌</div>
+      <h3>Existencialismo para la Vida</h3>
+      <p>Una mini-serie de 7 episodios con intros de cine y paisajes animados: Sartre, Camus, Kierkegaard y Frankl te acompañan en decisiones, ansiedad, redes sociales y grandes debates de tu vida real.</p>
+      <div class="etiquetas"><span class="etiqueta rosa">🎬 Estilo serie</span><span class="etiqueta oro">🏅 7 insignias</span><span class="etiqueta">💚 Para tu vida</span></div>
+      <a class="btn btn-primario" href="existencialismo-vida.html">🎬 ¡Ver episodio 1!</a>
+    </div>
+
+    <div class="carta aparece" style="--brillo: rgba(251,191,36,0.5);">
+      <div class="emoji">🃏</div>
+      <h3>Cartas de Batalla Filosófica</h3>
+      <p>La Esfinge de la Duda 🗿 te espera en la arena: 12 filósofos coleccionables con poderes de Lógica, Ética y Retórica. Gana el choque… y corona tu victoria respondiendo bien. ¡6 rondas de duelo!</p>
+      <div class="etiquetas"><span class="etiqueta rosa">⚔️ Duelo vs la Esfinge</span><span class="etiqueta">🎴 12 cartas</span><span class="etiqueta oro">👑 Coronas</span></div>
+      <a class="btn btn-primario" href="cartas-batalla.html">⚔️ ¡Entrar a la arena!</a>
+    </div>
+
+    <div class="carta pronto aparece" style="--brillo: rgba(251,191,36,0.5);">
+      <div class="cinta-pronto">PRONTO</div>
+      <div class="emoji">🎭</div>
+      <h3>¿Quién dijo qué?</h3>
+      <p>Frases célebres vuelan por la pantalla: arrástralas hasta su filósofo antes de que se acabe el tiempo. Velocidad + memoria = puntos extra.</p>
+      <div class="etiquetas"><span class="etiqueta">⚡ Contrarreloj</span><span class="etiqueta oro">🧲 Arrastrar y soltar</span></div>
+      <a class="btn btn-secundario" href="#" onclick="return proximamente()">🔒 Próximamente</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= ÉPOCAS ================= -->
+<section id="epocas">
+  <h2 class="titulo-seccion aparece">🧭 El viaje por <span style="color:var(--dorado)">2 500 años</span> de ideas</h2>
+  <p class="sub-seccion aparece">Todas las aventuras recorren las cuatro grandes épocas de la filosofía:</p>
+  <div class="epocas">
+    <div class="epoca aparece"><div class="icono">🏛️</div><h4>Antigua</h4><span>s. VI a.C. – V d.C.</span><p>Tales, Heráclito, Sócrates, Platón y Aristóteles: la razón nace en Grecia.</p></div>
+    <div class="epoca aparece"><div class="icono">⛪</div><h4>Medieval</h4><span>s. V – XV</span><p>San Agustín, Santo Tomás y Ockham: fe y razón navegan juntas.</p></div>
+    <div class="epoca aparece"><div class="icono">🔭</div><h4>Moderna</h4><span>s. XVI – XVIII</span><p>Descartes, Bacon, Kant y Rousseau: la ciencia toma el timón.</p></div>
+    <div class="epoca aparece"><div class="icono">🌆</div><h4>Contemporánea</h4><span>s. XIX – hoy</span><p>Nietzsche, Marx, Sartre y Beauvoir: las voces críticas de nuestro tiempo.</p></div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <span class="capitana">🏴‍☠️</span>
+  <div class="logo">Filosof<span class="ia">IA</span> Interactiva</div>
+  <p>⚓ Un proyecto educativo de la capitana del Barco Enadis</p>
+  <p>Pensamiento crítico para nuevas mentes · Filosofía + Juego + Inteligencia Artificial</p>
+  <p style="margin-top:12px; font-size:12px; opacity:0.7;">✨ "Una vida sin examen no merece ser vivida" — Sócrates</p>
+</footer>
+
+<script>
+  // Partículas flotantes de símbolos filosóficos
+  const simbolos = ["💭", "🧠", "✨", "📜", "🕯️", "⚖️", "🔮", "💡", "🌟", "🏛️"];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement("div");
+    p.className = "particula";
+    p.textContent = simbolos[i % simbolos.length];
+    p.style.left = (i * 23 + 7) % 100 + "%";
+    p.style.fontSize = 14 + (i % 4) * 8 + "px";
+    p.style.animationDuration = 14 + (i % 7) * 4 + "s";
+    p.style.animationDelay = i * 1.4 + "s";
+    document.body.appendChild(p);
+  }
+
+  // Frases rotativas de filósofos
+  const frases = [
+    ["\"Solo sé que nada sé.\"", "— Sócrates"],
+    ["\"Pienso, luego existo.\"", "— René Descartes"],
+    ["\"Nadie se baña dos veces en el mismo río.\"", "— Heráclito"],
+    ["\"El saber es poder.\"", "— Francis Bacon"],
+    ["\"No se nace mujer: se llega a serlo.\"", "— Simone de Beauvoir"],
+    ["\"El hombre es un animal racional y político.\"", "— Aristóteles"],
+    ["\"Atrévete a pensar por ti mismo.\"", "— Immanuel Kant"],
+  ];
+  let fi = 0;
+  const ft = document.getElementById("fraseTexto");
+  const fa = document.getElementById("fraseAutor");
+  setInterval(() => {
+    fi = (fi + 1) % frases.length;
+    ft.style.opacity = 0; fa.style.opacity = 0;
+    ft.style.transition = "opacity 0.5s"; fa.style.transition = "opacity 0.5s";
+    setTimeout(() => {
+      ft.textContent = frases[fi][0];
+      fa.textContent = frases[fi][1];
+      ft.style.opacity = 1; fa.style.opacity = 1;
+    }, 500);
+  }, 5000);
+
+  // Animación de aparición al hacer scroll
+  const obs = new IntersectionObserver(
+    (entradas) => entradas.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll(".aparece").forEach((el) => obs.observe(el));
+
+  function proximamente() {
+    alert("🔒 ¡Esta aventura se está construyendo en el astillero de la capitana Enadis! Muy pronto podrás jugarla. 🚧⚓");
+    return false;
+  }
+</script>
+</body>
+</html>

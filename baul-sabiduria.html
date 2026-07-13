@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Baúl de la Sabiduría 🏴‍☠️ — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, #0a2e4d 0%, #0d4f6e 40%, #10608a 70%, #0a3d5c 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 18px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 620px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #ffd700; text-align: center; font-size: 27px; margin: 6px 0; animation: brillar 2s infinite; }
+  h2 { color: #ffd700; text-align: center; font-size: 21px; margin: 6px 0; }
+  p.sub { color: #bde4f4; text-align: center; font-size: 15px; line-height: 1.5; margin: 6px 0 10px; max-width: 460px; }
+  .tarjeta { background: rgba(255,255,255,0.96); color: #0a2e4d; border-radius: 18px; padding: 20px; width: 100%; max-width: 470px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); text-align: center; }
+  input, textarea { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #a8d5e8; margin-top: 5px; font-family: inherit; outline: none; color: #0a2e4d; }
+  input:focus, textarea:focus { border-color: #ffd700; }
+  .btn { display: inline-block; padding: 13px 30px; font-size: 17px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #ffd700, #ffb700); color: #0a2e4d; box-shadow: 0 5px 18px rgba(255,215,0,0.4); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn.azul { background: linear-gradient(135deg, #1a7fb5, #0d5f8a); color: #fff; }
+  .btn.sec { background: rgba(0,0,0,0.35); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 20px; }
+  .btn.claro { background: #e8f4fa; color: #0a2e4d; border: 2px solid #a8d5e8; box-shadow: none; font-size: 14px; padding: 8px 18px; }
+  .opcion { display: block; width: 100%; padding: 13px 16px; margin-top: 9px; font-size: 15px; font-weight: 600; text-align: left; border-radius: 12px; cursor: pointer; border: 2px solid #a8d5e8; background: linear-gradient(135deg, #e8f4fa, #d0e9f5); color: #0a2e4d; transition: all 0.2s; font-family: inherit; }
+  .opcion.correcta { background: linear-gradient(135deg, #b8f0c0, #8fe09d); border-color: #3cb85c; }
+  .opcion.incorrecta { background: linear-gradient(135deg, #f8c8c8, #f0a0a0); border-color: #d85050; animation: sacudir 0.4s; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 30; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(255,215,0,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(255,215,0,0.3); }
+  .caja-barco { background: rgba(0,0,0,0.25); border-radius: 18px; padding: 14px; flex: 1 1 250px; max-width: 290px; }
+  .b1 { border: 2px solid #ffd700; } .b2 { border: 2px solid #5fd6f5; }
+  .tit-b1 { color: #ffd700; } .tit-b2 { color: #5fd6f5; }
+  .chip-tema { padding: 8px 18px; font-size: 14px; font-weight: bold; border-radius: 20px; cursor: pointer; border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.25); color: #bde4f4; }
+  .chip-tema.act1 { border-color: #ffd700; background: rgba(255,215,0,0.25); color: #ffd700; }
+  .chip-tema.act2 { border-color: #5fd6f5; background: rgba(95,214,245,0.25); color: #5fd6f5; }
+  .mapa { position: relative; width: 100%; max-width: 470px; height: 96px; margin: 4px 0 8px; background: rgba(0,0,0,0.22); border-radius: 16px; border: 1px solid rgba(255,215,0,0.25); }
+  .ruta { position: absolute; top: 56px; left: 6%; right: 6%; height: 4px; border-radius: 2px; background: repeating-linear-gradient(90deg, rgba(255,215,0,0.7) 0 8px, transparent 8px 16px); }
+  .puerto-marca { position: absolute; top: 38px; transform: translateX(-50%); text-align: center; font-size: 24px; opacity: 0.45; }
+  .puerto-marca.on { opacity: 1; filter: drop-shadow(0 0 8px rgba(255,215,0,0.8)); }
+  .puerto-marca div { font-size: 9px; font-weight: bold; white-space: nowrap; color: #7fb8d4; }
+  .puerto-marca.on div { color: #ffd700; }
+  .meta { position: absolute; right: 3%; top: 36px; font-size: 26px; text-align: center; }
+  .meta div { font-size: 9px; color: #ffd700; font-weight: bold; }
+  .barco-mapa { position: absolute; font-size: 22px; transition: left 0.8s ease; transform: translateX(-50%) scaleX(-1); animation: flotar 2.5s ease-in-out infinite; }
+  .marcador { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .eq { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 8px 14px; min-width: 150px; max-width: 225px; text-align: center; }
+  .eq.turno1 { background: rgba(255,255,255,0.15); border: 2px solid #ffd700; }
+  .eq.turno2 { background: rgba(255,255,255,0.15); border: 2px solid #5fd6f5; }
+  .eq .nom { font-weight: bold; font-size: 14px; }
+  .eq .tri { color: #bde4f4; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+  .eq .tes { font-size: 18px; min-height: 24px; }
+  .banner-turno { margin: 10px 0; padding: 8px 22px; border-radius: 30px; font-weight: bold; font-size: 15px; animation: rebote 0.5s ease-out; }
+  .bt1 { background: linear-gradient(135deg, #ffd700, #ffb700); color: #0a2e4d; }
+  .bt2 { background: linear-gradient(135deg, #2ab5d8, #1a7fb5); color: #fff; }
+  .badge-periodo { display: inline-block; background: linear-gradient(135deg, #0a2e4d, #1a7fb5); color: #ffd700; font-size: 13px; font-weight: bold; padding: 6px 14px; border-radius: 20px; margin-bottom: 10px; }
+  .emoji-grande { font-size: 80px; animation: rebote 0.9s ease-out, flotar 3s ease-in-out 1s infinite; margin: 4px 0; }
+  .baul-icono { font-size: 118px; cursor: pointer; user-select: none; animation: flotar 3s ease-in-out infinite; transition: filter 0.5s; }
+  .baul-icono.temblando { animation: temblar 0.3s infinite; }
+  .baul-icono.abierto { animation: brillar 1s infinite; filter: drop-shadow(0 0 30px gold); cursor: default; }
+  .zona-baul { position: relative; }
+  .particula-joya { position: absolute; left: 50%; top: 30%; pointer-events: none; z-index: 5; animation: explotar var(--dur) ease-out var(--del) forwards; }
+  .carta-nota { background: rgba(255,255,255,0.96); border-radius: 20px; padding: 16px 22px; text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,0.35); min-width: 200px; max-width: 260px; position: relative; color: #0a2e4d; }
+  .corona { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 30px; }
+  .banner-ganador { padding: 14px 32px; border-radius: 40px; font-size: 21px; font-weight: 900; text-align: center; margin: 6px 0 16px; animation: rebote 0.9s ease-out 0.3s backwards, flotar 2.5s ease-in-out 1.3s infinite; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #fff; border-radius: 8px; padding: 4px 10px; font-size: 13px; margin-top: 3px; }
+  .reg-carta { background: rgba(255,255,255,0.96); color: #0a2e4d; border-radius: 18px; padding: 14px 18px; width: 100%; box-shadow: 0 6px 20px rgba(0,0,0,0.3); margin-bottom: 14px; text-align: left; }
+  .reg-barco { flex: 1 1 220px; background: #f2f9fd; border-radius: 12px; padding: 10px 12px; }
+  .pin-input { font-size: 24px; letter-spacing: 6px; text-align: center; font-weight: 700; max-width: 220px; border: 2px solid rgba(255,215,0,0.9); }
+  .burbuja { position: fixed; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); bottom: -40px; animation: subir linear infinite; z-index: 0; pointer-events: none; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes subir { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(-110vh); opacity: 0; } }
+  @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(255,215,0,0.5); } 50% { text-shadow: 0 0 32px rgba(255,215,0,1); } }
+  @keyframes rebote { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  @keyframes sacudir { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  @keyframes temblar { 0%,100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-6px) rotate(-3deg); } 75% { transform: translateX(6px) rotate(3deg); } }
+  @keyframes explotar { 0% { transform: translate(0,0) rotate(0) scale(0.3); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); opacity: 0; } }
+  @keyframes caer { 0% { transform: translateY(-60px) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0.8; } }
+</style>
+</head>
+<body>
+
+<div class="controles">
+  <button class="ctrl-btn" onclick="abrirPin()" title="Registro de la administradora">📋</button>
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+  <button class="ctrl-btn on" id="btnMusica" onclick="toggleMusica()">🎵</button>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:62px; animation:flotar 3s ease-in-out infinite;">🏴‍☠️</div>
+  <h1>El Baúl de la Sabiduría</h1>
+  <p class="sub">⚓ La capitana del <b style="color:#ffd700">Barco Enadis</b> les da la bienvenida. Dos barcos navegarán de puerto en puerto hasta encontrar el tesoro. 💎</p>
+  <div style="width:100%; max-width:300px; margin-bottom:12px; z-index:2;">
+    <div style="color:#ffd700; font-weight:bold; font-size:14px; text-align:center; margin-bottom:4px;">🎓 Curso y grupo</div>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20" style="text-align:center; font-weight:600;">
+  </div>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center; width:100%; z-index:2;">
+    <div class="caja-barco b1">
+      <div class="tit-b1" style="font-weight:bold; text-align:center; margin-bottom:6px;">⛵ Barco 1</div>
+      <input id="inNom1" placeholder="Nombre del barco" maxlength="30" style="text-align:center; font-weight:600;">
+      <textarea id="inTrip1" rows="2" placeholder="Tripulantes (separados por coma)" maxlength="200"></textarea>
+    </div>
+    <div class="caja-barco b2">
+      <div class="tit-b2" style="font-weight:bold; text-align:center; margin-bottom:6px;">⛵ Barco 2</div>
+      <input id="inNom2" placeholder="Nombre del barco" maxlength="30" style="text-align:center; font-weight:600; border-color:#5fd6f5;">
+      <textarea id="inTrip2" rows="2" placeholder="Tripulantes (separados por coma)" maxlength="200" style="border-color:#5fd6f5;"></textarea>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px; margin-top:14px; z-index:2;">
+    <button class="chip-tema act1" id="chipFil" onclick="ponerTema('filosofia')">🏛️ Tema: Filosofía</button>
+    <button class="chip-tema" id="chipOce" onclick="ponerTema('oceano')">🐋 Tema: Océano</button>
+  </div>
+  <button class="btn" onclick="iniciarJuego()">⚓ ¡Zarpar!</button>
+  <p class="sub" style="font-size:13px;">🗣️ La voz de la capitana dará la bienvenida al zarpar.</p>
+  <a href="index.html" class="btn sec" style="margin-top:4px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== PUERTO ========== -->
+<div class="pantalla" id="p-puerto">
+  <div class="mapa" id="mapaPuerto"></div>
+  <div style="font-size:32px; letter-spacing:4px;">🌊🌊🌊</div>
+  <div class="emoji-grande" id="puEmoji">🏛️</div>
+  <h2 id="puNombre"></h2>
+  <div class="tarjeta">
+    <p id="puDesc" style="line-height:1.6; font-size:15px;"></p>
+    <button class="btn claro" onclick="leerPuerto()">🔊 Escuchar de nuevo</button>
+  </div>
+  <button class="btn" onclick="continuarViaje()">🧭 ¡Continuar el viaje!</button>
+</div>
+
+<!-- ========== JUEGO ========== -->
+<div class="pantalla" id="p-juego">
+  <div class="mapa" id="mapaJuego"></div>
+  <div class="marcador" id="marcador"></div>
+  <div class="banner-turno" id="bannerTurno"></div>
+  <div class="tarjeta">
+    <div id="badgePeriodo"></div>
+    <h2 id="pregTexto" style="color:#0a2e4d; font-size:19px; margin:0 0 10px;"></h2>
+    <button class="btn claro" onclick="leerPregunta()">🔊 Escuchar de nuevo</button>
+    <div id="opciones"></div>
+    <div id="resultado" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- ========== BAÚL ========== -->
+<div class="pantalla" id="p-baul">
+  <div class="mapa" id="mapaBaul"></div>
+  <h2>¡Los dos barcos llegaron a la Isla del Tesoro!</h2>
+  <div class="marcador" id="marcadorBaul"></div>
+  <p class="sub">¡Toquen el baúl para abrirlo y conocer las calificaciones!</p>
+  <div class="zona-baul" id="zonaBaul">
+    <div class="baul-icono" id="baul" onclick="abrirBaul()">🧰</div>
+  </div>
+  <p class="sub" id="msjBaul">👆 ¡Tóquenlo!</p>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:66px; animation:rebote 0.8s ease-out;">🏆</div>
+  <h1 style="font-size:23px;">¡El Baúl de la Sabiduría se abrió!</h1>
+  <div class="banner-ganador" id="bannerGanador"></div>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;" id="cartasFinal"></div>
+  <button class="btn" onclick="reiniciar()">🔄 Jugar de nuevo</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== PIN ========== -->
+<div class="pantalla" id="p-pin">
+  <div style="font-size:60px; animation:flotar 3s ease-in-out infinite;">🔐</div>
+  <h2>Acceso de la Administradora</h2>
+  <p class="sub" id="pinMsj"></p>
+  <input type="password" inputmode="numeric" class="pin-input" id="inPin" maxlength="12" placeholder="PIN">
+  <p style="color:#ff9f9f; font-weight:bold; font-size:14px; min-height:20px; margin-top:8px;" id="pinError"></p>
+  <div style="display:flex; gap:10px;">
+    <button class="btn" id="btnPin" onclick="confirmarPin()">🔓 Entrar</button>
+    <button class="btn sec" onclick="volverDePantalla()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ========== REGISTRO ========== -->
+<div class="pantalla" id="p-registro">
+  <h1 style="font-size:23px;">📋 Registro de la Administradora</h1>
+  <p class="sub">Resumen de partidas y notas de cada estudiante (se guardan automáticamente en este dispositivo).</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:14px;">
+    <button class="btn" style="font-size:15px; padding:10px 22px; margin-top:0;" onclick="volverDePantalla()">⬅️ Volver</button>
+    <button class="btn azul" style="font-size:15px; padding:10px 22px; margin-top:0;" id="btnCopiarReg" onclick="copiarResumen()">📄 Copiar resumen</button>
+    <button class="btn sec" style="margin-top:0;" id="btnBorrar" onclick="pedirBorrar()">🗑️ Borrar registro</button>
+  </div>
+  <div id="listaRegistros" style="width:100%;"></div>
+</div>
+
+<script>
+// ============ DATOS ============
+const PREGUNTAS_FILOSOFIA = [
+  { periodo: "🏛️ Filosofía Antigua", q: "Tales de Mileto, el primer filósofo, afirmó que el principio (arjé) de todas las cosas es…", opts: ["El fuego", "El agua", "El aire", "Los números"], correct: 1 },
+  { periodo: "🏛️ Filosofía Antigua", q: "Heráclito de Éfeso enseñó que 'todo fluye' (panta rei), es decir…", opts: ["Nada cambia jamás", "La realidad está en constante cambio, como un río", "Solo el agua es real", "El movimiento es una ilusión"], correct: 1 },
+  { periodo: "🏛️ Filosofía Antigua", q: "Sócrates, con su frase 'Solo sé que nada sé', practicaba un método llamado…", opts: ["La dialéctica hegeliana", "La duda metódica", "La mayéutica: dar a luz ideas mediante preguntas", "El empirismo"], correct: 2 },
+  { periodo: "🏛️ Filosofía Antigua", q: "¿Qué idea defendió Platón en su teoría de las Ideas?", opts: ["Solo existe el mundo material", "Todo fluye y nada permanece", "Existe un mundo perfecto de Ideas más real que el mundo sensible", "La felicidad está en el placer"], correct: 2 },
+  { periodo: "🏛️ Filosofía Antigua", q: "Aristóteles definió al ser humano como…", opts: ["Un alma inmortal encerrada", "Un animal racional y político", "Un ser de puro instinto", "Una idea perfecta"], correct: 1 },
+  { periodo: "⛪ Filosofía Medieval", q: "San Agustín de Hipona propuso la relación entre fe y razón con la frase…", opts: ["'Cree para comprender, comprende para creer'", "'Pienso, luego existo'", "'El hombre es la medida de todas las cosas'", "'Dios ha muerto'"], correct: 0 },
+  { periodo: "⛪ Filosofía Medieval", q: "Santo Tomás de Aquino es famoso por formular…", opts: ["La teoría del superhombre", "El contrato social", "La duda metódica", "Las cinco vías para demostrar la existencia de Dios"], correct: 3 },
+  { periodo: "⛪ Filosofía Medieval", q: "La 'navaja de Ockham' de Guillermo de Ockham sostiene que…", opts: ["La explicación más simple suele ser la mejor", "Todo conocimiento viene de los sentidos", "La fe está por encima de todo", "El mundo es pura ilusión"], correct: 0 },
+  { periodo: "🔭 Filosofía Moderna", q: "René Descartes, padre de la filosofía moderna, llegó a su primera certeza con la frase…", opts: ["'Solo sé que nada sé'", "'Pienso, luego existo'", "'El saber es poder'", "'Todo fluye'"], correct: 1 },
+  { periodo: "🔭 Filosofía Moderna", q: "Francis Bacon, defensor del método experimental, afirmó…", opts: ["'El saber es poder'", "'Dios ha muerto'", "'Todo fluye'", "'La existencia precede a la esencia'"], correct: 0 },
+  { periodo: "🔭 Filosofía Moderna", q: "Immanuel Kant, autor de la 'Crítica de la razón pura', propuso como ley moral…", opts: ["El placer como fin supremo", "La ley del más fuerte", "El imperativo categórico", "La voluntad de poder"], correct: 2 },
+  { periodo: "🔭 Filosofía Moderna", q: "Jean-Jacques Rousseau planteó que la sociedad se funda en…", opts: ["El contrato social", "La lucha de clases", "El mundo de las Ideas", "La selección natural"], correct: 0 },
+  { periodo: "🌆 Filosofía Contemporánea", q: "Friedrich Nietzsche proclamó 'Dios ha muerto' y propuso el ideal de…", opts: ["El santo", "El superhombre", "El filósofo rey", "El ciudadano del mundo"], correct: 1 },
+  { periodo: "🌆 Filosofía Contemporánea", q: "Karl Marx explicó la historia a través de…", opts: ["La voluntad divina", "Las ideas innatas", "La lucha de clases y el materialismo histórico", "El azar"], correct: 2 },
+  { periodo: "🌆 Filosofía Contemporánea", q: "Jean-Paul Sartre, existencialista, afirmó que en el ser humano…", opts: ["La esencia precede a la existencia", "Todo está determinado por Dios", "No existe la libertad", "La existencia precede a la esencia"], correct: 3 },
+  { periodo: "🌆 Filosofía Contemporánea", q: "Simone de Beauvoir, en 'El segundo sexo', afirmó…", opts: ["'No se nace mujer: se llega a serlo'", "'La mujer es un ser natural inmutable'", "'La existencia es sufrimiento'", "'El saber es poder'"], correct: 0 },
+];
+const PUERTOS_FILOSOFIA = [
+  { nombre: "Puerto de la Filosofía Antigua", emoji: "🏛️", inicio: 0, desc: "Siglos sexto antes de Cristo al quinto después de Cristo. En las costas de Grecia nació la filosofía: los primeros pensadores dejaron atrás los mitos y usaron la razón para preguntarse por el origen de todas las cosas, el arjé. En este puerto nos esperan Tales de Mileto, Heráclito, Sócrates, Platón y Aristóteles." },
+  { nombre: "Puerto de la Filosofía Medieval", emoji: "⛪", inicio: 5, desc: "Siglos quinto al quince. La filosofía navega junto a la fe: los grandes pensadores cristianos, como San Agustín, Santo Tomás de Aquino y Guillermo de Ockham, buscaron unir la razón con la religión." },
+  { nombre: "Puerto de la Filosofía Moderna", emoji: "🔭", inicio: 8, desc: "Siglos dieciséis al dieciocho. La razón y la ciencia toman el timón. Descartes duda de todo para encontrar una certeza, Bacon confía en la experiencia y el experimento, y Kant y Rousseau piensan la moral y la sociedad." },
+  { nombre: "Puerto de la Filosofía Contemporánea", emoji: "🌆", inicio: 12, desc: "Del siglo diecinueve hasta hoy. Llegan las voces críticas: Nietzsche, Marx, Sartre y Simone de Beauvoir cuestionan la moral, la sociedad, la historia y la libertad del ser humano." },
+];
+const PREGUNTAS_OCEANO = [
+  { q: "¿Cuál es el animal más grande del océano?", opts: ["El tiburón blanco", "La ballena azul", "El pulpo gigante", "La orca"], correct: 1 },
+  { q: "¿Cuántos brazos tiene un pulpo?", opts: ["6", "10", "8", "12"], correct: 2 },
+  { q: "¿Qué porcentaje de la Tierra está cubierto por océanos?", opts: ["Cerca del 50%", "Cerca del 30%", "Cerca del 90%", "Cerca del 70%"], correct: 3 },
+  { q: "¿Cómo respiran los peces bajo el agua?", opts: ["Con pulmones", "Con branquias", "Por la piel", "No respiran"], correct: 1 },
+  { q: "¿Cuál es el océano más grande del mundo?", opts: ["Atlántico", "Índico", "Pacífico", "Ártico"], correct: 2 },
+  { q: "¿Qué animal marino puede cambiar de color para camuflarse?", opts: ["El pulpo", "El delfín", "La tortuga", "El atún"], correct: 0 },
+  { q: "¿De qué están hechas las perlas?", opts: ["De arena", "De coral", "De nácar creado por ostras", "De sal marina"], correct: 2 },
+  { q: "¿Qué usan los delfines para orientarse y encontrar comida?", opts: ["El olfato", "La ecolocalización", "Las estrellas", "Las corrientes"], correct: 1 },
+];
+const PUERTOS_OCEANO = [
+  { nombre: "Arrecife de Coral", emoji: "🪸", inicio: 0, desc: "Aguas cálidas, llenas de color y de vida. Aquí conoceremos a los gigantes del mar y a sus criaturas más sorprendentes." },
+  { nombre: "Fosa Abisal", emoji: "🌊", inicio: 4, desc: "Descendemos a lo más profundo y misterioso del océano, donde se guardan los secretos de las perlas, los delfines y las grandes corrientes marinas." },
+];
+const TESOROS = ["💎", "⭐", "🐚", "👑", "📿", "🔱", "🪙", "💍"];
+const NOMBRES_TESORO = ["¡Un diamante del abismo!", "¡Una estrella de mar dorada!", "¡Una caracola nacarada!", "¡La corona del rey tritón!", "¡Un collar de perlas!", "¡El tridente de Poseidón!", "¡Una moneda de oro pirata!", "¡Un anillo de sirena!"];
+const JOYAS = ["💎", "⭐", "🐚", "👑", "📿", "🔱", "🪙", "💍", "✨", "🌟", "💠", "🔶"];
+const COLOR = [{ n: "#ffd700", t: "#0a2e4d" }, { n: "#5fd6f5", t: "#fff" }];
+
+// ============ ALMACENAMIENTO (funciona en tu página web) ============
+const memoria = {};
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); if (v !== null) return v; } catch (e) {} return memoria[k] ?? null; },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} memoria[k] = v; },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} delete memoria[k]; },
+};
+
+// ============ ESTADO ============
+let tema = "filosofia", idx = 0, puertoIdx = 0, tesoros = [[], []], respondido = false;
+let curso = "", nombres = ["Barco 1", "Barco 2"], trips = ["", ""];
+let baulAbierto = false, pantallaPrev = "p-inicio";
+let vozOn = true, musicaOn = true, musicaTimer = null, masterGain = null, audioCtx = null;
+
+const P = () => (tema === "oceano" ? PREGUNTAS_OCEANO : PREGUNTAS_FILOSOFIA);
+const PU = () => (tema === "oceano" ? PUERTOS_OCEANO : PUERTOS_FILOSOFIA);
+const turno = () => idx % 2;
+const pregEq = (eq) => (eq === 0 ? Math.ceil(P().length / 2) : Math.floor(P().length / 2));
+const notaDe = (ac, tot) => Math.max(1, Math.round((ac / Math.max(1, tot)) * 5 * 10) / 10);
+const limpiar = (s) => (s || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim();
+
+// ============ AUDIO Y VOZ ============
+function ctx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+function hablar(txt, cancelar = true) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    if (cancelar) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = "es-ES"; u.rate = 0.95; u.pitch = 1.05;
+    const v = speechSynthesis.getVoices().find((v) => v.lang && v.lang.startsWith("es"));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+const ACORDES = [{ n: [261.63, 329.63, 392, 523.25], b: 130.81 }, { n: [220, 261.63, 329.63, 440], b: 110 }, { n: [174.61, 220, 261.63, 349.23], b: 87.31 }, { n: [196, 246.94, 293.66, 392], b: 98 }];
+function iniciarMusica() {
+  if (musicaTimer || !musicaOn) return;
+  try {
+    const c = ctx(); masterGain = c.createGain(); masterGain.gain.value = 0.018; masterGain.connect(c.destination);
+    let paso = 0;
+    musicaTimer = setInterval(() => {
+      try {
+        const t = c.currentTime, ac = ACORDES[Math.floor(paso / 4) % 4];
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle"; o.frequency.value = ac.n[paso % 4];
+        g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.6, t + 0.05); g.gain.exponentialRampToValueAtTime(0.001, t + 0.85);
+        o.connect(g).connect(masterGain); o.start(t); o.stop(t + 0.9);
+        if (paso % 4 === 0) { const ob = c.createOscillator(), gb = c.createGain(); ob.type = "sine"; ob.frequency.value = ac.b; gb.gain.setValueAtTime(0.001, t); gb.gain.exponentialRampToValueAtTime(0.9, t + 0.08); gb.gain.exponentialRampToValueAtTime(0.001, t + 1.7); ob.connect(gb).connect(masterGain); ob.start(t); ob.stop(t + 1.8); }
+        paso++;
+      } catch (e) {}
+    }, 450);
+  } catch (e) {}
+}
+function detenerMusica() { if (musicaTimer) clearInterval(musicaTimer); musicaTimer = null; if (masterGain) try { masterGain.disconnect(); } catch (e) {} masterGain = null; }
+function toggleMusica() { musicaOn = !musicaOn; if (musicaOn) iniciarMusica(); else detenerMusica(); const b = document.getElementById("btnMusica"); b.textContent = musicaOn ? "🎵" : "🔕"; b.classList.toggle("on", musicaOn); }
+function sndOk() { try { const c = ctx(), t = c.currentTime; [880, 1108.7, 1318.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.001, t + i * 0.08); g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.08 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.5); o.connect(g).connect(c.destination); o.start(t + i * 0.08); o.stop(t + i * 0.08 + 0.6); }); } catch (e) {} }
+function sndError() { try { const c = ctx(), t = c.currentTime; const o = c.createOscillator(), g = c.createGain(); o.type = "triangle"; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(150, t + 0.35); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.45); } catch (e) {} }
+function sndCampana() { try { const c = ctx(), t = c.currentTime; [0, 0.45].forEach((d) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = 659.25; g.gain.setValueAtTime(0.001, t + d); g.gain.exponentialRampToValueAtTime(0.2, t + d + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.8); o.connect(g).connect(c.destination); o.start(t + d); o.stop(t + d + 0.9); }); } catch (e) {} }
+function sndMetalico() {
+  try {
+    const c = ctx(), t = c.currentTime;
+    [523, 1244, 1867, 2794, 3729].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "square"; o.frequency.value = f; g.gain.setValueAtTime(0.18 / (i + 1), t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.2 - i * 0.15); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 1.3); });
+    const o2 = c.createOscillator(), g2 = c.createGain(); o2.type = "sawtooth"; o2.frequency.setValueAtTime(180, t + 0.15); o2.frequency.linearRampToValueAtTime(320, t + 0.7); g2.gain.setValueAtTime(0.05, t + 0.15); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.8); o2.connect(g2).connect(c.destination); o2.start(t + 0.15); o2.stop(t + 0.85);
+    for (let i = 0; i < 22; i++) { const dt = 0.5 + Math.random() * 1.6; const o3 = c.createOscillator(), g3 = c.createGain(); o3.type = "sine"; o3.frequency.value = 1800 + Math.random() * 2600; g3.gain.setValueAtTime(0.001, t + dt); g3.gain.exponentialRampToValueAtTime(0.08 + Math.random() * 0.07, t + dt + 0.01); g3.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.25); o3.connect(g3).connect(c.destination); o3.start(t + dt); o3.stop(t + dt + 0.3); }
+  } catch (e) {}
+}
+function sndFanfarria() { try { const c = ctx(), t = c.currentTime; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sawtooth"; o.frequency.value = f; const ini = t + i * 0.22, dur = i === 3 ? 0.9 : 0.2; g.gain.setValueAtTime(0.001, ini); g.gain.exponentialRampToValueAtTime(0.12, ini + 0.03); g.gain.exponentialRampToValueAtTime(0.001, ini + dur); o.connect(g).connect(c.destination); o.start(ini); o.stop(ini + dur + 0.1); }); } catch (e) {} }
+
+// ============ NAVEGACIÓN ============
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+function pintarMapa(elId, progreso) {
+  const el = document.getElementById(elId), total = P().length;
+  let html = '<div class="ruta"></div>';
+  PU().forEach((pu, i) => {
+    const pos = 6 + (pu.inicio / total) * 82;
+    const on = progreso * total >= pu.inicio;
+    html += `<div class="puerto-marca ${on ? "on" : ""}" style="left:${pos}%" title="${pu.nombre}">${pu.emoji}<div>Puerto ${i + 1}</div></div>`;
+  });
+  html += '<div class="meta">🏝️<div>Tesoro</div></div>';
+  const pb = 6 + progreso * 82;
+  html += `<div class="barco-mapa" style="left:${pb}%; top:6px; filter:drop-shadow(0 0 6px #ffd700);">⛵</div>`;
+  html += `<div class="barco-mapa" style="left:${Math.max(2, pb - 5)}%; top:24px; filter:drop-shadow(0 0 6px #5fd6f5); animation-delay:0.6s;">⛵</div>`;
+  el.innerHTML = html;
+}
+function pintarMarcador(elId) {
+  const el = document.getElementById(elId);
+  el.innerHTML = [0, 1].map((eq) => `
+    <div class="eq ${elId === "marcador" && turno() === eq ? "turno" + (eq + 1) : ""}">
+      <div class="nom" style="color:${COLOR[eq].n}">⛵ ${nombres[eq]}</div>
+      ${trips[eq] ? `<div class="tri">👥 ${trips[eq]}</div>` : ""}
+      <div class="tes">${tesoros[eq].length ? tesoros[eq].join(" ") : '<span style="color:#7fb8d4;font-size:12px;">sin tesoros…</span>'}</div>
+    </div>`).join("");
+}
+
+// ============ FLUJO DEL JUEGO ============
+function ponerTema(t) { tema = t; document.getElementById("chipFil").className = "chip-tema" + (t === "filosofia" ? " act1" : ""); document.getElementById("chipOce").className = "chip-tema" + (t === "oceano" ? " act2" : ""); }
+function iniciarJuego() {
+  curso = document.getElementById("inCurso").value.trim();
+  nombres = [document.getElementById("inNom1").value.trim() || "Barco 1", document.getElementById("inNom2").value.trim() || "Barco 2"];
+  trips = [document.getElementById("inTrip1").value.trim(), document.getElementById("inTrip2").value.trim()];
+  idx = 0; puertoIdx = 0; tesoros = [[], []]; baulAbierto = false;
+  iniciarMusica(); sndCampana();
+  hablar(`¡Bienvenidos a la gran aventura! La capitana del Barco Enadis les da la bienvenida. Será una gran aventura, y cada equipo luchará por llegar a la meta y encontrar su tesoro. Hoy compiten: ${nombres[0]}, y ${nombres[1]}. ¡Buena suerte, navegantes!`);
+  renderPuerto(0);
+  hablar(`Primera parada: ${PU()[0].nombre}. ${PU()[0].desc}`, false);
+}
+function renderPuerto(i) {
+  puertoIdx = i;
+  const pu = PU()[i];
+  document.getElementById("puEmoji").textContent = pu.emoji;
+  document.getElementById("puNombre").textContent = "⚓ ¡Tierra a la vista! — " + pu.nombre;
+  document.getElementById("puDesc").textContent = pu.desc;
+  pintarMapa("mapaPuerto", pu.inicio / P().length);
+  mostrar("p-puerto");
+}
+function leerPuerto() { const pu = PU()[puertoIdx]; hablar(pu.nombre + ". " + pu.desc); }
+function textoPregunta(p) { return (p.periodo ? limpiar(p.periodo) + ". " : "") + p.q + " Las opciones son: " + p.opts.map(limpiar).join(". ") + "."; }
+function continuarViaje() { renderPregunta(); mostrar("p-juego"); hablar(`Turno de ${nombres[turno()]}. Pregunta ${idx + 1}. ` + textoPregunta(P()[idx])); }
+function renderPregunta() {
+  respondido = false;
+  const p = P()[idx];
+  pintarMapa("mapaJuego", idx / P().length);
+  pintarMarcador("marcador");
+  const bt = document.getElementById("bannerTurno");
+  bt.className = "banner-turno bt" + (turno() + 1);
+  bt.textContent = `🎯 Turno de: ${nombres[turno()]} — Pregunta ${idx + 1} de ${P().length}`;
+  document.getElementById("badgePeriodo").innerHTML = p.periodo ? `<div class="badge-periodo">${p.periodo}</div>` : "";
+  document.getElementById("pregTexto").textContent = p.q;
+  document.getElementById("resultado").innerHTML = "";
+  const cont = document.getElementById("opciones");
+  cont.innerHTML = "";
+  p.opts.forEach((op, i) => {
+    const b = document.createElement("button");
+    b.className = "opcion"; b.textContent = op;
+    b.onclick = () => responder(i, b);
+    cont.appendChild(b);
+  });
+}
+function leerPregunta() { hablar(textoPregunta(P()[idx])); }
+function responder(i, btnEl) {
+  if (respondido) return;
+  respondido = true;
+  const p = P()[idx], eq = turno();
+  document.querySelectorAll("#opciones .opcion").forEach((b, j) => { if (j === p.correct) b.classList.add("correcta"); });
+  const res = document.getElementById("resultado");
+  const esUltima = idx + 1 >= P().length;
+  const btnSig = `<button class="btn azul" onclick="siguiente()">${esUltima ? "Ir al Baúl 🗝️" : "Turno de " + nombres[(idx + 1) % 2] + " 🌊"}</button>`;
+  if (i === p.correct) {
+    const ti = tesoros[eq].length % TESOROS.length;
+    sndOk();
+    tesoros[eq].push(TESOROS[ti]);
+    pintarMarcador("marcador");
+    res.innerHTML = `<div style="font-size:52px;">${TESOROS[ti]}</div><div style="color:#c9950c;font-weight:bold;font-size:17px;">${NOMBRES_TESORO[ti]} Para ${nombres[eq]} ⛵</div>` + btnSig;
+    setTimeout(() => hablar(`¡Respuesta correcta! ${nombres[eq]} ha ganado ` + limpiar(NOMBRES_TESORO[ti])), 600);
+  } else {
+    sndError();
+    btnEl.classList.add("incorrecta");
+    res.innerHTML = `<div style="color:#b04545;font-weight:bold;font-size:16px;">🫧 ¡Ups! La corriente desvió a ${nombres[eq]}… ¡sigan navegando!</div>` + btnSig;
+    setTimeout(() => hablar("Respuesta incorrecta. La respuesta correcta era: " + limpiar(p.opts[p.correct])), 500);
+  }
+}
+function siguiente() {
+  if (idx + 1 < P().length) {
+    idx++;
+    const pn = PU().findIndex((pu) => pu.inicio === idx);
+    if (pn > 0) {
+      sndCampana();
+      renderPuerto(pn);
+      hablar(`¡Tierra a la vista! Los barcos han llegado al ${PU()[pn].nombre}. ${PU()[pn].desc}`);
+    } else {
+      renderPregunta();
+      hablar(`Turno de ${nombres[turno()]}. Pregunta ${idx + 1}. ` + textoPregunta(P()[idx]));
+    }
+  } else {
+    pintarMapa("mapaBaul", 1);
+    pintarMarcador("marcadorBaul");
+    document.getElementById("baul").textContent = "🧰";
+    document.getElementById("baul").className = "baul-icono";
+    document.getElementById("msjBaul").textContent = "👆 ¡Tóquenlo!";
+    mostrar("p-baul");
+    hablar(`¡Han llegado al fondo del mar! ${nombres[0]} consiguió ${tesoros[0].length} tesoros, y ${nombres[1]} consiguió ${tesoros[1].length}. ¡Toquen el baúl para abrirlo y conocer las calificaciones!`);
+  }
+}
+function abrirBaul() {
+  if (baulAbierto) return;
+  baulAbierto = true;
+  const baul = document.getElementById("baul");
+  baul.classList.add("temblando");
+  document.getElementById("msjBaul").textContent = "🗝️ La cerradura está girando…";
+  hablar("La cerradura está girando…");
+  setTimeout(() => {
+    baul.classList.remove("temblando");
+    baul.classList.add("abierto");
+    baul.textContent = "🏆";
+    sndMetalico();
+    const zona = document.getElementById("zonaBaul");
+    const cant = 30 + (tesoros[0].length + tesoros[1].length) * 5;
+    for (let i = 0; i < cant; i++) {
+      const d = document.createElement("div");
+      d.className = "particula-joya";
+      d.textContent = JOYAS[Math.floor(Math.random() * JOYAS.length)];
+      d.style.fontSize = 18 + Math.random() * 26 + "px";
+      d.style.setProperty("--dx", (Math.random() - 0.5) * 320 + "px");
+      d.style.setProperty("--dy", -(80 + Math.random() * 340) + "px");
+      d.style.setProperty("--rot", (Math.random() - 0.5) * 720 + "deg");
+      d.style.setProperty("--dur", 1.4 + Math.random() * 1.2 + "s");
+      d.style.setProperty("--del", Math.random() * 0.7 + "s");
+      zona.appendChild(d);
+    }
+    setTimeout(finalizar, 2600);
+  }, 900);
+}
+function finalizar() {
+  const total = P().length;
+  const notas = [0, 1].map((eq) => notaDe(tesoros[eq].length, pregEq(eq)));
+  const gi = notas[0] > notas[1] ? 0 : notas[1] > notas[0] ? 1 : -1;
+  sndFanfarria();
+  const bg = document.getElementById("bannerGanador");
+  if (gi === -1) {
+    bg.style.background = "linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #2ab5d8 50%, #1a7fb5 100%)";
+    bg.style.color = "#fff"; bg.style.boxShadow = "0 0 30px rgba(255,215,0,0.6)";
+    bg.textContent = "🤝 ¡Empate! Ambos barcos comparten el tesoro";
+  } else {
+    bg.style.background = gi === 0 ? "linear-gradient(135deg,#ffd700,#ffb700)" : "linear-gradient(135deg,#2ab5d8,#1a7fb5)";
+    bg.style.color = COLOR[gi].t; bg.style.boxShadow = `0 0 35px ${COLOR[gi].n}`;
+    bg.textContent = `👑 ¡BARCO GANADOR: ${nombres[gi]}! 🎉`;
+  }
+  const colorNota = (n) => (n >= 4.5 ? "#3cb85c" : n >= 3.5 ? "#8fd14f" : n >= 3 ? "#c9950c" : n >= 2 ? "#e07b2a" : "#d85050");
+  document.getElementById("cartasFinal").innerHTML = [0, 1].map((eq) => {
+    const gana = gi === -1 || eq === gi;
+    const alumnos = trips[eq].split(",").map((s) => s.trim()).filter(Boolean);
+    return `<div class="carta-nota" style="border:3px solid ${COLOR[eq].n}; ${gana ? `box-shadow:0 0 28px ${COLOR[eq].n};transform:scale(1.04);` : "opacity:0.82;"}">
+      ${gana && gi !== -1 ? '<div class="corona">👑</div>' : ""}
+      <div style="font-weight:bold;">⛵ ${nombres[eq]}</div>
+      ${trips[eq] ? `<div style="color:#5a7a8a;font-size:12px;">👥 ${trips[eq]}</div>` : ""}
+      <div style="color:#5a7a8a;font-size:12px;letter-spacing:1px;margin-top:4px;">CALIFICACIÓN</div>
+      <div style="font-size:44px;font-weight:900;color:${colorNota(notas[eq])};">${notas[eq].toFixed(1)}</div>
+      <div style="font-size:20px;letter-spacing:2px;">${[1,2,3,4,5].map((s) => `<span style="opacity:${notas[eq] >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("")}</div>
+      <div style="color:#5a7a8a;font-size:13px;">${tesoros[eq].length} de ${pregEq(eq)} aciertos</div>
+      <div style="font-size:22px;margin-top:6px;">${tesoros[eq].length ? tesoros[eq].join(" ") : "🫧"}</div>
+      ${alumnos.map((a) => `<div class="fila-alumno"><span>👤 ${a}</span><b style="color:${colorNota(notas[eq])}">${notas[eq].toFixed(1)}</b></div>`).join("")}
+    </div>`;
+  }).join("");
+  // Lluvia de joyas
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement("div");
+    d.textContent = JOYAS[i % JOYAS.length];
+    d.style.cssText = `position:fixed;left:${(i * 29 + 7) % 100}%;top:-60px;font-size:${16 + (i % 4) * 7}px;animation:caer ${4 + (i % 5)}s linear infinite;animation-delay:${i * 0.6}s;pointer-events:none;z-index:1;`;
+    d.dataset.lluvia = "1";
+    document.body.appendChild(d);
+  }
+  mostrar("p-final");
+  const ganTxt = gi === -1 ? "¡Empate! Ambos barcos comparten el tesoro." : `¡El barco ganador es ${nombres[gi]}!`;
+  guardarPartida(notas, ganTxt);
+  hablar(`¡El Baúl de la Sabiduría se ha abierto! Calificaciones: ${nombres[0]}: ${notas[0].toFixed(1).replace(".", " punto ")}. ${nombres[1]}: ${notas[1].toFixed(1).replace(".", " punto ")}. ${ganTxt} ¡Felicitaciones, navegantes!`);
+}
+function reiniciar() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  document.querySelectorAll('[data-lluvia]').forEach((d) => d.remove());
+  document.querySelectorAll(".particula-joya").forEach((d) => d.remove());
+  idx = 0; tesoros = [[], []]; baulAbierto = false;
+  mostrar("p-inicio");
+}
+
+// ============ REGISTRO ADMINISTRADORA (con PIN) ============
+function guardarPartida(notas, ganTxt) {
+  const partida = {
+    fecha: new Date().toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" }),
+    curso, tema: tema === "oceano" ? "Océano" : "Filosofía", ganador: ganTxt,
+    barcos: [0, 1].map((eq) => ({ nombre: nombres[eq], tripulantes: trips[eq], aciertos: tesoros[eq].length, total: pregEq(eq), nota: notas[eq] })),
+  };
+  try {
+    let lista = [];
+    const v = store.get("fia-registro");
+    if (v) lista = JSON.parse(v);
+    lista.unshift(partida);
+    store.set("fia-registro", JSON.stringify(lista.slice(0, 50)));
+  } catch (e) {}
+}
+function abrirPin() {
+  pantallaPrev = document.querySelector(".pantalla.activa").id;
+  const pin = store.get("fia-pin");
+  document.getElementById("pinMsj").textContent = pin
+    ? "Ingresa tu PIN para ver el registro de notas."
+    : "🗝️ Es tu primera vez: crea tu PIN secreto (mínimo 4 dígitos). Solo tú podrás ver el registro.";
+  document.getElementById("btnPin").textContent = pin ? "🔓 Entrar" : "🗝️ Guardar PIN y entrar";
+  document.getElementById("inPin").value = "";
+  document.getElementById("pinError").textContent = "";
+  mostrar("p-pin");
+}
+function confirmarPin() {
+  const val = document.getElementById("inPin").value.trim();
+  const err = document.getElementById("pinError");
+  if (val.length < 4) { err.textContent = "⚠️ El PIN debe tener al menos 4 dígitos."; return; }
+  const pin = store.get("fia-pin");
+  if (!pin) { store.set("fia-pin", val); abrirRegistro(); }
+  else if (val === pin) abrirRegistro();
+  else { err.textContent = "⚠️ PIN incorrecto. Intenta de nuevo."; document.getElementById("inPin").value = ""; }
+}
+function volverDePantalla() { mostrar(pantallaPrev); }
+let confirmandoBorrar = false;
+function abrirRegistro() {
+  confirmandoBorrar = false;
+  document.getElementById("btnBorrar").textContent = "🗑️ Borrar registro";
+  let lista = [];
+  try { const v = store.get("fia-registro"); if (v) lista = JSON.parse(v); } catch (e) {}
+  const el = document.getElementById("listaRegistros");
+  if (!lista.length) {
+    el.innerHTML = '<div style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,215,0,0.3);border-radius:16px;padding:22px;color:#bde4f4;text-align:center;">🫧 Aún no hay partidas registradas. Al terminar un juego, los resultados aparecerán aquí automáticamente.</div>';
+  } else {
+    el.innerHTML = lista.map((r) => `
+      <div class="reg-carta">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+          <b style="font-size:14px;">📅 ${r.fecha}${r.curso ? " · 🎓 " + r.curso : ""} · ${r.tema === "Océano" ? "🐋" : "🏛️"} ${r.tema}</b>
+          <span style="color:#c9950c;font-weight:bold;font-size:13px;">🏆 ${r.ganador}</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${r.barcos.map((b, bi) => {
+            const al = (b.tripulantes || "").split(",").map((s) => s.trim()).filter(Boolean);
+            const col = b.nota >= 3 ? "#3cb85c" : "#d85050";
+            return `<div class="reg-barco" style="border:2px solid ${COLOR[bi].n};">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <b style="font-size:14px;">⛵ ${b.nombre}</b>
+                <b style="font-size:20px;color:${col};">${b.nota.toFixed(1)}</b>
+              </div>
+              <div style="color:#5a7a8a;font-size:12px;margin-bottom:6px;">${b.aciertos} de ${b.total} aciertos</div>
+              ${al.length ? al.map((a) => `<div class="fila-alumno" style="background:#fff;"><span>👤 ${a}</span><b style="color:${col}">${b.nota.toFixed(1)}</b></div>`).join("") : '<div style="color:#8aa5b5;font-size:12px;font-style:italic;">Sin tripulantes registrados</div>'}
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`).join("");
+  }
+  mostrar("p-registro");
+}
+function pedirBorrar() {
+  const b = document.getElementById("btnBorrar");
+  if (!confirmandoBorrar) { confirmandoBorrar = true; b.textContent = "⚠️ ¿Confirmar borrado?"; b.style.background = "#b03030"; }
+  else { store.del("fia-registro"); confirmandoBorrar = false; b.textContent = "🗑️ Borrar registro"; b.style.background = ""; abrirRegistro(); }
+}
+function copiarResumen() {
+  let lista = [];
+  try { const v = store.get("fia-registro"); if (v) lista = JSON.parse(v); } catch (e) {}
+  const txt = lista.map((r) => {
+    const L = [`📅 ${r.fecha}${r.curso ? " — Curso: " + r.curso : ""} — Tema: ${r.tema} — 🏆 ${r.ganador}`];
+    r.barcos.forEach((b) => {
+      L.push(`  ⛵ ${b.nombre} | Nota: ${b.nota.toFixed(1)} | Aciertos: ${b.aciertos}/${b.total}`);
+      (b.tripulantes || "").split(",").map((s) => s.trim()).filter(Boolean).forEach((a) => L.push(`     • ${a}: ${b.nota.toFixed(1)}`));
+    });
+    return L.join("\n");
+  }).join("\n\n");
+  const fin = () => { const b = document.getElementById("btnCopiarReg"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar resumen"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+
+// ============ DECORACIÓN ============
+for (let i = 0; i < 10; i++) {
+  const b = document.createElement("div");
+  b.className = "burbuja";
+  const s = 8 + (i % 4) * 6;
+  b.style.cssText += `left:${(i * 37 + 13) % 100}%;width:${s}px;height:${s}px;animation-duration:${7 + (i % 5) * 2}s;animation-delay:${i * 0.9}s;`;
+  document.body.appendChild(b);
+}
+if ("speechSynthesis" in window) speechSynthesis.getVoices();
+</script>
+</body>
+</html>

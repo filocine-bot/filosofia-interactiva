@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diálogo con Sócrates 💬 — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, #101c33 0%, #1b2c4d 45%, #16233d 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #f0d48a; text-align: center; font-size: 26px; margin: 6px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #f0d48a; text-align: center; font-size: 20px; margin: 6px 0; }
+  p.sub { color: #c3d3ee; text-align: center; font-size: 15px; line-height: 1.55; margin: 6px 0 10px; max-width: 460px; }
+  .tarjeta { background: rgba(255,255,255,0.96); color: #1b2c4d; border-radius: 18px; padding: 18px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.45); }
+  input, textarea { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #a9bede; margin-top: 5px; font-family: inherit; outline: none; color: #1b2c4d; }
+  input:focus, textarea:focus { border-color: #f0d48a; }
+  label { display: block; text-align: left; font-weight: bold; color: #33507e; font-size: 14px; margin-top: 10px; }
+  .btn { display: inline-block; padding: 13px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #f0d48a, #d9a93f); color: #1b2c4d; box-shadow: 0 5px 18px rgba(240,212,138,0.35); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn.sec { background: rgba(0,0,0,0.35); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 18px; }
+  .tema-chip { padding: 10px 16px; font-size: 14px; font-weight: bold; border-radius: 22px; cursor: pointer; border: 2px solid #a9bede; background: #eef3fb; color: #33507e; margin: 4px; font-family: inherit; }
+  .tema-chip.sel { border-color: #d9a93f; background: #fdf3d7; color: #8a6410; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 30; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(240,212,138,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(240,212,138,0.3); }
+  /* Chat */
+  .chat-zona { width: 100%; background: rgba(0,0,0,0.28); border: 1px solid rgba(240,212,138,0.3); border-radius: 18px; padding: 14px; height: 52vh; min-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .msg { display: flex; gap: 8px; max-width: 92%; animation: entrar 0.35s ease-out; }
+  .msg.soc { align-self: flex-start; }
+  .msg.est { align-self: flex-end; flex-direction: row-reverse; }
+  .avatar { font-size: 26px; flex-shrink: 0; }
+  .globo { padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.5; }
+  .msg.soc .globo { background: #fdf3d7; color: #4a3a10; border: 1px solid #e8d191; border-bottom-left-radius: 4px; }
+  .msg.est .globo { background: #d6e6fb; color: #1b2c4d; border: 1px solid #a9c6ee; border-bottom-right-radius: 4px; }
+  .escribiendo { font-style: italic; color: #c3d3ee; font-size: 13px; padding-left: 6px; }
+  .zona-input { display: flex; gap: 8px; width: 100%; margin-top: 10px; }
+  .zona-input textarea { flex: 1; margin-top: 0; resize: none; height: 52px; }
+  .btn-enviar { width: 56px; height: 52px; border-radius: 14px; border: none; font-size: 22px; cursor: pointer; background: linear-gradient(135deg, #f0d48a, #d9a93f); }
+  .hud { display: flex; gap: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(240,212,138,0.35); border-radius: 26px; padding: 7px 16px; margin-bottom: 10px; font-size: 13px; }
+  .hud b { color: #f0d48a; }
+  .columna { position: fixed; bottom: -10px; font-size: 70px; opacity: 0.12; z-index: 0; pointer-events: none; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #eef3fb; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(240,212,138,0.5); } 50% { text-shadow: 0 0 26px rgba(240,212,138,1); } }
+  @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+</style>
+</head>
+<body>
+
+<div class="columna" style="left:2%;">🏛️</div>
+<div class="columna" style="right:2%;">🏛️</div>
+
+<div class="controles">
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:66px; animation:flotar 3s ease-in-out infinite;">🧔🏛️</div>
+  <h1>Diálogo con Sócrates</h1>
+  <p class="sub">💬 En el ágora de Atenas te espera el maestro de la <b style="color:#f0d48a">mayéutica</b>: no te dará respuestas… te hará <b style="color:#f0d48a">preguntas</b> hasta que tus propias ideas salgan a la luz. ¿Sobrevivirás al examen socrático sin contradecirte?</p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>👤 Tu nombre</label>
+    <input id="inNombre" placeholder="Ej: Ana María" maxlength="40">
+    <label>🤔 Elige el tema del diálogo</label>
+    <div style="text-align:center; margin-top:6px;" id="temas"></div>
+    <button class="btn" onclick="comenzar()">🏛️ Entrar al ágora</button>
+  </div>
+  <a href="index.html" class="btn sec" style="margin-top:10px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== CHAT ========== -->
+<div class="pantalla" id="p-chat">
+  <div class="hud" style="margin-top:34px;">
+    <span>🗣️ Rondas: <b id="hudRondas">0</b></span>
+    <span>🎯 Tema: <b id="hudTema"></b></span>
+  </div>
+  <div class="chat-zona" id="chat"></div>
+  <div class="escribiendo" id="escribiendo" style="display:none; align-self:flex-start;">Sócrates está pensando… 🤔</div>
+  <div class="zona-input">
+    <textarea id="inMsg" placeholder="Escribe tu respuesta a Sócrates…" maxlength="500"></textarea>
+    <button class="btn-enviar" onclick="enviar()">📜</button>
+  </div>
+  <button class="btn sec" style="margin-top:10px;" onclick="terminarDialogo()">🏁 Terminar diálogo y ver mi resultado</button>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:64px; animation:flotar 3s ease-in-out infinite;">🦉</div>
+  <h1 style="font-size:23px;">El examen socrático terminó</h1>
+  <p class="sub" id="fraseCierre"></p>
+  <div class="tarjeta" style="text-align:center;">
+    <div style="font-size:14px; color:#7a8cb0; font-weight:bold;" id="finDatos"></div>
+    <div style="display:flex; justify-content:center; gap:22px; margin:10px 0; flex-wrap:wrap;">
+      <div>🗣️ Rondas<br><b style="font-size:22px;" id="finRondas"></b></div>
+      <div>✍️ Palabras<br><b style="font-size:22px;" id="finPalabras"></b></div>
+    </div>
+    <div style="color:#7a8cb0; font-size:13px; letter-spacing:1px;">NOTA DE PARTICIPACIÓN</div>
+    <div id="finNota" style="font-size:50px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:23px; letter-spacing:3px;"></div>
+    <div id="finAlumno"></div>
+    <button class="btn sec" style="color:#33507e; border-color:#a9bede; background:#eef3fb;" id="btnCopiar" onclick="copiarResumen()">📄 Copiar diálogo para la profesora</button>
+  </div>
+  <button class="btn" onclick="location.reload()">🔄 Nuevo diálogo</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<script>
+// ================= CONFIGURACIÓN =================
+const TEMAS = {
+  "La justicia": "¿Qué es la justicia? ¿Actuar con justicia es siempre lo que más nos conviene?",
+  "La felicidad": "¿Qué es la felicidad? ¿Se puede ser feliz teniéndolo todo… o sin tener nada?",
+  "La libertad": "¿Qué significa ser libre? ¿Somos libres si siempre seguimos lo que otros esperan?",
+  "La amistad": "¿Qué es un verdadero amigo? ¿Puede ser tu amigo alguien que te dice solo lo que quieres oír?",
+  "La verdad": "¿Qué es la verdad? ¿Está mal mentir si es para proteger a alguien?",
+  "La valentía": "¿Qué es la valentía? ¿Es valiente quien no siente miedo… o quien actúa a pesar de él?",
+};
+let temaSel = "La justicia";
+let curso = "", nombre = "", rondas = 0, palabras = 0;
+let historial = []; // {role, content}
+let vozOn = true, ocupado = false, etapaFallback = 0, modoIA = null; // null = sin probar, true/false
+
+// ================= VOZ =================
+function hablar(txt) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = "es-ES"; u.rate = 0.93; u.pitch = 0.85;
+    const v = speechSynthesis.getVoices().find((v) => v.lang && v.lang.startsWith("es"));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+
+// ================= UI =================
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+function agregarMsg(rol, texto) {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + (rol === "soc" ? "soc" : "est");
+  div.innerHTML = `<div class="avatar">${rol === "soc" ? "🧔" : "🙋"}</div><div class="globo">${texto.replace(/</g, "&lt;")}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function setEscribiendo(v) { document.getElementById("escribiendo").style.display = v ? "block" : "none"; }
+
+// ================= SÓCRATES CON IA (cuando está disponible) =================
+const SISTEMA = `Eres Sócrates, el filósofo de Atenas, dialogando con un estudiante colombiano de secundaria (13 a 17 años). Practica la mayéutica de forma estricta:
+- Responde SIEMPRE en español, con máximo 3 frases cortas y cálidas.
+- NUNCA des la respuesta ni tu opinión final: guía con preguntas.
+- Termina SIEMPRE tu turno con UNA sola pregunta que examine lo que el estudiante acaba de decir (pide definiciones, ejemplos, contraejemplos, excepciones, o muestra con suavidad sus contradicciones).
+- Usa un tono amable, algo juguetón, y de vez en cuando expresiones como "querido amigo" o referencias sencillas a Atenas.
+- Mantén el contenido apropiado para menores de edad y centrado en el tema filosófico del diálogo.
+- Si el estudiante se desvía a temas inapropiados u otros temas, redirígelo con gentileza a la pregunta filosófica.`;
+
+async function preguntarIA() {
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: SISTEMA + " El tema de hoy es: " + temaSel + ".",
+      messages: historial,
+    }),
+  });
+  if (!resp.ok) throw new Error("sin IA");
+  const data = await resp.json();
+  const txt = (data.content || []).map((c) => (c.type === "text" ? c.text : "")).filter(Boolean).join("\n").trim();
+  if (!txt) throw new Error("vacío");
+  return txt;
+}
+
+// ================= SÓCRATES INTEGRADO (funciona sin conexión a la IA) =================
+function palabraClave(txt) {
+  const parar = ["que", "como", "para", "pero", "porque", "cuando", "donde", "esta", "este", "esa", "ese", "una", "uno", "las", "los", "con", "sin", "por", "muy", "mas", "más", "algo", "alguien", "ser", "es", "son", "hay", "the", "creo", "pienso", "opino", "digo", "siento", "también", "tambien", "entonces", "osea", "sea", "todo", "toda", "nada", "cosa", "cosas", "persona", "personas", "gente"];
+  const pals = txt.toLowerCase().replace(/[^a-záéíóúñü\s]/g, "").split(/\s+/).filter((w) => w.length > 3 && !parar.includes(w));
+  pals.sort((a, b) => b.length - a.length);
+  return pals[0] || temaSel.toLowerCase().replace("la ", "");
+}
+function socratesLocal(txtEstudiante) {
+  const k = palabraClave(txtEstudiante);
+  const ETAPAS = [
+    [`Interesante, querido amigo. Pero antes de seguir, examinemos las palabras: cuando dices "${k}", ¿qué entiendes exactamente por eso? Defínelo como si yo fuera un niño de Atenas que nunca lo ha escuchado.`],
+    [`Mmm, ya veo. Los ejemplos iluminan como antorchas en la noche. ¿Podrías darme un ejemplo de tu propia vida donde eso que dices sobre "${k}" se cumpla?`],
+    [`¡Buen ejemplo! Pero un ateniense me dijo ayer exactamente lo contrario de lo que tú afirmas… ¿qué le responderías para demostrarle que se equivoca?`],
+    [`Vas navegando bien. Ahora dime: ¿eso que afirmas se cumple SIEMPRE, en todos los casos… o puedes pensar en una excepción donde no funcione?`,],
+    [`Ajá… entonces tu idea tiene matices, como casi todo en la vida. ¿Y de dónde crees que aprendiste esa idea: de tu familia, de tus amigos, de lo que ves en redes? ¿La has examinado tú mismo?`],
+    [`Me gusta cómo piensas, aunque yo solo sé que nada sé. Una más: si todos en tu colegio actuaran según lo que acabas de decir, ¿el mundo sería mejor o peor? ¿Por qué?`],
+    [`Querido amigo, hemos dado a luz varias ideas juntos: definiste, diste ejemplos, enfrentaste objeciones y encontraste excepciones. ¿Cambió en algo tu idea inicial sobre ${temaSel.toLowerCase()} después de este diálogo? Cuéntame, y luego puedes tocar "Terminar diálogo".`],
+  ];
+  const grupo = ETAPAS[Math.min(etapaFallback, ETAPAS.length - 1)];
+  etapaFallback++;
+  return grupo[0];
+}
+
+// ================= FLUJO =================
+function pintarTemas() {
+  const cont = document.getElementById("temas");
+  cont.innerHTML = "";
+  Object.keys(TEMAS).forEach((t) => {
+    const b = document.createElement("button");
+    b.className = "tema-chip" + (t === temaSel ? " sel" : "");
+    b.textContent = t;
+    b.onclick = () => { temaSel = t; pintarTemas(); };
+    cont.appendChild(b);
+  });
+}
+pintarTemas();
+
+function comenzar() {
+  curso = document.getElementById("inCurso").value.trim();
+  nombre = document.getElementById("inNombre").value.trim() || "Estudiante";
+  document.getElementById("hudTema").textContent = temaSel;
+  mostrar("p-chat");
+  const saludo = `¡Salud, ${nombre}! Soy Sócrates, y en esta ágora nadie sale como entró. 🏛️ Hoy examinaremos juntos: ${TEMAS[temaSel]} Dime primero: ¿tú qué piensas?`;
+  agregarMsg("soc", saludo);
+  historial.push({ role: "assistant", content: saludo });
+  hablar(saludo);
+}
+
+async function enviar() {
+  if (ocupado) return;
+  const inp = document.getElementById("inMsg");
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = "";
+  ocupado = true;
+  agregarMsg("est", txt);
+  historial.push({ role: "user", content: txt });
+  rondas++;
+  palabras += txt.split(/\s+/).filter(Boolean).length;
+  document.getElementById("hudRondas").textContent = rondas;
+  setEscribiendo(true);
+  let respuesta;
+  try {
+    if (modoIA === false) throw new Error("modo local");
+    respuesta = await preguntarIA();
+    modoIA = true;
+  } catch (e) {
+    modoIA = false;
+    await new Promise((r) => setTimeout(r, 900)); // pausa de "pensamiento"
+    respuesta = socratesLocal(txt);
+  }
+  setEscribiendo(false);
+  agregarMsg("soc", respuesta);
+  historial.push({ role: "assistant", content: respuesta });
+  hablar(respuesta);
+  ocupado = false;
+}
+document.getElementById("inMsg").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviar(); }
+});
+
+function notaFinal() {
+  // Participación: rondas y profundidad (palabras por respuesta)
+  const prof = rondas ? palabras / rondas : 0;
+  let n = 1 + rondas * 0.45 + (prof >= 8 ? 0.8 : prof >= 4 ? 0.4 : 0);
+  return Math.max(1, Math.min(5, Math.round(n * 10) / 10));
+}
+function terminarDialogo() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const nota = notaFinal();
+  const cierres = [
+    "\"Una vida sin examen no merece ser vivida.\" Hoy examinaste la tuya. — Sócrates 🦉",
+    "\"Solo sé que nada sé\"… pero tú hoy sabes un poco más que ayer. — Sócrates 🦉",
+    "Las ideas, como los hijos, nacen con esfuerzo. Hoy diste a luz varias. — Sócrates 🦉",
+  ];
+  document.getElementById("fraseCierre").textContent = cierres[Math.floor(Math.random() * cierres.length)];
+  document.getElementById("finDatos").textContent = (curso ? "🎓 " + curso + " · " : "") + "👤 " + nombre + " · 🎯 " + temaSel;
+  document.getElementById("finRondas").textContent = rondas;
+  document.getElementById("finPalabras").textContent = palabras;
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML = [1, 2, 3, 4, 5].map((s) => `<span style="opacity:${nota >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("");
+  document.getElementById("finAlumno").innerHTML = `<div class="fila-alumno"><span>👤 ${nombre}</span><b style="color:${nEl.style.color}">${nota.toFixed(1)}</b></div>`;
+  mostrar("p-final");
+  hablar(`El examen socrático ha terminado, ${nombre}. Tu nota de participación es ${nota.toFixed(1).replace(".", " punto ")}. Recuerda: una vida sin examen no merece ser vivida.`);
+}
+function copiarResumen() {
+  const nota = notaFinal();
+  let txt = "💬 DIÁLOGO CON SÓCRATES — FilosofIA Interactiva\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "👤 Estudiante: " + nombre + " | 🎯 Tema: " + temaSel + "\n";
+  txt += "🗣️ Rondas: " + rondas + " | ✍️ Palabras: " + palabras + " | 📋 Nota: " + nota.toFixed(1) + "\n\n--- TRANSCRIPCIÓN ---\n";
+  historial.forEach((m) => { txt += (m.role === "assistant" ? "🧔 Sócrates: " : "🙋 " + nombre + ": ") + m.content + "\n"; });
+  const fin = () => { const b = document.getElementById("btnCopiar"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar diálogo para la profesora"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+if ("speechSynthesis" in window) speechSynthesis.getVoices();
+</script>
+</body>
+</html>

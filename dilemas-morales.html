@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dilemas Morales ⚖️ — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(180deg, #12222b 0%, #1c3440 45%, #142831 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #ffc861; text-align: center; font-size: 26px; margin: 6px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #ffc861; text-align: center; font-size: 20px; margin: 6px 0; }
+  p.sub { color: #bfe0e8; text-align: center; font-size: 15px; line-height: 1.55; margin: 6px 0 10px; max-width: 470px; }
+  .tarjeta { background: rgba(255,255,255,0.96); color: #12222b; border-radius: 18px; padding: 18px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.45); }
+  input, textarea { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #9fc6d0; margin-top: 5px; font-family: inherit; outline: none; color: #12222b; }
+  input:focus, textarea:focus { border-color: #ffc861; }
+  label { display: block; text-align: left; font-weight: bold; color: #2a5361; font-size: 14px; margin-top: 10px; }
+  .btn { display: inline-block; padding: 13px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #ffc861, #e89b2e); color: #12222b; box-shadow: 0 5px 18px rgba(255,200,97,0.35); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.sec { background: rgba(0,0,0,0.35); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 18px; }
+  .opcion { display: block; width: 100%; padding: 13px 16px; margin-top: 9px; font-size: 15px; font-weight: 600; text-align: left; border-radius: 12px; cursor: pointer; border: 2px solid #9fc6d0; background: linear-gradient(135deg, #eaf5f8, #d8ebf0); color: #12222b; transition: all 0.2s; font-family: inherit; }
+  .opcion:hover { transform: translateX(4px); border-color: #ffc861; }
+  .opcion.elegida { background: linear-gradient(135deg, #ffedc7, #ffe0a0); border-color: #e89b2e; }
+  .hud { display: flex; gap: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,200,97,0.35); border-radius: 26px; padding: 7px 16px; margin-bottom: 10px; font-size: 13px; margin-top: 34px; }
+  .hud b { color: #ffc861; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 30; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(255,200,97,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(255,200,97,0.3); }
+  .filosofo { border-radius: 14px; padding: 12px 14px; margin-top: 10px; text-align: left; font-size: 14px; line-height: 1.5; border: 2px solid transparent; }
+  .fil-kant { background: #eef1fb; border-color: #8a9bd8; }
+  .fil-mill { background: #eafaf0; border-color: #7ecf9a; }
+  .fil-aris { background: #fdf1e6; border-color: #e8a86a; }
+  .filosofo.tuyo { box-shadow: 0 0 0 3px #ffc861, 0 4px 16px rgba(255,200,97,0.4); }
+  .filosofo b { display: block; margin-bottom: 3px; }
+  .sello-tuyo { display: inline-block; background: #ffc861; color: #12222b; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 12px; margin-left: 6px; }
+  .barra-cont { background: #e5eef1; border-radius: 12px; height: 26px; margin-top: 6px; overflow: hidden; position: relative; }
+  .barra { height: 100%; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 800; color: #12222b; border-radius: 12px; transition: width 1.2s ease; }
+  .balanza { position: fixed; font-size: 60px; opacity: 0.1; z-index: 0; pointer-events: none; animation: flotar 4s ease-in-out infinite; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #eaf5f8; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  .contador-palabras { font-size: 12px; color: #5a7f8a; text-align: right; margin-top: 3px; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(255,200,97,0.5); } 50% { text-shadow: 0 0 26px rgba(255,200,97,1); } }
+  @keyframes flotar { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(4deg); } }
+  @keyframes rebote { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="balanza" style="left:3%; top:20%;">⚖️</div>
+<div class="balanza" style="right:3%; top:60%; animation-delay:1.5s;">⚖️</div>
+
+<div class="controles">
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:66px; animation:flotar 3.5s ease-in-out infinite;">⚖️</div>
+  <h1>Dilemas Morales</h1>
+  <p class="sub">🤔 Seis situaciones donde <b style="color:#ffc861">no hay respuesta fácil</b>. Decide qué harías, descubre qué dirían <b style="color:#8a9bd8">Kant</b>, <b style="color:#7ecf9a">Mill</b> y <b style="color:#e8a86a">Aristóteles</b>, y al final conoce tu <b style="color:#ffc861">brújula moral</b> 🧭.</p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>👤 Tu nombre</label>
+    <input id="inNombre" placeholder="Ej: Carlos Andrés" maxlength="40">
+    <button class="btn" onclick="comenzar()">⚖️ Enfrentar los dilemas</button>
+  </div>
+  <a href="index.html" class="btn sec" style="margin-top:10px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== DILEMA ========== -->
+<div class="pantalla" id="p-dilema">
+  <div class="hud"><span>📜 Dilema <b id="hudNum"></b> de 6</span><span>🧭 <b id="hudNombre"></b></span></div>
+  <div class="tarjeta">
+    <h2 style="color:#12222b; font-size:18px;" id="dilTitulo"></h2>
+    <p style="font-size:15px; line-height:1.6; margin-top:8px; text-align:left;" id="dilHistoria"></p>
+    <button class="btn sec" style="color:#2a5361; border-color:#9fc6d0; background:#eaf5f8; margin-top:8px;" onclick="leerDilema()">🔊 Escuchar de nuevo</button>
+    <p style="font-weight:bold; margin-top:12px; color:#2a5361;">¿Qué harías tú?</p>
+    <div id="opciones"></div>
+  </div>
+</div>
+
+<!-- ========== REVELACIÓN ========== -->
+<div class="pantalla" id="p-revela">
+  <div class="hud"><span>📜 Dilema <b id="hudNum2"></b> de 6</span></div>
+  <div class="tarjeta">
+    <h2 style="color:#12222b; font-size:17px;">🏛️ ¿Qué dirían los filósofos?</h2>
+    <div id="panelFilosofos"></div>
+    <label style="margin-top:14px;">✍️ Tu reflexión (mínimo 12 palabras para continuar)</label>
+    <textarea id="inReflexion" rows="3" placeholder="¿Por qué elegiste esa opción? ¿Algún filósofo te hizo dudar?" maxlength="600" oninput="contarPalabras()"></textarea>
+    <div class="contador-palabras" id="cuentaPal">0 palabras</div>
+    <button class="btn" id="btnSigDilema" onclick="siguienteDilema()" disabled>➡️ Siguiente dilema</button>
+  </div>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:64px; animation:rebote 0.8s ease-out;">🧭</div>
+  <h1 style="font-size:23px;">Tu brújula moral</h1>
+  <p class="sub" id="perfilTexto"></p>
+  <div class="tarjeta" style="text-align:center;">
+    <div style="font-size:14px; color:#5a7f8a; font-weight:bold;" id="finDatos"></div>
+    <div style="text-align:left; margin-top:12px;" id="barras"></div>
+    <div style="color:#5a7f8a; font-size:13px; letter-spacing:1px; margin-top:16px;">NOTA DE LA ACTIVIDAD</div>
+    <div id="finNota" style="font-size:50px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:23px; letter-spacing:3px;"></div>
+    <div id="finAlumno"></div>
+    <button class="btn sec" style="color:#2a5361; border-color:#9fc6d0; background:#eaf5f8;" id="btnCopiar" onclick="copiarResumen()">📄 Copiar resumen para la profesora</button>
+  </div>
+  <button class="btn" onclick="location.reload()">🔄 Repetir dilemas</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<script>
+// ============ DILEMAS ============
+// escuela: kant (deber), mill (consecuencias), aris (virtud / término medio)
+const DILEMAS = [
+  {
+    titulo: "🚋 El tranvía descontrolado",
+    historia: "Un tranvía sin frenos avanza hacia cinco trabajadores que no lo ven venir. Tú estás junto a una palanca: si la accionas, el tranvía se desviará a otra vía… donde hay una sola persona. No hay tiempo para nada más.",
+    opciones: [
+      { txt: "Acciono la palanca: es terrible, pero mueren menos personas.", escuela: "mill" },
+      { txt: "No la acciono: no me corresponde decidir sacrificar a una persona.", escuela: "kant" },
+      { txt: "Grito con todas mis fuerzas para advertirles, aunque sea casi imposible que me oigan.", escuela: "aris" },
+    ],
+    kant: "Immanuel Kant diría que jamás debemos usar a una persona como un simple medio, ni siquiera para salvar a otras cinco. Hay deberes que no se negocian: accionar la palanca es decidir matar.",
+    mill: "John Stuart Mill, utilitarista, haría cuentas: la acción correcta es la que produce el mayor bienestar para el mayor número. Cinco vidas valen más que una: acciona la palanca.",
+    aris: "Aristóteles no daría una fórmula: pediría phrónesis, sabiduría práctica. La persona virtuosa hace lo mejor posible en la situación concreta, con valentía y prudencia, sin fórmulas automáticas.",
+  },
+  {
+    titulo: "💍 El anillo de Giges",
+    historia: "Encuentras un anillo mágico que te vuelve invisible cuando quieras. Nadie, jamás, podría descubrir nada de lo que hagas con él. Platón contó esta historia para preguntar: ¿somos justos por convicción… o solo por miedo a ser descubiertos?",
+    opciones: [
+      { txt: "Actuaría igual que siempre: lo correcto es correcto aunque nadie me vea.", escuela: "kant" },
+      { txt: "Lo usaría solo para hacer el bien: detener injusticias, ayudar en secreto.", escuela: "mill" },
+      { txt: "Lo guardaría: un poder así puede corromper hasta al mejor, y prefiero no tentarme.", escuela: "aris" },
+    ],
+    kant: "Kant diría que la moral no depende de testigos: actúa solo según reglas que quisieras que fueran ley universal. El deber vale igual en la luz que en la invisibilidad.",
+    mill: "Mill evaluaría los resultados: si el anillo produce más felicidad que daño (ayudar, proteger, denunciar), usarlo sería correcto. Lo que importa son las consecuencias, no la invisibilidad.",
+    aris: "Aristóteles hablaría del carácter: la virtud es un hábito que se cultiva. Quien es justo de verdad, lo es también invisible; pero el sabio conoce sus límites y evita las tentaciones que lo corrompen.",
+  },
+  {
+    titulo: "🎨 La verdad que duele",
+    historia: "Tu mejor amiga te muestra emocionada el proyecto con el que competirá mañana. Está feliz… pero tú ves errores graves que podrían costarle el concurso. Si se los dices, se pondrá muy triste y quizás se bloquee. Si callas, competirá con fallas.",
+    opciones: [
+      { txt: "Le digo toda la verdad: mentir o callar sería engañarla.", escuela: "kant" },
+      { txt: "No le digo nada: a estas alturas solo lograría angustiarla y hacerla rendir peor.", escuela: "mill" },
+      { txt: "Destaco lo bueno y le señalo con cariño los 2 errores que aún puede corregir a tiempo.", escuela: "aris" },
+    ],
+    kant: "Para Kant, decir la verdad es un deber, incluso cuando duele. Engañar a tu amiga —aunque sea por cariño— es tratarla como alguien incapaz de manejar la realidad.",
+    mill: "Mill mediría las consecuencias: ¿qué produce más bienestar total? Si decir la verdad ahora solo causa angustia sin remedio, callar podría ser lo correcto; si aún puede corregir, hablar maximiza su felicidad futura.",
+    aris: "Aristóteles buscaría el término medio entre la franqueza brutal y el silencio cómplice: la honestidad amable. El amigo virtuoso dice la verdad de forma que ayude, no que destruya.",
+  },
+  {
+    titulo: "📝 El examen final",
+    historia: "Tu mejor amigo perderá el año si reprueba el examen de mañana. En plena prueba, te pasa un papelito: te pide que le dejes copiar tus respuestas. El profesor no está mirando.",
+    opciones: [
+      { txt: "No lo dejo copiar: si todos hicieran trampa, los exámenes no valdrían nada.", escuela: "kant" },
+      { txt: "Lo dejo copiar: que pierda el año es un daño enorme comparado con una copia.", escuela: "mill" },
+      { txt: "No le paso las respuestas, pero al salir le propongo estudiar juntos y hablar con el profesor.", escuela: "aris" },
+    ],
+    kant: "Kant aplicaría el imperativo categórico: ¿podrías querer que 'copiar cuando lo necesito' fuera ley universal? No, porque destruiría el sentido mismo de los exámenes. La trampa es injusta con todos.",
+    mill: "Mill sumaría y restaría: evitar que tu amigo pierda el año parece producir más felicidad… pero un utilitarista cuidadoso también contaría el daño a la confianza, a los demás estudiantes y a tu amigo, que no aprenderá.",
+    aris: "Aristóteles miraría el carácter: ayudar a hacer trampa no es verdadera amistad, porque la amistad virtuosa busca que el otro sea mejor. El amigo excelente ayuda a estudiar, no a engañar.",
+  },
+  {
+    titulo: "🏆 Justicia o lealtad",
+    historia: "Descubres que tu amigo dañó a escondidas el proyecto de otro compañero para ganar el concurso de ciencias. Nadie más lo sabe. El compañero afectado está desesperado creyendo que fue su culpa.",
+    opciones: [
+      { txt: "Lo denuncio: la justicia está por encima de la amistad.", escuela: "kant" },
+      { txt: "Evalúo qué causa menos daño total antes de decidir si hablar o callar.", escuela: "mill" },
+      { txt: "Hablo primero con mi amigo y le exijo que él mismo lo confiese y lo repare.", escuela: "aris" },
+    ],
+    kant: "Kant sería tajante: hay un deber de justicia y de verdad que no depende de quién sea el culpable. Encubrir a tu amigo te hace cómplice de tratar injustamente al otro compañero.",
+    mill: "Mill analizaría consecuencias: el sufrimiento del compañero inocente, el precedente de la trampa, la amistad… La opción correcta es la que minimice el daño total, y encubrir suele multiplicarlo.",
+    aris: "Aristóteles vería una oportunidad de virtud: darle a tu amigo la posibilidad de corregirse él mismo educa su carácter. La justicia y la amistad se honran cuando el culpable repara su falta.",
+  },
+  {
+    titulo: "🤝 La promesa",
+    historia: "Le prometiste a tu hermano menor acompañarlo a su primer partido: lleva semanas ilusionado. Pero justo ese día surge una jornada de ayuda tras una emergencia en tu barrio, donde harías falta de verdad.",
+    opciones: [
+      { txt: "Cumplo mi promesa: prometer obliga, y mi hermano confía en mí.", escuela: "kant" },
+      { txt: "Voy a la jornada: ayudar a muchas familias vale más que un partido.", escuela: "mill" },
+      { txt: "Hablo con mi hermano, le explico, y busco cómo cumplirle ese mismo día o compensarlo pronto.", escuela: "aris" },
+    ],
+    kant: "Para Kant, las promesas crean deberes: romperlas cuando conviene destruiría la confianza que hace posibles todas las promesas. Tu palabra a tu hermano no es negociable por cálculos.",
+    mill: "Mill compararía la felicidad producida: la ayuda a muchas familias en emergencia probablemente supera la tristeza de tu hermano, sobre todo si puedes compensarlo después.",
+    aris: "Aristóteles buscaría la respuesta prudente que honre ambos bienes: el cariño familiar y la solidaridad. El virtuoso no elige con fórmulas: delibera, dialoga y encuentra el equilibrio posible.",
+  },
+];
+
+// ============ ESTADO ============
+let idx = 0, curso = "", nombre = "";
+let conteo = { kant: 0, mill: 0, aris: 0 };
+let respuestas = []; // {dilema, opcion, escuela, reflexion}
+let vozOn = true;
+
+// ============ VOZ ============
+function hablar(txt) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = "es-ES"; u.rate = 0.95;
+    const v = speechSynthesis.getVoices().find((v) => v.lang && v.lang.startsWith("es"));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+
+// ============ FLUJO ============
+function comenzar() {
+  curso = document.getElementById("inCurso").value.trim();
+  nombre = document.getElementById("inNombre").value.trim() || "Estudiante";
+  document.getElementById("hudNombre").textContent = nombre;
+  hablar("Bienvenido, " + nombre + ", al tribunal de los dilemas morales. Seis situaciones difíciles te esperan. No hay respuestas fáciles: solo tu conciencia… y tres filósofos observándote. ¡Comencemos!");
+  renderDilema();
+}
+function renderDilema() {
+  const d = DILEMAS[idx];
+  document.getElementById("hudNum").textContent = idx + 1;
+  document.getElementById("dilTitulo").textContent = d.titulo;
+  document.getElementById("dilHistoria").textContent = d.historia;
+  const cont = document.getElementById("opciones");
+  cont.innerHTML = "";
+  d.opciones.forEach((op, i) => {
+    const b = document.createElement("button");
+    b.className = "opcion";
+    b.textContent = String.fromCharCode(65 + i) + ") " + op.txt;
+    b.onclick = () => elegir(i);
+    cont.appendChild(b);
+  });
+  mostrar("p-dilema");
+  setTimeout(() => leerDilema(), 300);
+}
+function leerDilema() {
+  const d = DILEMAS[idx];
+  hablar(limpiarEmoji(d.titulo) + ". " + d.historia + " ¿Qué harías tú? Opción A: " + d.opciones[0].txt + " Opción B: " + d.opciones[1].txt + " Opción C: " + d.opciones[2].txt);
+}
+function limpiarEmoji(s) { return (s || "").replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").trim(); }
+function elegir(i) {
+  const d = DILEMAS[idx];
+  const op = d.opciones[i];
+  conteo[op.escuela]++;
+  respuestas.push({ dilema: d.titulo, opcion: op.txt, escuela: op.escuela, reflexion: "" });
+  document.getElementById("hudNum2").textContent = idx + 1;
+  const NOMBRE_ESC = { kant: "Kant", mill: "Mill", aris: "Aristóteles" };
+  const panel = document.getElementById("panelFilosofos");
+  panel.innerHTML = `
+    <div class="filosofo fil-kant ${op.escuela === "kant" ? "tuyo" : ""}"><b>🟦 Immanuel Kant — el deber ${op.escuela === "kant" ? '<span class="sello-tuyo">TU ELECCIÓN 🧭</span>' : ""}</b>${d.kant}</div>
+    <div class="filosofo fil-mill ${op.escuela === "mill" ? "tuyo" : ""}"><b>🟩 John Stuart Mill — las consecuencias ${op.escuela === "mill" ? '<span class="sello-tuyo">TU ELECCIÓN 🧭</span>' : ""}</b>${d.mill}</div>
+    <div class="filosofo fil-aris ${op.escuela === "aris" ? "tuyo" : ""}"><b>🟧 Aristóteles — la virtud ${op.escuela === "aris" ? '<span class="sello-tuyo">TU ELECCIÓN 🧭</span>' : ""}</b>${d.aris}</div>`;
+  document.getElementById("inReflexion").value = "";
+  document.getElementById("btnSigDilema").disabled = true;
+  document.getElementById("btnSigDilema").textContent = idx + 1 < DILEMAS.length ? "➡️ Siguiente dilema" : "🧭 Ver mi brújula moral";
+  document.getElementById("cuentaPal").textContent = "0 palabras";
+  mostrar("p-revela");
+  hablar("Tu decisión se parece a la de " + NOMBRE_ESC[op.escuela] + ". Escucha lo que dirían los tres filósofos, y luego escribe tu reflexión. " + limpiarEmoji(d[op.escuela]));
+}
+function contarPalabras() {
+  const n = document.getElementById("inReflexion").value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById("cuentaPal").textContent = n + " palabras" + (n < 12 ? " (mínimo 12)" : " ✅");
+  document.getElementById("btnSigDilema").disabled = n < 12;
+}
+function siguienteDilema() {
+  respuestas[respuestas.length - 1].reflexion = document.getElementById("inReflexion").value.trim();
+  idx++;
+  if (idx < DILEMAS.length) renderDilema();
+  else finalizar();
+}
+function notaFinal() {
+  const hechas = respuestas.filter((r) => r.reflexion).length;
+  const promPal = hechas ? respuestas.reduce((s, r) => s + r.reflexion.split(/\s+/).filter(Boolean).length, 0) / hechas : 0;
+  let n = 1 + hechas * 0.55 + (promPal >= 25 ? 0.7 : promPal >= 16 ? 0.4 : 0);
+  return Math.max(1, Math.min(5, Math.round(n * 10) / 10));
+}
+function finalizar() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const total = conteo.kant + conteo.mill + conteo.aris;
+  const pct = (x) => Math.round((x / total) * 100);
+  const ESCUELAS = [
+    { k: "kant", nom: "🟦 Kant — el deber", color: "#8a9bd8", perfil: "Tu brújula apunta al DEBER: crees que hay principios que no se negocian, aunque cueste. ¡Kant estaría orgulloso… y te examinaría igual! 🟦" },
+    { k: "mill", nom: "🟩 Mill — las consecuencias", color: "#7ecf9a", perfil: "Tu brújula apunta a las CONSECUENCIAS: buscas el mayor bienestar para la mayoría. Mill te invitaría a su club utilitarista. 🟩" },
+    { k: "aris", nom: "🟧 Aristóteles — la virtud", color: "#e8a86a", perfil: "Tu brújula apunta a la VIRTUD: buscas el equilibrio prudente en cada situación. Aristóteles te querría en su Liceo. 🟧" },
+  ];
+  ESCUELAS.sort((a, b) => conteo[b.k] - conteo[a.k]);
+  const empate = conteo[ESCUELAS[0].k] === conteo[ESCUELAS[1].k];
+  document.getElementById("perfilTexto").textContent = empate
+    ? "🧭 ¡Brújula equilibrada! Tus decisiones combinan varias escuelas: piensas cada dilema por sí mismo, como un verdadero filósofo."
+    : ESCUELAS[0].perfil;
+  document.getElementById("finDatos").textContent = (curso ? "🎓 " + curso + " · " : "") + "👤 " + nombre;
+  document.getElementById("barras").innerHTML = ESCUELAS.map((e) =>
+    `<div style="font-size:13px; font-weight:bold; margin-top:8px;">${e.nom} — ${pct(conteo[e.k])}%</div>
+     <div class="barra-cont"><div class="barra" style="width:0%; background:${e.color};" data-w="${pct(conteo[e.k])}">${conteo[e.k]} de ${total}</div></div>`
+  ).join("");
+  const nota = notaFinal();
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML = [1, 2, 3, 4, 5].map((s) => `<span style="opacity:${nota >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("");
+  document.getElementById("finAlumno").innerHTML = `<div class="fila-alumno"><span>👤 ${nombre}</span><b style="color:${nEl.style.color}">${nota.toFixed(1)}</b></div>`;
+  mostrar("p-final");
+  setTimeout(() => document.querySelectorAll(".barra").forEach((b) => (b.style.width = b.dataset.w + "%")), 200);
+  hablar("Tu brújula moral está lista, " + nombre + ". " + limpiarEmoji(document.getElementById("perfilTexto").textContent) + " Tu nota de la actividad es " + nota.toFixed(1).replace(".", " punto ") + ".");
+}
+function copiarResumen() {
+  const nota = notaFinal();
+  let txt = "⚖️ DILEMAS MORALES — FilosofIA Interactiva\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "👤 Estudiante: " + nombre + " | 📋 Nota: " + nota.toFixed(1) + "\n";
+  txt += "🧭 Brújula: Kant " + conteo.kant + " · Mill " + conteo.mill + " · Aristóteles " + conteo.aris + "\n\n--- DECISIONES Y REFLEXIONES ---\n";
+  respuestas.forEach((r, i) => {
+    txt += (i + 1) + ". " + r.dilema + "\n   Eligió: " + r.opcion + " [" + { kant: "Kant", mill: "Mill", aris: "Aristóteles" }[r.escuela] + "]\n   Reflexión: " + r.reflexion + "\n";
+  });
+  const fin = () => { const b = document.getElementById("btnCopiar"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar resumen para la profesora"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+if ("speechSynthesis" in window) speechSynthesis.getVoices();
+</script>
+</body>
+</html>

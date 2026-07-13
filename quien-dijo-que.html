@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Quién dijo qué? 🎭 — FilosofIA Interactiva</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trebuchet MS', sans-serif;
+    background: linear-gradient(160deg, #0e2a24 0%, #14403a 45%, #0c2620 100%);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px; overflow-x: hidden;
+  }
+  .pantalla { display: none; width: 100%; max-width: 560px; flex-direction: column; align-items: center; animation: entrar 0.5s ease-out; }
+  .pantalla.activa { display: flex; }
+  h1 { color: #6ee7b7; text-align: center; font-size: 26px; margin: 6px 0; animation: brillar 2.5s infinite; }
+  h2 { color: #6ee7b7; text-align: center; font-size: 19px; margin: 6px 0; }
+  p.sub { color: #c2e8d8; text-align: center; font-size: 15px; line-height: 1.55; margin: 6px 0 10px; max-width: 470px; }
+  .tarjeta { background: rgba(255,255,255,0.97); color: #0e2a24; border-radius: 18px; padding: 18px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; }
+  input { width: 100%; padding: 11px 13px; font-size: 15px; border-radius: 12px; border: 2px solid #9dd8bd; margin-top: 5px; font-family: inherit; outline: none; color: #0e2a24; }
+  label { display: block; text-align: left; font-weight: bold; color: #1d6a4f; font-size: 14px; margin-top: 10px; }
+  .btn { display: inline-block; padding: 13px 28px; font-size: 16px; font-weight: bold; border: none; border-radius: 40px; cursor: pointer; margin-top: 12px; background: linear-gradient(135deg, #6ee7b7, #22b380); color: #0e2a24; box-shadow: 0 5px 18px rgba(110,231,183,0.4); transition: transform 0.15s; text-decoration: none; }
+  .btn:active { transform: scale(0.96); }
+  .btn.sec { background: rgba(0,0,0,0.4); color: #fff; border: 1px solid rgba(255,255,255,0.35); box-shadow: none; font-size: 14px; padding: 9px 18px; }
+  .controles { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 60; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; border: 2px solid rgba(110,231,183,0.5); background: rgba(0,0,0,0.45); color: #fff; }
+  .ctrl-btn.on { background: rgba(110,231,183,0.3); }
+  .hud { display: flex; gap: 10px; background: rgba(0,0,0,0.35); border: 1px solid rgba(110,231,183,0.4); border-radius: 26px; padding: 8px 16px; margin: 34px 0 8px; font-size: 13px; flex-wrap: wrap; justify-content: center; }
+  .hud b { color: #6ee7b7; }
+  .racha { color: #ffb84d !important; animation: pulsoR 0.8s infinite; }
+  .frase-caja {
+    background: rgba(255,255,255,0.97); color: #0e2a24; border-radius: 18px; padding: 20px 18px; width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; min-height: 110px;
+    display: flex; flex-direction: column; justify-content: center; animation: rebote 0.5s ease-out;
+  }
+  .frase-txt { font-size: 19px; font-weight: 800; font-style: italic; line-height: 1.4; }
+  .barra-tiempo-cont { width: 100%; height: 14px; background: rgba(0,0,0,0.4); border-radius: 10px; margin: 10px 0; overflow: hidden; border: 1px solid rgba(110,231,183,0.4); }
+  .barra-tiempo { height: 100%; width: 100%; background: linear-gradient(90deg, #6ee7b7, #22b380); border-radius: 10px; transition: width 0.1s linear, background 0.3s; }
+  .barra-tiempo.peligro { background: linear-gradient(90deg, #ff9f6e, #e85050); }
+  .filosofos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin-top: 4px; }
+  .fil-btn {
+    background: linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+    border: 2px solid rgba(110,231,183,0.4); border-radius: 16px; padding: 12px 8px;
+    cursor: pointer; text-align: center; color: #fff; font-family: inherit; transition: all 0.15s;
+  }
+  .fil-btn:hover { transform: translateY(-4px); border-color: #6ee7b7; background: rgba(110,231,183,0.15); }
+  .fil-btn .fe { font-size: 38px; }
+  .fil-btn .fn { font-size: 14px; font-weight: 800; margin-top: 4px; }
+  .fil-btn.correcta { background: rgba(60,184,92,0.4); border-color: #3cb85c; }
+  .fil-btn.incorrecta { background: rgba(216,80,80,0.4); border-color: #d85050; animation: sacudir 0.4s; }
+  .dato { background: #fdf6de; border: 2px dashed #d9b23f; border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-size: 13.5px; color: #6a5510; text-align: left; line-height: 1.5; animation: entrar 0.4s; }
+  .puntos-flotantes { position: fixed; font-size: 26px; font-weight: 900; color: #6ee7b7; text-shadow: 0 2px 10px rgba(0,0,0,0.6); z-index: 80; animation: subirPuntos 1.2s ease-out forwards; pointer-events: none; }
+  .nivel-banner { padding: 10px 26px; border-radius: 30px; font-weight: 900; font-size: 17px; background: linear-gradient(135deg, #6ee7b7, #22b380); color: #0e2a24; animation: rebote 0.7s ease-out; box-shadow: 0 0 26px rgba(110,231,183,0.6); margin-bottom: 6px; text-align: center; }
+  .mascara { position: fixed; font-size: 54px; opacity: 0.1; z-index: 0; pointer-events: none; animation: flotar 4s ease-in-out infinite; }
+  .fila-alumno { display: flex; justify-content: space-between; background: #e8f8ef; border-radius: 10px; padding: 7px 14px; margin-top: 6px; font-size: 15px; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes brillar { 0%,100% { text-shadow: 0 0 10px rgba(110,231,183,0.5); } 50% { text-shadow: 0 0 26px rgba(110,231,183,1); } }
+  @keyframes flotar { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(4deg); } }
+  @keyframes rebote { 0% { transform: scale(0); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes sacudir { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  @keyframes pulsoR { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+  @keyframes subirPuntos { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90px); opacity: 0; } }
+  @keyframes caer { 0% { transform: translateY(-60px) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0.8; } }
+</style>
+</head>
+<body>
+
+<div class="mascara" style="left:3%; top:16%;">🎭</div>
+<div class="mascara" style="right:3%; top:60%; animation-delay:1.5s;">🎭</div>
+
+<div class="controles">
+  <button class="ctrl-btn on" id="btnVoz" onclick="toggleVoz()">🗣️</button>
+</div>
+
+<!-- ========== INICIO ========== -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="font-size:60px; animation:flotar 3.5s ease-in-out infinite;">🎭⚡</div>
+  <h1>¿Quién dijo qué?</h1>
+  <p class="sub">Las frases más famosas de la filosofía vuelan por el escenario. 🎬 Tienes segundos para tocar al filósofo que la dijo. <b style="color:#6ee7b7">3 niveles</b>, rachas de fuego 🔥, puntos por velocidad… y datos curiosos cuando falles (¡fallar también enseña!).</p>
+  <div class="tarjeta">
+    <label>🎓 Curso y grupo</label>
+    <input id="inCurso" placeholder="Ej: 10-1, 11-2" maxlength="20">
+    <label>👤 Tu nombre</label>
+    <input id="inNombre" placeholder="Ej: Mariana" maxlength="40">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <button class="btn sec" style="color:#1d6a4f; border-color:#9dd8bd; background:#e8f8ef;" onclick="probarVoz()">🔊 Probar la voz</button>
+      <button class="btn" onclick="comenzar()">⚡ ¡Al escenario!</button>
+    </div>
+    <p style="font-size:12px; color:#5a8a75; margin-top:10px;">💡 Los puntos premian la velocidad, pero tu nota solo depende de los aciertos.</p>
+  </div>
+  <a href="index.html" class="btn sec" style="margin-top:10px;">🏠 Volver a FilosofIA</a>
+</div>
+
+<!-- ========== NIVEL ========== -->
+<div class="pantalla" id="p-nivel">
+  <div style="font-size:56px; margin-top:40px; animation:rebote 0.7s ease-out;" id="nivEmoji"></div>
+  <div class="nivel-banner" id="nivBanner"></div>
+  <p class="sub" id="nivDesc"></p>
+  <button class="btn" onclick="empezarNivel()">🎬 ¡Comenzar nivel!</button>
+</div>
+
+<!-- ========== JUEGO ========== -->
+<div class="pantalla" id="p-juego">
+  <div class="hud">
+    <span>🎬 Frase <b id="hudFrase"></b>/<b id="hudTotal"></b></span>
+    <span>💯 <b id="hudPuntos">0</b></span>
+    <span id="hudRachaCont">🔥 Racha: <b id="hudRacha">0</b></span>
+    <span>✅ <b id="hudAciertos">0</b></span>
+  </div>
+  <div class="frase-caja" id="fraseCaja">
+    <div style="font-size:12px; color:#5a8a75; font-weight:800; letter-spacing:1px;">¿QUIÉN DIJO…?</div>
+    <div class="frase-txt" id="fraseTxt"></div>
+  </div>
+  <div class="barra-tiempo-cont"><div class="barra-tiempo" id="barraTiempo"></div></div>
+  <div class="filosofos" id="filosofos"></div>
+  <div class="dato" id="dato" style="display:none;"></div>
+  <button class="btn" id="btnSigFrase" style="display:none;" onclick="siguienteFrase()"></button>
+</div>
+
+<!-- ========== FINAL ========== -->
+<div class="pantalla" id="p-final">
+  <div style="font-size:60px; animation:rebote 0.8s ease-out;">🏆🎭</div>
+  <h1 style="font-size:22px;" id="finTitulo"></h1>
+  <p class="sub" id="finFrase"></p>
+  <div class="tarjeta">
+    <div style="font-size:14px; color:#5a8a75; font-weight:bold;" id="finDatos"></div>
+    <div style="display:flex; justify-content:center; gap:18px; margin:10px 0; flex-wrap:wrap;">
+      <div>💯 Puntos<br><b style="font-size:22px;" id="finPuntos"></b></div>
+      <div>✅ Aciertos<br><b style="font-size:22px;" id="finAciertos"></b></div>
+      <div>🔥 Mejor racha<br><b style="font-size:22px;" id="finRacha"></b></div>
+    </div>
+    <div style="color:#5a8a75; font-size:13px; letter-spacing:1px;">NOTA DE LA ACTIVIDAD</div>
+    <div id="finNota" style="font-size:50px; font-weight:900;"></div>
+    <div id="finEstrellas" style="font-size:23px; letter-spacing:3px;"></div>
+    <div id="finAlumno"></div>
+    <button class="btn sec" style="color:#1d6a4f; border-color:#9dd8bd; background:#e8f8ef;" id="btnCopiar" onclick="copiarResumen()">📄 Copiar resumen para la profesora</button>
+  </div>
+  <button class="btn" onclick="location.reload()">🔄 Jugar de nuevo</button>
+  <a href="index.html" class="btn sec">🏠 Volver a FilosofIA</a>
+</div>
+
+<script>
+// ================= NIVELES Y FRASES =================
+const NIVELES = [
+  {
+    nombre: "NIVEL 1 · Filosofía Antigua", emoji: "🏛️", tiempo: 15,
+    desc: "Grecia te espera: Sócrates, Heráclito, Platón y Aristóteles. 15 segundos por frase. ¡Calentamiento!",
+    filosofos: [
+      { n: "Sócrates", e: "🧔" }, { n: "Heráclito", e: "🔥" }, { n: "Platón", e: "🏛️" }, { n: "Aristóteles", e: "📚" },
+    ],
+    frases: [
+      { f: "Solo sé que nada sé.", a: "Sócrates", dato: "Sócrates presumía de su ignorancia: para él, reconocer lo que NO sabemos es el inicio de la sabiduría." },
+      { f: "Una vida sin examen no merece ser vivida.", a: "Sócrates", dato: "Lo dijo en su juicio, antes de ser condenado a muerte. Prefirió morir a dejar de filosofar." },
+      { f: "Nadie se baña dos veces en el mismo río.", a: "Heráclito", dato: "Para Heráclito todo fluye (panta rei): el río cambia… y tú también. Nada permanece igual." },
+      { f: "Existe un mundo perfecto de Ideas, más real que el que vemos.", a: "Platón", dato: "Su teoría de las Ideas: este mundo es como sombras en una caverna comparado con el mundo de las Ideas." },
+      { f: "El ser humano es un animal racional y político.", a: "Aristóteles", dato: "Para Aristóteles nacimos para vivir en comunidad (polis) y usar la razón: por eso 'político'." },
+      { f: "La virtud está en el término medio.", a: "Aristóteles", dato: "Ni cobardía ni temeridad: valentía. Para Aristóteles, la virtud es el equilibrio entre dos extremos." },
+    ],
+  },
+  {
+    nombre: "NIVEL 2 · Medieval y Moderna", emoji: "🔭", tiempo: 12,
+    desc: "De las abadías a los laboratorios: Agustín, Tomás de Aquino, Descartes y Kant. ¡12 segundos por frase!",
+    filosofos: [
+      { n: "San Agustín", e: "⛪" }, { n: "T. de Aquino", e: "📜" }, { n: "Descartes", e: "🔭" }, { n: "Kant", e: "⚖️" },
+    ],
+    frases: [
+      { f: "Pienso, luego existo.", a: "Descartes", dato: "Tras dudar de TODO, Descartes halló una certeza: si dudo, pienso; y si pienso… existo." },
+      { f: "Ama, y haz lo que quieras.", a: "San Agustín", dato: "Para Agustín, quien ama de verdad no necesita más reglas: el amor auténtico no daña." },
+      { f: "Cree para comprender, comprende para creer.", a: "San Agustín", dato: "Su fórmula para unir la fe y la razón: no son enemigas, se necesitan mutuamente." },
+      { f: "Hay cinco vías para demostrar la existencia de Dios.", a: "T. de Aquino", dato: "Santo Tomás usó la razón (¡y a Aristóteles!) para argumentar la existencia de Dios por cinco caminos." },
+      { f: "Actúa solo según una máxima que quieras ver convertida en ley universal.", a: "Kant", dato: "El imperativo categórico: antes de actuar pregúntate '¿y si TODOS hicieran esto?'" },
+      { f: "El cielo estrellado sobre mí, y la ley moral en mí.", a: "Kant", dato: "Las dos cosas que más admiraba Kant. La frase está grabada en su tumba en Königsberg." },
+    ],
+  },
+  {
+    nombre: "NIVEL 3 · Contemporánea", emoji: "🌆", tiempo: 10,
+    desc: "El nivel final: Nietzsche, Marx, Sartre y Simone de Beauvoir. ¡Solo 10 segundos! 🔥",
+    filosofos: [
+      { n: "Nietzsche", e: "⚡" }, { n: "Marx", e: "🚩" }, { n: "Sartre", e: "🕶️" }, { n: "S. de Beauvoir", e: "💜" },
+    ],
+    frases: [
+      { f: "Dios ha muerto.", a: "Nietzsche", dato: "No celebraba: anunciaba la crisis de los valores tradicionales y el reto de crear valores nuevos." },
+      { f: "Lo que no me mata, me hace más fuerte.", a: "Nietzsche", dato: "De 'El crepúsculo de los ídolos'. Sí: la frase de mil canciones y gimnasios es de Nietzsche." },
+      { f: "No se nace mujer: se llega a serlo.", a: "S. de Beauvoir", dato: "De 'El segundo sexo' (1949): ser mujer no es solo biología, también es una construcción social." },
+      { f: "La existencia precede a la esencia.", a: "Sartre", dato: "Primero existes, y LUEGO te defines con tus actos: no naces con un destino escrito." },
+      { f: "Estamos condenados a ser libres.", a: "Sartre", dato: "No puedes renunciar a tu libertad: incluso no elegir… es una elección." },
+      { f: "Los filósofos han interpretado el mundo; de lo que se trata es de transformarlo.", a: "Marx", dato: "Su famosa Tesis 11 sobre Feuerbach: la filosofía debe cambiar la realidad, no solo explicarla." },
+    ],
+  },
+];
+
+// ================= ESTADO =================
+let nivel = 0, fraseIdx = 0, ordenFrases = [];
+let puntos = 0, aciertos = 0, fallosT = 0, racha = 0, mejorRacha = 0;
+let tiempoRestante = 0, timerInt = null, respondida = false;
+let curso = "", nombre = "", vozOn = true, audioCtx = null;
+let registro = [];
+const TOTAL_FRASES = NIVELES.reduce((s, n) => s + n.frases.length, 0);
+
+// ================= AUDIO / VOZ =================
+function ctx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); return audioCtx; }
+function sndOk() { try { const c = ctx(), t = c.currentTime; [880, 1108.7, 1318.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.001, t + i * 0.07); g.gain.exponentialRampToValueAtTime(0.2, t + i * 0.07 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.07 + 0.4); o.connect(g).connect(c.destination); o.start(t + i * 0.07); o.stop(t + i * 0.07 + 0.5); }); } catch (e) {} }
+function sndMal() { try { const c = ctx(), t = c.currentTime; const o = c.createOscillator(), g = c.createGain(); o.type = "triangle"; o.frequency.setValueAtTime(280, t); o.frequency.exponentialRampToValueAtTime(130, t + 0.3); g.gain.setValueAtTime(0.14, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.4); } catch (e) {} }
+function sndTic() { try { const c = ctx(), t = c.currentTime; const o = c.createOscillator(), g = c.createGain(); o.type = "square"; o.frequency.value = 900; g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.06); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.07); } catch (e) {} }
+function sndFanfarria() { try { const c = ctx(), t = c.currentTime; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = "sawtooth"; o.frequency.value = f; const ini = t + i * 0.22, dur = i === 3 ? 0.9 : 0.2; g.gain.setValueAtTime(0.001, ini); g.gain.exponentialRampToValueAtTime(0.11, ini + 0.03); g.gain.exponentialRampToValueAtTime(0.001, ini + dur); o.connect(g).connect(c.destination); o.start(ini); o.stop(ini + dur + 0.1); }); } catch (e) {} }
+function vozES() { const vs = speechSynthesis.getVoices(); return vs.find((v) => /es[-_]/i.test(v.lang || "")) || vs.find((v) => (v.lang || "").startsWith("es")) || null; }
+function hablar(txt, cancelar = true) {
+  if (!vozOn || !("speechSynthesis" in window)) return;
+  try {
+    if (cancelar) speechSynthesis.cancel();
+    const frases = (txt.match(/[^.!?…:]+[.!?…:]*/g) || [txt]).map((f) => f.trim()).filter(Boolean);
+    const v = vozES();
+    frases.forEach((f) => { const u = new SpeechSynthesisUtterance(f); u.lang = "es-ES"; u.rate = 1.0; if (v) u.voice = v; speechSynthesis.speak(u); });
+  } catch (e) {}
+}
+setInterval(() => { try { if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {} }, 4000);
+if ("speechSynthesis" in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+function probarVoz() { ctx(); hablar("¡Tres, dos, uno! Soy la voz del escenario filosófico. Si me escuchas, que empiece el espectáculo."); }
+function toggleVoz() { vozOn = !vozOn; if (!vozOn) try { speechSynthesis.cancel(); } catch (e) {} const b = document.getElementById("btnVoz"); b.textContent = vozOn ? "🗣️" : "🔇"; b.classList.toggle("on", vozOn); }
+function mostrar(id) { document.querySelectorAll(".pantalla").forEach((p) => p.classList.remove("activa")); document.getElementById(id).classList.add("activa"); window.scrollTo(0, 0); }
+function mezclar(a) { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+
+// ================= FLUJO =================
+function comenzar() {
+  ctx();
+  curso = document.getElementById("inCurso").value.trim();
+  nombre = document.getElementById("inNombre").value.trim() || "Estudiante";
+  nivel = 0;
+  hablar("¡Bienvenida, bienvenido al gran escenario, " + nombre + "! Las frases más célebres de la filosofía volarán ante ti. Toca al filósofo correcto antes de que el tiempo se agote. ¡Prepárate!");
+  mostrarNivel();
+}
+function mostrarNivel() {
+  const N = NIVELES[nivel];
+  document.getElementById("nivEmoji").textContent = N.emoji;
+  document.getElementById("nivBanner").textContent = "🎬 " + N.nombre;
+  document.getElementById("nivDesc").textContent = N.desc;
+  mostrar("p-nivel");
+  hablar(N.nombre.replace("·", ".") + ". " + N.desc);
+}
+function empezarNivel() {
+  const N = NIVELES[nivel];
+  ordenFrases = mezclar(N.frases);
+  fraseIdx = 0;
+  document.getElementById("hudTotal").textContent = N.frases.length;
+  mostrar("p-juego");
+  mostrarFrase();
+}
+function mostrarFrase() {
+  const N = NIVELES[nivel];
+  const F = ordenFrases[fraseIdx];
+  respondida = false;
+  document.getElementById("hudFrase").textContent = fraseIdx + 1;
+  document.getElementById("hudPuntos").textContent = puntos;
+  document.getElementById("hudAciertos").textContent = aciertos;
+  actualizarRacha();
+  document.getElementById("fraseTxt").textContent = "“" + F.f + "”";
+  document.getElementById("fraseCaja").style.animation = "none";
+  void document.getElementById("fraseCaja").offsetWidth;
+  document.getElementById("fraseCaja").style.animation = "rebote 0.5s ease-out";
+  document.getElementById("dato").style.display = "none";
+  document.getElementById("btnSigFrase").style.display = "none";
+  const cont = document.getElementById("filosofos");
+  cont.innerHTML = "";
+  mezclar(N.filosofos).forEach((fil) => {
+    const b = document.createElement("button");
+    b.className = "fil-btn";
+    b.innerHTML = `<div class="fe">${fil.e}</div><div class="fn">${fil.n}</div>`;
+    b.onclick = () => responder(fil.n, b, F);
+    cont.appendChild(b);
+  });
+  hablar("¿Quién dijo: " + F.f + "?");
+  // Cronómetro
+  tiempoRestante = N.tiempo * 10; // décimas
+  clearInterval(timerInt);
+  const barra = document.getElementById("barraTiempo");
+  barra.classList.remove("peligro");
+  timerInt = setInterval(() => {
+    tiempoRestante--;
+    const pct = (tiempoRestante / (N.tiempo * 10)) * 100;
+    barra.style.width = pct + "%";
+    if (pct < 30) barra.classList.add("peligro");
+    if (tiempoRestante % 10 === 0 && tiempoRestante <= 30 && tiempoRestante > 0) sndTic();
+    if (tiempoRestante <= 0) { clearInterval(timerInt); tiempoAgotado(F); }
+  }, 100);
+}
+function actualizarRacha() {
+  const el = document.getElementById("hudRacha");
+  el.textContent = racha;
+  document.getElementById("hudRachaCont").classList.toggle("racha", racha >= 3);
+}
+function puntosFlotantes(txt, x, y) {
+  const d = document.createElement("div");
+  d.className = "puntos-flotantes";
+  d.textContent = txt;
+  d.style.left = x + "px"; d.style.top = y + "px";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1200);
+}
+function responder(nombreFil, btnEl, F) {
+  if (respondida) return;
+  respondida = true;
+  clearInterval(timerInt);
+  const correcto = nombreFil === F.a;
+  document.querySelectorAll(".fil-btn").forEach((b) => {
+    if (b.querySelector(".fn").textContent === F.a) b.classList.add("correcta");
+  });
+  const r = btnEl.getBoundingClientRect();
+  if (correcto) {
+    aciertos++;
+    racha++;
+    mejorRacha = Math.max(mejorRacha, racha);
+    const bonusTiempo = Math.round(tiempoRestante); // décimas restantes
+    const mult = racha >= 3 ? 2 : 1;
+    const ganados = (100 + bonusTiempo) * mult;
+    puntos += ganados;
+    sndOk();
+    puntosFlotantes("+" + ganados + (mult === 2 ? " 🔥x2" : ""), r.left + r.width / 2, r.top);
+    hablar("¡Correcto! Era " + F.a + "." + (racha >= 3 ? " ¡Racha de fuego, " + racha + " seguidas!" : ""));
+    registro.push({ f: F.f, a: F.a, ok: true });
+  } else {
+    fallosT++;
+    racha = 0;
+    btnEl.classList.add("incorrecta");
+    sndMal();
+    hablar("¡Uy! Era " + F.a + ". " + F.dato);
+    registro.push({ f: F.f, a: F.a, ok: false });
+  }
+  actualizarRacha();
+  document.getElementById("hudPuntos").textContent = puntos;
+  document.getElementById("hudAciertos").textContent = aciertos;
+  const dato = document.getElementById("dato");
+  dato.style.display = "block";
+  dato.innerHTML = "<b>🎓 Dato:</b> " + F.dato;
+  mostrarBotonSiguiente();
+}
+function tiempoAgotado(F) {
+  if (respondida) return;
+  respondida = true;
+  fallosT++;
+  racha = 0;
+  actualizarRacha();
+  sndMal();
+  document.querySelectorAll(".fil-btn").forEach((b) => {
+    if (b.querySelector(".fn").textContent === F.a) b.classList.add("correcta");
+  });
+  const dato = document.getElementById("dato");
+  dato.style.display = "block";
+  dato.innerHTML = "<b>⏰ ¡Tiempo!</b> Era <b>" + F.a + "</b>. 🎓 " + F.dato;
+  hablar("¡Se acabó el tiempo! Era " + F.a + ". " + F.dato);
+  registro.push({ f: F.f, a: F.a, ok: false });
+  mostrarBotonSiguiente();
+}
+function mostrarBotonSiguiente() {
+  const btn = document.getElementById("btnSigFrase");
+  btn.style.display = "inline-block";
+  const N = NIVELES[nivel];
+  if (fraseIdx + 1 < N.frases.length) btn.textContent = "➡️ Siguiente frase";
+  else if (nivel + 1 < NIVELES.length) btn.textContent = "🎬 ¡Nivel " + (nivel + 2) + "!";
+  else btn.textContent = "🏆 Ver mi resultado";
+}
+function siguienteFrase() {
+  const N = NIVELES[nivel];
+  if (fraseIdx + 1 < N.frases.length) { fraseIdx++; mostrarFrase(); }
+  else if (nivel + 1 < NIVELES.length) { nivel++; mostrarNivel(); }
+  else finalizar();
+}
+function notaFinal() { return Math.max(1, Math.min(5, Math.round((1 + (aciertos / TOTAL_FRASES) * 4) * 10) / 10)); }
+function tituloPor(p) {
+  if (p >= 2200) return "🏆 ¡ORÁCULO LEGENDARIO!";
+  if (p >= 1500) return "🌟 Maestro de las Citas";
+  if (p >= 900) return "📜 Aprendiz Veloz";
+  return "🎭 Explorador del Escenario";
+}
+function finalizar() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  sndFanfarria();
+  const nota = notaFinal();
+  document.getElementById("finTitulo").textContent = tituloPor(puntos);
+  document.getElementById("finFrase").textContent = "\"Las palabras de los sabios ahora también son tuyas.\" 🎭";
+  document.getElementById("finDatos").textContent = (curso ? "🎓 " + curso + " · " : "") + "👤 " + nombre;
+  document.getElementById("finPuntos").textContent = puntos;
+  document.getElementById("finAciertos").textContent = aciertos + " de " + TOTAL_FRASES;
+  document.getElementById("finRacha").textContent = mejorRacha + " 🔥";
+  const nEl = document.getElementById("finNota");
+  nEl.textContent = nota.toFixed(1);
+  nEl.style.color = nota >= 4.5 ? "#3cb85c" : nota >= 3.5 ? "#8fd14f" : nota >= 3 ? "#c9950c" : "#d85050";
+  document.getElementById("finEstrellas").innerHTML = [1, 2, 3, 4, 5].map((s) => `<span style="opacity:${nota >= s - 0.25 ? 1 : 0.2}">⭐</span>`).join("");
+  document.getElementById("finAlumno").innerHTML = `<div class="fila-alumno"><span>👤 ${nombre}</span><b style="color:${nEl.style.color}">${nota.toFixed(1)}</b></div>`;
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement("div");
+    d.textContent = ["🎭", "⭐", "📜", "✨"][i % 4];
+    d.style.cssText = `position:fixed;left:${(i * 29 + 7) % 100}%;top:-60px;font-size:${16 + (i % 4) * 7}px;animation:caer ${4 + (i % 5)}s linear infinite;animation-delay:${i * 0.6}s;pointer-events:none;z-index:1;`;
+    document.body.appendChild(d);
+  }
+  mostrar("p-final");
+  hablar("¡Espectáculo terminado, " + nombre + "! " + tituloPor(puntos).replace(/[🏆🌟📜🎭¡!]/g, "") + ". Acertaste " + aciertos + " de " + TOTAL_FRASES + " frases, con " + puntos + " puntos y una racha máxima de " + mejorRacha + ". Tu nota es " + nota.toFixed(1).replace(".", " punto ") + ". ¡El telón cae entre aplausos!");
+}
+function copiarResumen() {
+  const nota = notaFinal();
+  let txt = "🎭 ¿QUIÉN DIJO QUÉ? — FilosofIA Interactiva\n";
+  txt += "📅 " + new Date().toLocaleString("es-CO") + "\n";
+  if (curso) txt += "🎓 Curso: " + curso + "\n";
+  txt += "👤 Estudiante: " + nombre + " | 💯 Puntos: " + puntos + " | ✅ Aciertos: " + aciertos + "/" + TOTAL_FRASES + " | 🔥 Racha: " + mejorRacha + " | 📋 Nota: " + nota.toFixed(1) + "\n\n--- FRASES ---\n";
+  registro.forEach((r, i) => { txt += (i + 1) + ". " + (r.ok ? "✅" : "❌") + " \"" + r.f + "\" — " + r.a + "\n"; });
+  const fin = () => { const b = document.getElementById("btnCopiar"); b.textContent = "✅ ¡Copiado!"; setTimeout(() => (b.textContent = "📄 Copiar resumen para la profesora"), 2500); };
+  try { navigator.clipboard.writeText(txt).then(fin).catch(fin); } catch (e) { fin(); }
+}
+</script>
+</body>
+</html>
