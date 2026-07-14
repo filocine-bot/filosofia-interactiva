@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FilosofIA Interactiva — Pensamiento crítico para nuevas mentes</title>
+<meta name="description" content="Aprende filosofía jugando: escape rooms, duelos de cartas, dilemas morales y aventuras con inteligencia artificial. 7 actividades gratuitas con voz en off y calificación automática.">
+<meta property="og:title" content="FilosofIA Interactiva 🧠⚡">
+<meta property="og:description" content="Pensamiento crítico para nuevas mentes: 7 aventuras filosóficas interactivas para estudiantes.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<style>
+  :root {
+    --fondo: #0b0518; --morado: #7c3aed; --violeta: #a855f7; --cian: #22d3ee;
+    --dorado: #fbbf24; --rosa: #f472b6; --texto: #e9e2f7; --texto-suave: #b3a5d6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', 'Trebuchet MS', sans-serif; background: var(--fondo); color: var(--texto); overflow-x: hidden; }
+
+  #barraScroll { position: fixed; top: 0; left: 0; height: 4px; width: 0%; z-index: 100;
+    background: linear-gradient(90deg, var(--dorado), var(--rosa), var(--cian)); box-shadow: 0 0 12px rgba(251,191,36,0.6); }
+
+  .fondo-gradiente { position: fixed; inset: 0; z-index: -3;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124,58,237,0.35), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 20%, rgba(34,211,238,0.18), transparent 60%),
+      radial-gradient(ellipse 90% 70% at 50% 100%, rgba(244,114,182,0.14), transparent 60%); }
+  .orbe { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.35; z-index: -2; animation: orbita 16s ease-in-out infinite alternate; pointer-events: none; }
+  @keyframes orbita { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,-50px) scale(1.2); } }
+  .particula { position: fixed; z-index: -1; opacity: 0.45; pointer-events: none; animation: flotarP linear infinite; filter: drop-shadow(0 0 8px rgba(168,85,247,0.7)); }
+  @keyframes flotarP { 0% { transform: translateY(105vh) rotate(0); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+
+  /* ===== Nav ===== */
+  nav { position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 5vw; background: rgba(11,5,24,0.82); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(168,85,247,0.25); }
+  .logo { font-size: 19px; font-weight: 900; letter-spacing: 0.5px; }
+  .logo .ia { background: linear-gradient(90deg, var(--cian), var(--violeta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .nav-links { display: flex; gap: 20px; font-size: 14px; align-items: center; }
+  .nav-links a { color: var(--texto-suave); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--cian); }
+  .hamburguesa { display: none; font-size: 26px; background: none; border: none; color: var(--texto); cursor: pointer; }
+  .menu-movil { display: none; position: fixed; top: 54px; left: 0; right: 0; z-index: 49; background: rgba(11,5,24,0.97);
+    backdrop-filter: blur(14px); flex-direction: column; padding: 16px 5vw 22px; gap: 14px; border-bottom: 1px solid rgba(168,85,247,0.3); }
+  .menu-movil a { color: var(--texto); text-decoration: none; font-weight: 700; font-size: 16px; padding: 8px 0; }
+  .menu-movil.abierto { display: flex; animation: subirSuave 0.3s ease-out; }
+  @media (max-width: 700px) { .nav-links { display: none; } .hamburguesa { display: block; } }
+
+  /* ===== Hero COMPACTO: los juegos son los protagonistas ===== */
+  header { text-align: center; padding: 26px 5vw 8px; }
+  .insignia { display: inline-flex; align-items: center; gap: 8px; background: rgba(168,85,247,0.14); border: 1px solid rgba(168,85,247,0.45);
+    color: var(--violeta); padding: 6px 16px; border-radius: 40px; font-size: 12px; font-weight: 700; letter-spacing: 1px; animation: subirSuave 0.7s ease-out; }
+  h1.titulo { font-size: clamp(34px, 6vw, 58px); font-weight: 900; line-height: 1.05; margin: 12px 0 6px; animation: subirSuave 0.8s ease-out 0.05s backwards; }
+  h1 .grad { background: linear-gradient(90deg, var(--dorado), var(--rosa), var(--violeta), var(--cian)); background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent; animation: arcoiris 6s linear infinite; }
+  @keyframes arcoiris { to { background-position: 300% 0; } }
+  .subtitulo { max-width: 620px; margin: 0 auto; color: var(--texto-suave); font-size: clamp(14px, 2vw, 17px); line-height: 1.5; animation: subirSuave 0.9s ease-out 0.1s backwards; }
+  .mini-stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; animation: subirSuave 0.9s ease-out 0.15s backwards; }
+  .mini-stat { font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 20px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(251,191,36,0.35); color: var(--dorado); }
+  @keyframes subirSuave { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== Buscador + Filtros (fijos al hacer scroll) ===== */
+  .panel-filtros { position: sticky; top: 52px; z-index: 45; padding: 12px 5vw; margin-top: 14px;
+    background: rgba(11,5,24,0.85); backdrop-filter: blur(14px); border-top: 1px solid rgba(168,85,247,0.2); border-bottom: 1px solid rgba(168,85,247,0.2); }
+  .panel-int { max-width: 1180px; margin: 0 auto; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .buscador { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(34,211,238,0.4);
+    border-radius: 30px; padding: 9px 18px; flex: 1 1 240px; max-width: 340px; }
+  .buscador input { background: none; border: none; outline: none; color: var(--texto); font-size: 15px; width: 100%; font-family: inherit; }
+  .buscador input::placeholder { color: var(--texto-suave); }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .filtro { padding: 9px 18px; border-radius: 30px; font-size: 13.5px; font-weight: 700; cursor: pointer;
+    background: rgba(255,255,255,0.05); color: var(--texto-suave); border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; font-family: inherit; }
+  .filtro:hover { border-color: var(--cian); color: var(--cian); }
+  .filtro.activo { background: linear-gradient(135deg, var(--dorado), #f59e0b); color: #1a0f2e; border-color: transparent; box-shadow: 0 4px 16px rgba(251,191,36,0.4); }
+
+  /* ===== Secciones ===== */
+  section { padding: 46px 5vw; max-width: 1180px; margin: 0 auto; }
+  #actividades { padding-top: 26px; }
+  .titulo-seccion { font-size: clamp(26px, 4.5vw, 38px); font-weight: 900; text-align: center; margin-bottom: 8px; }
+  .sub-seccion { text-align: center; color: var(--texto-suave); max-width: 620px; margin: 0 auto 32px; font-size: 15px; line-height: 1.6; }
+
+  /* ===== Cartas de actividades ===== */
+  .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+  .carta { position: relative; border-radius: 24px; padding: 22px 20px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(10px); overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s; display: flex; flex-direction: column; }
+  .carta::before { content: ""; position: absolute; inset: -2px; border-radius: 24px; z-index: -1;
+    background: linear-gradient(135deg, transparent 40%, var(--brillo, rgba(168,85,247,0.5))); opacity: 0; transition: opacity 0.3s; }
+  .carta:hover { transform: translateY(-7px) scale(1.01); box-shadow: 0 18px 44px rgba(124,58,237,0.35); }
+  .carta:hover::before { opacity: 1; }
+  .carta.oculta { display: none; }
+  .carta .cabeza { display: flex; align-items: center; gap: 12px; }
+  .carta .emoji { font-size: 42px; }
+  .carta h3 { font-size: 18.5px; line-height: 1.2; }
+  .carta p { font-size: 13.5px; color: var(--texto-suave); line-height: 1.55; flex-grow: 1; margin-top: 8px; }
+  .etiquetas { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .etiqueta { font-size: 10.5px; font-weight: 700; padding: 4px 11px; border-radius: 20px;
+    background: rgba(34,211,238,0.12); color: var(--cian); border: 1px solid rgba(34,211,238,0.3); }
+  .etiqueta.oro { background: rgba(251,191,36,0.12); color: var(--dorado); border-color: rgba(251,191,36,0.35); }
+  .etiqueta.rosa { background: rgba(244,114,182,0.12); color: var(--rosa); border-color: rgba(244,114,182,0.35); }
+  .btn { padding: 13px 26px; border-radius: 40px; font-size: 15px; font-weight: 800; text-decoration: none; cursor: pointer; border: none;
+    transition: transform 0.2s, box-shadow 0.2s; display: inline-block; text-align: center; }
+  .btn-primario { background: linear-gradient(135deg, var(--dorado), #f59e0b); color: #1a0f2e; box-shadow: 0 6px 22px rgba(251,191,36,0.35); }
+  .btn-primario:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 34px rgba(251,191,36,0.5); }
+  .num-aventura { position: absolute; top: 10px; right: 16px; font-size: 40px; font-weight: 900; opacity: 0.08; }
+  .sin-resultados { text-align: center; color: var(--texto-suave); padding: 30px; display: none; font-size: 15px; }
+
+  /* ===== Marquee ===== */
+  .marquee { overflow: hidden; border-top: 1px solid rgba(168,85,247,0.25); border-bottom: 1px solid rgba(168,85,247,0.25);
+    background: rgba(0,0,0,0.3); padding: 13px 0; white-space: nowrap; }
+  .marquee-pista { display: inline-block; animation: desfilar 40s linear infinite; }
+  .marquee span { margin: 0 34px; font-size: 14px; font-style: italic; color: var(--texto-suave); }
+  .marquee b { color: var(--dorado); font-style: normal; }
+  @keyframes desfilar { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ===== Pasos ===== */
+  .pasos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .paso { background: rgba(255,255,255,0.04); border: 1px solid rgba(168,85,247,0.25); border-radius: 20px; padding: 22px 18px; text-align: center;
+    transition: transform 0.25s, border-color 0.25s; }
+  .paso:hover { transform: translateY(-6px); border-color: var(--cian); }
+  .paso .icono { font-size: 38px; margin-bottom: 10px; display: inline-block; animation: flotarIcono 3s ease-in-out infinite; }
+  @keyframes flotarIcono { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .paso h3 { font-size: 17px; margin-bottom: 6px; color: var(--dorado); }
+  .paso p { font-size: 13.5px; color: var(--texto-suave); line-height: 1.5; }
+
+  /* ===== Épocas ===== */
+  .epocas { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  .epoca { border-radius: 18px; padding: 20px 16px; text-align: center; border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04); transition: transform 0.25s, background 0.25s; }
+  .epoca:hover { transform: scale(1.04); background: rgba(255,255,255,0.08); }
+  .epoca .icono { font-size: 34px; }
+  .epoca h4 { color: var(--dorado); margin: 6px 0 3px; font-size: 15px; }
+  .epoca span { font-size: 11px; color: var(--cian); font-weight: 700; }
+  .epoca p { font-size: 12.5px; color: var(--texto-suave); margin-top: 5px; line-height: 1.5; }
+
+  /* ===== Docentes ===== */
+  .docentes { background: linear-gradient(160deg, rgba(251,191,36,0.08), rgba(124,58,237,0.08));
+    border: 1px solid rgba(251,191,36,0.3); border-radius: 26px; padding: 30px 24px; }
+  .doc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 16px; }
+  .doc-item { display: flex; gap: 10px; align-items: flex-start; }
+  .doc-item .ic { font-size: 26px; flex-shrink: 0; }
+  .doc-item h4 { font-size: 14px; color: var(--dorado); margin-bottom: 3px; }
+  .doc-item p { font-size: 12.5px; color: var(--texto-suave); line-height: 1.5; }
+
+  /* ===== Footer ===== */
+  footer { margin-top: 30px; padding: 38px 5vw 30px; text-align: center; border-top: 1px solid rgba(168,85,247,0.25); background: rgba(0,0,0,0.3); }
+  footer .logo { font-size: 22px; margin-bottom: 8px; }
+  footer p { color: var(--texto-suave); font-size: 13px; margin: 3px 0; }
+  .capitana { font-size: 36px; display: inline-block; animation: flotarIcono 3s ease-in-out infinite; }
+  .footer-links { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 12px 0; }
+  .footer-links a { color: var(--cian); text-decoration: none; font-size: 12.5px; font-weight: 600; }
+  .footer-links a:hover { text-decoration: underline; }
+
+  #arriba { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; z-index: 60;
+    background: linear-gradient(135deg, var(--dorado), #f59e0b); color: #1a0f2e; font-size: 21px; border: none; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(251,191,36,0.4); opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.2s; }
+  #arriba.visible { opacity: 1; pointer-events: auto; }
+  #arriba:hover { transform: translateY(-4px); }
+
+  .aparece { opacity: 0; transform: translateY(26px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+  .aparece.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="barraScroll"></div>
+<div class="fondo-gradiente"></div>
+<div class="orbe" style="width:320px;height:320px;background:var(--morado);top:6%;left:-90px;"></div>
+<div class="orbe" style="width:260px;height:260px;background:var(--cian);top:50%;right:-70px;animation-delay:3s;"></div>
+<div class="orbe" style="width:230px;height:230px;background:var(--rosa);bottom:4%;left:16%;animation-delay:6s;"></div>
+
+<nav>
+  <div class="logo">🧠 Filosof<span class="ia">IA</span> Interactiva</div>
+  <div class="nav-links">
+    <a href="#actividades">🎮 Aventuras</a>
+    <a href="#como">¿Cómo funciona?</a>
+    <a href="#epocas">Épocas</a>
+    <a href="#docentes">Docentes</a>
+  </div>
+  <button class="hamburguesa" onclick="toggleMenu()">☰</button>
+</nav>
+<div class="menu-movil" id="menuMovil">
+  <a href="#actividades" onclick="toggleMenu()">🎮 Aventuras</a>
+  <a href="#como" onclick="toggleMenu()">✨ ¿Cómo funciona?</a>
+  <a href="#epocas" onclick="toggleMenu()">🧭 Épocas</a>
+  <a href="#docentes" onclick="toggleMenu()">🍎 Para docentes</a>
+</div>
+
+<!-- ================= HERO COMPACTO ================= -->
+<header>
+  <div class="insignia">⚡ APRENDE JUGANDO · CON INTELIGENCIA ARTIFICIAL</div>
+  <h1 class="titulo">Filosof<span class="grad">IA</span> Interactiva</h1>
+  <p class="subtitulo">Elige tu aventura y descubre 2 500 años de grandes ideas <b style="color:var(--dorado)">jugando</b> 🚀</p>
+  <div class="mini-stats">
+    <span class="mini-stat">🎮 7 AVENTURAS</span>
+    <span class="mini-stat">🏛️ 25+ FILÓSOFOS</span>
+    <span class="mini-stat">🗣️ CON VOZ EN OFF</span>
+    <span class="mini-stat">🆓 100% GRATIS</span>
+  </div>
+</header>
+
+<!-- ================= BUSCADOR + FILTROS (fijos) ================= -->
+<div class="panel-filtros">
+  <div class="panel-int">
+    <div class="buscador">🔍<input type="text" id="buscar" placeholder="Busca: Platón, cartas, dilemas…" oninput="aplicarFiltros()"></div>
+    <div class="filtros">
+      <button class="filtro activo" data-cat="todas" onclick="setCategoria('todas', this)">✨ Todas</button>
+      <button class="filtro" data-cat="juego" onclick="setCategoria('juego', this)">🎮 Juegos y retos</button>
+      <button class="filtro" data-cat="reflexion" onclick="setCategoria('reflexion', this)">✍️ Reflexión y vida</button>
+      <button class="filtro" data-cat="ia" onclick="setCategoria('ia', this)">🤖 Con IA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ACTIVIDADES (primero y al frente) ================= -->
+<section id="actividades">
+  <div class="grilla" id="grilla">
+
+    <div class="carta aparece visible" data-cat="juego" style="--brillo: rgba(251,191,36,0.55);">
+      <div class="num-aventura">01</div>
+      <div class="cabeza"><div class="emoji">🕯️</div><h3>Escape Room: La Caverna de Platón</h3></div>
+      <p>Despiertas encadenado viendo solo sombras. Resuelve los enigmas de 4 salas, descubre los códigos y escapa hacia la luz del conocimiento.</p>
+      <div class="etiquetas"><span class="etiqueta oro">⏱️ Contra el tiempo</span><span class="etiqueta">🔐 4 candados</span><span class="etiqueta rosa">🗣️ Voz en off</span></div>
+      <a class="btn btn-primario" href="escape-room.html">🗝️ ¡Escapar ahora!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="juego" style="--brillo: rgba(34,211,238,0.55);">
+      <div class="num-aventura">02</div>
+      <div class="cabeza"><div class="emoji">🏴‍☠️</div><h3>El Baúl de la Sabiduría</h3></div>
+      <p>Dos barcos compiten de puerto en puerto por la historia de la filosofía. Cada acierto da un tesoro, y el baúl se abre con lluvia de joyas.</p>
+      <div class="etiquetas"><span class="etiqueta">⛵ 2 equipos</span><span class="etiqueta oro">💎 Tesoros</span><span class="etiqueta rosa">🗺️ Mapa de puertos</span></div>
+      <a class="btn btn-primario" href="baul-sabiduria.html">⚓ ¡Zarpar!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="ia" style="--brillo: rgba(244,114,182,0.5);">
+      <div class="num-aventura">03</div>
+      <div class="cabeza"><div class="emoji">💬</div><h3>Diálogo con Sócrates</h3></div>
+      <p>Entra al ágora de Atenas y conversa con el maestro de la mayéutica: no te dará respuestas, te hará preguntas hasta que tus ideas salgan a la luz.</p>
+      <div class="etiquetas"><span class="etiqueta rosa">🤖 Con IA</span><span class="etiqueta">🧠 Pensamiento crítico</span><span class="etiqueta oro">🦉 Mayéutica</span></div>
+      <a class="btn btn-primario" href="dialogo-socrates.html">🏛️ ¡Entrar al ágora!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="reflexion" style="--brillo: rgba(168,85,247,0.5);">
+      <div class="num-aventura">04</div>
+      <div class="cabeza"><div class="emoji">⚖️</div><h3>Dilemas Morales</h3></div>
+      <p>El tranvía, el anillo de Giges, la verdad que duele… Decide qué harías en 6 dilemas, descubre qué dirían Kant, Mill y Aristóteles, y conoce tu brújula moral 🧭.</p>
+      <div class="etiquetas"><span class="etiqueta">🧭 Brújula moral</span><span class="etiqueta oro">✍️ Reflexión</span><span class="etiqueta rosa">🗣️ Voz en off</span></div>
+      <a class="btn btn-primario" href="dilemas-morales.html">⚖️ ¡Enfrentar los dilemas!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="reflexion" style="--brillo: rgba(34,211,238,0.5);">
+      <div class="num-aventura">05</div>
+      <div class="cabeza"><div class="emoji">🌌</div><h3>Existencialismo para la Vida</h3></div>
+      <p>Mini-serie de 7 episodios con intros de cine y paisajes animados: Sartre, Camus, Kierkegaard y Frankl te acompañan en decisiones, ansiedad y redes sociales.</p>
+      <div class="etiquetas"><span class="etiqueta rosa">🎬 Estilo serie</span><span class="etiqueta oro">🏅 7 insignias</span><span class="etiqueta">💚 Para tu vida</span></div>
+      <a class="btn btn-primario" href="existencialismo-vida.html">🎬 ¡Ver episodio 1!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="juego" style="--brillo: rgba(251,191,36,0.5);">
+      <div class="num-aventura">06</div>
+      <div class="cabeza"><div class="emoji">🃏</div><h3>Cartas de Batalla Filosófica</h3></div>
+      <p>La Esfinge de la Duda 🗿 te espera en la arena: 12 filósofos coleccionables con poderes de Lógica, Ética y Retórica. ¡6 rondas de duelo por las coronas!</p>
+      <div class="etiquetas"><span class="etiqueta rosa">⚔️ Vs la Esfinge</span><span class="etiqueta">🎴 12 cartas</span><span class="etiqueta oro">👑 Coronas</span></div>
+      <a class="btn btn-primario" href="cartas-batalla.html">⚔️ ¡Entrar a la arena!</a>
+    </div>
+
+    <div class="carta aparece visible" data-cat="juego" style="--brillo: rgba(110,231,183,0.5);">
+      <div class="num-aventura">07</div>
+      <div class="cabeza"><div class="emoji">🎭</div><h3>¿Quién dijo qué?</h3></div>
+      <p>Las frases más famosas de la filosofía en un contrarreloj de 3 niveles: toca al filósofo correcto, enciende rachas 🔥 y gana títulos como Oráculo Legendario.</p>
+      <div class="etiquetas"><span class="etiqueta">⚡ Contrarreloj</span><span class="etiqueta oro">🔥 Rachas x2</span><span class="etiqueta rosa">🎓 Datos curiosos</span></div>
+      <a class="btn btn-primario" href="quien-dijo-que.html">🎭 ¡Al escenario!</a>
+    </div>
+
+  </div>
+  <div class="sin-resultados" id="sinResultados">🔍 No encontramos aventuras con esa búsqueda… ¡prueba con otra palabra o toca "✨ Todas"!</div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee">
+  <div class="marquee-pista" id="marqueePista">
+    <span>"Solo sé que nada sé" <b>— Sócrates</b></span>
+    <span>"Pienso, luego existo" <b>— Descartes</b></span>
+    <span>"Todo fluye" <b>— Heráclito</b></span>
+    <span>"El saber es poder" <b>— Bacon</b></span>
+    <span>"No se nace mujer: se llega a serlo" <b>— Beauvoir</b></span>
+    <span>"Estamos condenados a ser libres" <b>— Sartre</b></span>
+    <span>"Atrévete a pensar" <b>— Kant</b></span>
+    <span>"Hay que imaginar a Sísifo feliz" <b>— Camus</b></span>
+  </div>
+</div>
+
+<!-- ================= CÓMO FUNCIONA ================= -->
+<section id="como">
+  <h2 class="titulo-seccion aparece">¿Cómo <span style="color:var(--cian)">funciona</span>? 🤔</h2>
+  <p class="sub-seccion aparece">Nada de clases aburridas: aquí la filosofía se vive con retos, voz en off, música y calificación automática.</p>
+  <div class="pasos">
+    <div class="paso aparece"><span class="icono">👥</span><h3>1. Regístrate</h3><p>Escribe tu curso (10-1, 11-2…), tu nombre o el de tu equipo. ¡La aventura es mejor acompañada!</p></div>
+    <div class="paso aparece"><span class="icono">🗺️</span><h3>2. Elige tu aventura</h3><p>Escape rooms, duelos de cartas, dilemas, diálogos con IA y mini-series. Cada una enseña distinto.</p></div>
+    <div class="paso aparece"><span class="icono">🧩</span><h3>3. Piensa y resuelve</h3><p>Enigmas con voz en off, pistas y datos curiosos. Cada acierto da tesoros, coronas o insignias.</p></div>
+    <div class="paso aparece"><span class="icono">🏆</span><h3>4. Gana tu nota</h3><p>Calificación de 1.0 a 5.0 con estrellas y fanfarria, y un resumen copiable para tu profe.</p></div>
+  </div>
+</section>
+
+<!-- ================= ÉPOCAS ================= -->
+<section id="epocas">
+  <h2 class="titulo-seccion aparece">🧭 El viaje por <span style="color:var(--dorado)">2 500 años</span> de ideas</h2>
+  <p class="sub-seccion aparece">Todas las aventuras recorren las cuatro grandes épocas de la filosofía:</p>
+  <div class="epocas">
+    <div class="epoca aparece"><div class="icono">🏛️</div><h4>Antigua</h4><span>s. VI a.C. – V d.C.</span><p>Tales, Heráclito, Sócrates, Platón y Aristóteles: la razón nace en Grecia.</p></div>
+    <div class="epoca aparece"><div class="icono">⛪</div><h4>Medieval</h4><span>s. V – XV</span><p>San Agustín, Santo Tomás y Ockham: fe y razón navegan juntas.</p></div>
+    <div class="epoca aparece"><div class="icono">🔭</div><h4>Moderna</h4><span>s. XVI – XVIII</span><p>Descartes, Bacon, Kant y Rousseau: la ciencia toma el timón.</p></div>
+    <div class="epoca aparece"><div class="icono">🌆</div><h4>Contemporánea</h4><span>s. XIX – hoy</span><p>Nietzsche, Marx, Sartre, Camus y Beauvoir: las voces críticas de hoy.</p></div>
+  </div>
+</section>
+
+<!-- ================= DOCENTES ================= -->
+<section id="docentes">
+  <div class="docentes aparece">
+    <h2 class="titulo-seccion" style="font-size:clamp(22px,4vw,30px);">🍎 Para <span style="color:var(--dorado)">docentes</span></h2>
+    <p class="sub-seccion" style="margin-bottom:4px;">FilosofIA Interactiva está diseñada para el aula real:</p>
+    <div class="doc-grid">
+      <div class="doc-item"><div class="ic">📋</div><div><h4>Notas de 1.0 a 5.0</h4><p>Cada actividad califica automáticamente con la escala colombiana, con estrellas y detalle de aciertos.</p></div></div>
+      <div class="doc-item"><div class="ic">📄</div><div><h4>Resumen copiable</h4><p>Un botón copia los resultados (curso, estudiante, respuestas) para tu planilla.</p></div></div>
+      <div class="doc-item"><div class="ic">🗣️</div><div><h4>Accesible</h4><p>Voz en off en español en todas las aventuras, con controles para activarla o silenciarla.</p></div></div>
+      <div class="doc-item"><div class="ic">💛</div><div><h4>Cuidado emocional</h4><p>Los temas sensibles incluyen mensajes responsables y la Línea 106 de Colombia.</p></div></div>
+      <div class="doc-item"><div class="ic">👥</div><div><h4>Individual o en equipos</h4><p>Para proyectar en el tablero o para el celular de cada estudiante.</p></div></div>
+      <div class="doc-item"><div class="ic">🆓</div><div><h4>Sin cuentas ni costos</h4><p>Los estudiantes solo abren el enlace y juegan: sin registros ni publicidad.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <span class="capitana">🏴‍☠️</span>
+  <div class="logo">Filosof<span class="ia">IA</span> Interactiva</div>
+  <p>⚓ Un proyecto educativo de la capitana del Barco Enadis</p>
+  <p>Pensamiento crítico para nuevas mentes · Filosofía + Juego + Inteligencia Artificial</p>
+  <div class="footer-links">
+    <a href="escape-room.html">🕯️ Escape Room</a>
+    <a href="baul-sabiduria.html">🏴‍☠️ Baúl</a>
+    <a href="dialogo-socrates.html">💬 Sócrates</a>
+    <a href="dilemas-morales.html">⚖️ Dilemas</a>
+    <a href="existencialismo-vida.html">🌌 Existencialismo</a>
+    <a href="cartas-batalla.html">🃏 Cartas</a>
+    <a href="quien-dijo-que.html">🎭 ¿Quién dijo qué?</a>
+  </div>
+  <p style="margin-top:10px; font-size:12px; opacity:0.7;">✨ "Una vida sin examen no merece ser vivida" — Sócrates</p>
+</footer>
+
+<button id="arriba" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">⬆️</button>
+
+<script>
+  // Partículas flotantes
+  const simbolos = ["💭", "🧠", "✨", "📜", "🕯️", "⚖️", "🔮", "💡", "🌟", "🏛️", "🃏", "🎭"];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement("div");
+    p.className = "particula";
+    p.textContent = simbolos[i % simbolos.length];
+    p.style.left = (i * 23 + 7) % 100 + "%";
+    p.style.fontSize = 13 + (i % 4) * 7 + "px";
+    p.style.animationDuration = 14 + (i % 7) * 4 + "s";
+    p.style.animationDelay = i * 1.4 + "s";
+    document.body.appendChild(p);
+  }
+
+  // Duplicar marquee para bucle perfecto
+  const pista = document.getElementById("marqueePista");
+  pista.innerHTML += pista.innerHTML;
+
+  // Aparición al hacer scroll
+  const obs = new IntersectionObserver(
+    (es) => es.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll(".aparece").forEach((el) => obs.observe(el));
+
+  // Barra de progreso + botón arriba
+  window.addEventListener("scroll", () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    document.getElementById("barraScroll").style.width = pct + "%";
+    document.getElementById("arriba").classList.toggle("visible", h.scrollTop > 500);
+  });
+
+  // Menú móvil
+  function toggleMenu() { document.getElementById("menuMovil").classList.toggle("abierto"); }
+
+  // ===== Buscador + filtros combinados =====
+  let categoriaActiva = "todas";
+  function setCategoria(cat, btn) {
+    categoriaActiva = cat;
+    document.querySelectorAll(".filtro").forEach((f) => f.classList.remove("activo"));
+    btn.classList.add("activo");
+    aplicarFiltros();
+  }
+  function normalizar(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+  function aplicarFiltros() {
+    const q = normalizar(document.getElementById("buscar").value.trim());
+    let visibles = 0;
+    document.querySelectorAll(".carta[data-cat]").forEach((c) => {
+      const coincideCat = categoriaActiva === "todas" || c.dataset.cat === categoriaActiva;
+      const coincideTexto = !q || normalizar(c.textContent).includes(q);
+      const mostrar = coincideCat && coincideTexto;
+      c.classList.toggle("oculta", !mostrar);
+      if (mostrar) visibles++;
+    });
+    document.getElementById("sinResultados").style.display = visibles ? "none" : "block";
+  }
+</script>
+</body>
+</html>
