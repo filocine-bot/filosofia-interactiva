@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dilemas de Hoy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#FBF7F2;--surface:#FFFFFF;--ink:#14202C;--muted:#4A5866;--line:#E2D8CC;--teal:#1F6563;--coral:#9A4A2E;
+--display:"Marcellus",Georgia,serif;--body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--bg:#11181E;--surface:#1A242C;--ink:#E8EEF2;--muted:#A9B6C1;--line:#2C3A45;--teal:#7FC9C3;--coral:#F0A487;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:980px;margin:0 auto}
+header{padding-block:32px 20px;display:flex;flex-direction:column;gap:8px}
+.brand{font-family:var(--display);font-size:1.05rem;color:var(--muted)}
+.eyebrow{margin:0;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--coral);font-weight:700}
+h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:62ch;font-size:1.08rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;color:inherit;text-decoration:none;transition:transform .15s}
+.card:hover{transform:translateY(-3px)}
+.card:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+figure{margin:0} figure svg{display:block;width:100%;height:auto}
+.body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex-grow:1}
+.eb{font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--teal);font-weight:700}
+h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.5rem;line-height:1.15}
+.body p{margin:0;color:var(--muted);font-size:.98rem;flex-grow:1}
+.go{font-weight:700;color:var(--coral);margin-top:6px}
+.note{margin-top:24px;font-size:.9rem;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><span class="brand">FilosofIA · Filosofía 10.° y 11.°</span><p class="eyebrow">Cinco experiencias para pensar</p><h1>Dilemas de hoy</h1>
+<p class="lead">Ética digital, convivencia, sentido de la vida, emociones y el futuro del planeta. Elige un dilema, decide, escucha a los filósofos y escribe tu propia solución. Al final de cada uno, envía tu bitácora a tu docente.</p></header>
+<main class="grid">
+<a class="card" href="dilema1-comparte.html"><figure><svg viewBox="0 0 600 240" role="img" aria-label="Una mano sostiene un celular con el chat del salón, mientras flotan reacciones y mensajes" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r1bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#132B45"/><stop offset="1" stop-color="#1F6563"/></linearGradient>
+<linearGradient id="r1scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFE7DC"/><stop offset="1" stop-color="#E2D7C9"/></linearGradient>
+<radialGradient id="r1glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7FC9C3" stop-opacity=".55"/><stop offset="1" stop-color="#7FC9C3" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r1bg)"/>
+<g fill="#FFFFFF"><circle cx="60" cy="50" r="22" opacity=".06"/><circle cx="120" cy="170" r="34" opacity=".05"/><circle cx="520" cy="60" r="40" opacity=".06"/><circle cx="470" cy="190" r="18" opacity=".08"/><circle cx="560" cy="150" r="10" opacity=".12"/><circle cx="30" cy="120" r="8" opacity=".12"/></g>
+<circle cx="300" cy="120" r="150" fill="url(#r1glow)"/>
+<g transform="rotate(-8 300 130)">
+<rect x="236" y="22" width="132" height="214" rx="20" fill="#0B1118"/>
+<rect x="244" y="34" width="116" height="190" rx="12" fill="url(#r1scr)"/>
+<rect x="244" y="34" width="116" height="24" rx="12" fill="#1F6563"/><rect x="244" y="46" width="116" height="12" fill="#1F6563"/>
+<circle cx="258" cy="46" r="7" fill="#7FC9C3"/><rect x="270" y="42" width="52" height="6" rx="3" fill="#DCEDEB"/>
+<rect x="252" y="66" width="72" height="20" rx="8" fill="#FFFFFF"/><rect x="258" y="73" width="50" height="5" rx="2.5" fill="#B9C3CC"/>
+<rect x="252" y="92" width="88" height="54" rx="8" fill="#FFFFFF"/><rect x="256" y="96" width="80" height="40" rx="5" fill="#3A4654"/><path d="M290 108 l12 8 l-12 8z" fill="#FFFFFF"/><rect x="258" y="139" width="40" height="4" rx="2" fill="#B9C3CC"/>
+<rect x="284" y="152" width="68" height="20" rx="8" fill="#D3F0D9"/><rect x="290" y="159" width="44" height="5" rx="2.5" fill="#8DBF98"/>
+<rect x="252" y="178" width="60" height="20" rx="8" fill="#FFFFFF"/><rect x="258" y="185" width="38" height="5" rx="2.5" fill="#B9C3CC"/>
+<rect x="250" y="206" width="104" height="12" rx="6" fill="#FFFFFF"/>
+<circle cx="352" cy="38" r="9" fill="#C8553D"/><text x="352" y="42" font-family="Atkinson Hyperlegible, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">27</text>
+</g>
+<path d="M228 240 C224 214 226 196 236 186 C244 178 254 182 256 192 L258 206 C266 196 278 198 280 210 L284 240Z" fill="#9C6B4A"/>
+<path d="M352 240 C356 222 360 206 372 196 C380 190 388 196 384 206 C378 220 372 230 370 240Z" fill="#8A5B3D"/>
+<path d="M236 186 C240 172 252 168 260 174 L262 196 C256 192 246 192 240 198Z" fill="#B07B57"/>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="14">
+<g transform="translate(70 70)"><rect width="92" height="34" rx="14" fill="#FFFFFF"/><path d="M70 34 l10 12 l-2 -12z" fill="#FFFFFF"/><text x="46" y="22" fill="#1F2A2E" text-anchor="middle">jajajaja</text></g>
+<g transform="translate(420 44)"><rect width="110" height="34" rx="14" fill="#F6E1D6"/><path d="M20 34 l-8 12 l14 -12z" fill="#F6E1D6"/><text x="55" y="22" fill="#9A4A2E" text-anchor="middle">¡reenvíalo!</text></g>
+<g transform="translate(440 150)"><rect width="96" height="34" rx="14" fill="#DCEDEB"/><path d="M16 34 l-6 12 l14 -12z" fill="#DCEDEB"/><text x="48" y="22" fill="#1F6563" text-anchor="middle">¿y si fuera yo?</text></g>
+<g transform="translate(60 150)"><rect width="84" height="34" rx="14" fill="#FFFFFF" opacity=".9"/><text x="42" y="22" fill="#1F2A2E" text-anchor="middle">visto 32</text></g>
+</g>
+</svg></figure><div class="body"><span class="eb">Dilema 1 · Ética digital</span><h2>Lo que se comparte</h2><p>Un video, un clic, un reenvío. ¿Qué haces cuando el chat del salón se vuelve contra alguien?</p><span class="go">Empezar →</span></div></a>
+<a class="card" href="dilema2-patio.html"><figure><svg viewBox="0 0 600 240" role="img" aria-label="Tres estudiantes conversan en el patio del colegio bajo un árbol" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r2sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D9B8"/><stop offset="1" stop-color="#F3E8DA"/></linearGradient>
+<linearGradient id="r2gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9B59A"/><stop offset="1" stop-color="#B39C7E"/></linearGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r2sky)"/>
+<circle cx="520" cy="56" r="30" fill="#F9C784" opacity=".8"/>
+<g fill="#E9D3BA"><rect x="300" y="70" width="290" height="110"/></g>
+<path d="M292 72 L445 30 L598 72Z" fill="#C8553D" opacity=".85"/>
+<g fill="#B8D8D5"><rect x="318" y="90" width="34" height="28" rx="3"/><rect x="368" y="90" width="34" height="28" rx="3"/><rect x="418" y="90" width="34" height="28" rx="3"/><rect x="468" y="90" width="34" height="28" rx="3"/><rect x="518" y="90" width="34" height="28" rx="3"/><rect x="318" y="130" width="34" height="28" rx="3"/><rect x="368" y="130" width="34" height="28" rx="3"/><rect x="468" y="130" width="34" height="28" rx="3"/><rect x="518" y="130" width="34" height="28" rx="3"/></g>
+<rect x="420" y="128" width="30" height="52" fill="#8A5B3D"/>
+<rect x="0" y="178" width="600" height="62" fill="url(#r2gr)"/>
+<rect x="116" y="94" width="18" height="90" fill="#6B4A33"/>
+<g fill="#4F8A5B"><circle cx="96" cy="78" r="42"/><circle cx="150" cy="70" r="46"/><circle cx="124" cy="40" r="38"/><circle cx="70" cy="104" r="26"/></g>
+<g fill="#3E7349" opacity=".8"><circle cx="112" cy="92" r="24"/><circle cx="168" cy="96" r="22"/></g>
+<rect x="160" y="166" width="150" height="10" rx="3" fill="#7A5236"/><rect x="170" y="176" width="8" height="20" fill="#5E3F2A"/><rect x="292" y="176" width="8" height="20" fill="#5E3F2A"/>
+<g>
+<circle cx="196" cy="118" r="15" fill="#6B4A33"/><path d="M180 112 c4-12 28-12 32 0 c-6-4-26-4-32 0z" fill="#1F2A2E"/>
+<path d="M176 166 c0-22 8-34 20-34 c12 0 20 12 20 34z" fill="#1F6563"/>
+<path d="M180 166 l-4 26 h12 l4-26z M208 166 l6 26 h12 l-6-26z" fill="#2B3A4A"/>
+</g>
+<g>
+<circle cx="270" cy="114" r="15" fill="#C08A63"/><path d="M254 112 c0-16 32-16 32 0 c2 10-2 20-4 26 c-2-14-24-14-28-26z" fill="#3A2416"/>
+<path d="M250 166 c0-22 8-36 20-36 c12 0 20 14 20 36z" fill="#C8553D"/>
+<path d="M254 166 l-4 26 h12 l4-26z M280 166 l4 26 h12 l-4-26z" fill="#2B3A4A"/>
+</g>
+<g>
+<circle cx="350" cy="104" r="15" fill="#8A5B3D"/><path d="M336 100 c2-12 26-14 30 0 c-8-3-22-3-30 0z" fill="#1F2A2E"/>
+<path d="M330 178 c0-30 8-58 20-58 c12 0 20 28 20 58z" fill="#D9A441"/>
+<path d="M334 178 l-2 30 h12 l2-30z M356 178 l2 30 h12 l-2-30z" fill="#2B3A4A"/>
+<path d="M330 140 l-16 14" stroke="#8A5B3D" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="13">
+<g transform="translate(150 44)"><rect width="88" height="32" rx="14" fill="#FFFFFF"/><path d="M40 32 l6 10 l6-10z" fill="#FFFFFF"/><text x="44" y="21" fill="#1F2A2E" text-anchor="middle">Yo sentí…</text></g>
+<g transform="translate(244 30)"><rect width="104" height="32" rx="14" fill="#FFFFFF"/><path d="M30 32 l-2 12 l12-12z" fill="#FFFFFF"/><text x="52" y="21" fill="#1F2A2E" text-anchor="middle">Te escucho</text></g>
+<g transform="translate(372 66)"><rect width="104" height="32" rx="14" fill="#DCEDEB"/><path d="M14 32 l-12 8 l22-8z" fill="#DCEDEB"/><text x="52" y="21" fill="#1F6563" text-anchor="middle">¿Qué proponen?</text></g>
+</g>
+</svg></figure><div class="body"><span class="eb">Dilema 2 · Convivencia</span><h2>Hablemos en el patio</h2><p>Un rumor, un grito y un amigo en medio. Escucha tres versiones y propone un acuerdo.</p><span class="go">Empezar →</span></div></a>
+<a class="card" href="dilema3-quien.html"><figure><svg viewBox="0 0 600 240" role="img" aria-label="Una joven con morral mira al amanecer un camino que se divide en tres" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r3sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3A5C"/><stop offset=".55" stop-color="#E58E6E"/><stop offset="1" stop-color="#F7D58B"/></linearGradient>
+<radialGradient id="r3sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF6D8"/><stop offset=".5" stop-color="#FCE3A0" stop-opacity=".9"/><stop offset="1" stop-color="#F7D58B" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r3sky)"/>
+<circle cx="300" cy="150" r="90" fill="url(#r3sun)"/>
+<circle cx="300" cy="150" r="30" fill="#FFF1C9"/>
+<g fill="#FFFFFF" opacity=".7"><circle cx="70" cy="30" r="1.5"/><circle cx="140" cy="18" r="1.2"/><circle cx="460" cy="24" r="1.5"/><circle cx="540" cy="40" r="1.2"/><circle cx="210" cy="40" r="1"/></g>
+<path d="M0 160 C90 130 170 150 250 140 C340 128 420 120 600 150 V240 H0Z" fill="#8C5A63"/>
+<path d="M0 180 C110 160 200 176 300 168 C400 160 500 170 600 182 V240 H0Z" fill="#5E3F55"/>
+<path d="M0 204 C120 192 240 204 600 198 V240 H0Z" fill="#3A2A40"/>
+<path d="M300 240 L292 196 L300 168" stroke="#F6E1D6" stroke-width="10" fill="none" stroke-linecap="round" opacity=".55"/>
+<path d="M296 196 C250 186 190 178 120 170" stroke="#F6E1D6" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5"/>
+<path d="M298 196 C350 186 420 180 500 172" stroke="#F6E1D6" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5"/>
+<rect x="318" y="150" width="5" height="52" fill="#2A1E2E"/>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="12">
+<path d="M323 150 h70 l10 9 l-10 9 h-70z" fill="#F6E1D6"/><text x="358" y="163" fill="#3A2A40" text-anchor="middle">Música</text>
+<path d="M318 170 h-70 l-10 9 l10 9 h70z" fill="#DCEDEB"/><text x="282" y="183" fill="#1F3B4A" text-anchor="middle">Ciencia</text>
+<path d="M323 132 h58 l10 9 l-10 9 h-58z" fill="#F7D58B"/><text x="352" y="145" fill="#3A2A40" text-anchor="middle">¿Y yo?</text>
+</g>
+<g fill="#1E1520" transform="translate(-70 0)">
+<circle cx="250" cy="150" r="11"/>
+<path d="M240 160 c-8 6-10 22-8 40 h12 l2-20 2 20 h12 c2-18 0-34-8-40z"/>
+<rect x="232" y="162" width="10" height="22" rx="4"/>
+<path d="M244 200 l-4 26 h8 l4-24z M254 200 l4 24 h8 l-4-26z"/>
+<path d="M244 142 c4-8 16-8 18 2 c-6-3-12-3-18-2z"/>
+</g>
+</svg></figure><div class="body"><span class="eb">Dilema 3 · Reflexión existencial</span><h2>¿Quién quiero ser?</h2><p>Libertad, sentido y futuro con Sartre, Frankl y Camus. Termina con una carta a tu yo del futuro.</p><span class="go">Empezar →</span></div></a>
+<a class="card" href="dilema4-siento.html"><figure><svg viewBox="0 0 600 240" role="img" aria-label="Perfil de una persona frente al mar: sus emociones salen en ondas de color y se vuelven calma" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r4sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#244A5C"/><stop offset=".6" stop-color="#7FB3AE"/><stop offset="1" stop-color="#F3D9C4"/></linearGradient>
+<linearGradient id="r4sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E7E86"/><stop offset="1" stop-color="#1F4A55"/></linearGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r4sky)"/>
+<circle cx="470" cy="140" r="26" fill="#FBE7C8" opacity=".9"/>
+<rect y="150" width="600" height="90" fill="url(#r4sea)"/>
+<g stroke="#BFE6E1" stroke-width="2" opacity=".5" fill="none"><path d="M260 170 h120 M300 186 h160 M240 204 h110 M400 214 h140 M330 228 h90"/></g>
+<path d="M0 240 V60 C30 50 70 52 92 70 C110 84 112 104 118 116 C122 124 132 128 128 136 C124 142 116 142 118 150 C120 158 112 160 112 168 C112 176 106 182 96 184 C86 186 86 198 90 214 L96 240Z" fill="#14262E"/>
+<g fill="none" stroke-linecap="round" stroke-width="9">
+<path d="M126 104 C170 70 210 120 250 90 C290 60 320 110 360 96" stroke="#E9785B" opacity=".9"/>
+<path d="M128 120 C180 110 210 140 260 122 C300 108 330 132 380 124" stroke="#E2B547" opacity=".9"/>
+<path d="M126 136 C180 140 220 150 270 142 C320 136 360 144 420 140" stroke="#B49AD8" opacity=".85"/>
+<path d="M124 152 C190 156 250 154 320 154 C380 154 430 154 500 152" stroke="#9FD8CF" opacity=".9"/>
+</g>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="13" fill="#FFFFFF">
+<text x="372" y="92">ira</text><text x="392" y="120">miedo</text><text x="430" y="138">tristeza</text><text x="512" y="156">calma</text>
+</g>
+</svg></figure><div class="body"><span class="eb">Dilema 4 · Manejo de emociones</span><h2>Lo que siento, lo que elijo</h2><p>Nombra tus emociones, separa lo que depende de ti y busca el término medio.</p><span class="go">Empezar →</span></div></a>
+<a class="card" href="dilema5-rio.html"><figure><svg viewBox="0 0 600 240" role="img" aria-label="Un río con un pescador en canoa: en una orilla una fábrica vierte residuos, en la otra hay árboles, paneles solares y una comunidad reunida" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r5sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2B38A"/><stop offset=".7" stop-color="#F8DDB8"/><stop offset="1" stop-color="#F8E9D4"/></linearGradient>
+<linearGradient id="r5riv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7A6A4A"/><stop offset=".35" stop-color="#4E8C8F"/><stop offset="1" stop-color="#2F7A86"/></linearGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r5sky)"/>
+<circle cx="300" cy="96" r="34" fill="#FCE7C2"/>
+<path d="M0 120 C120 108 220 118 300 114 C400 108 500 116 600 112 V240 H0Z" fill="#9DB37C"/>
+<path d="M0 150 C80 140 160 152 240 146 C330 140 420 160 600 150 V240 H0Z" fill="#7E9B62"/>
+<path d="M120 240 C170 200 230 176 320 168 C420 160 520 168 600 160 V196 C520 200 430 196 350 204 C280 212 240 228 230 240Z" fill="url(#r5riv)"/>
+<g fill="#5E6A72"><rect x="40" y="70" width="90" height="60"/><rect x="58" y="34" width="14" height="40"/><rect x="90" y="46" width="12" height="28"/></g>
+<g fill="#7C878E"><path d="M40 70 l22 -14 v14z M62 70 l22 -14 v14z M84 70 l22 -14 v14z M106 70 l24 -14 v14z"/></g>
+<g fill="#9AA3A8" opacity=".75"><circle cx="66" cy="24" r="10"/><circle cx="78" cy="14" r="12"/><circle cx="96" cy="8" r="9"/><circle cx="98" cy="36" r="8"/><circle cx="110" cy="28" r="10"/></g>
+<path d="M130 120 C150 126 160 140 178 170" stroke="#5E4A2E" stroke-width="7" fill="none"/>
+<path d="M172 172 C190 186 210 190 236 194" stroke="#6B5A3A" stroke-width="10" fill="none" opacity=".55" stroke-linecap="round"/>
+<g fill="#3E6B45"><circle cx="470" cy="100" r="22"/><circle cx="500" cy="92" r="26"/><circle cx="530" cy="104" r="20"/><circle cx="560" cy="96" r="24"/></g>
+<g fill="#5E3F2A"><rect x="496" y="110" width="6" height="22"/><rect x="556" y="112" width="6" height="20"/></g>
+<g><path d="M380 130 l40 -8 l8 18 l-40 8z" fill="#2F4F7A"/><path d="M384 132 l32 -6 M388 140 l32 -6 M398 126 l6 14 M410 124 l6 14" stroke="#9DB8E0" stroke-width="1.2"/><rect x="402" y="146" width="3" height="10" fill="#3A4654"/></g>
+<g fill="#2A2420"><circle cx="440" cy="138" r="5"/><path d="M434 156 c0-8 3-13 6-13 c3 0 6 5 6 13z"/><circle cx="456" cy="140" r="5"/><path d="M450 158 c0-8 3-13 6-13 c3 0 6 5 6 13z"/><circle cx="472" cy="138" r="5"/><path d="M466 156 c0-8 3-13 6-13 c3 0 6 5 6 13z"/></g>
+<path d="M300 186 h58 c-4 8-12 12-22 12 h-20 c-8 0-14-4-16-12z" fill="#6B4A33"/>
+<g fill="#1E1A18"><circle cx="330" cy="168" r="5"/><path d="M325 186 c0-8 2-13 5-13 c3 0 5 5 5 13z"/><path d="M322 162 h16 l-8 -6z"/></g>
+<path d="M336 174 l20 -20" stroke="#1E1A18" stroke-width="2"/>
+<g stroke="#FFFFFF" stroke-width="1.5" opacity=".5" fill="none"><path d="M260 210 h40 M380 182 h50 M450 176 h60"/></g>
+</svg></figure><div class="body"><span class="eb">Dilema 5 · Ambiente y tecnología</span><h2>El río que heredamos</h2><p>Un consejo comunitario sobre un río contaminado y la inteligencia artificial. ¿Tú qué votarías?</p><span class="go">Empezar →</span></div></a>
+</main>
+<p class="note">Aquí no hay respuestas correctas o incorrectas: lo valioso es cómo razonas. I. E. Alfonso Spath Spath · Docente: Enadis Vargas Hernández.</p>
+</div>
+</body>
+</html>

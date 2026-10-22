@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hablemos en el Patio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+:root{--lapis:#1F6563;--lapis-soft:#DCEDEB;--ochre:#9A4A2E;--ochre-soft:#F6E1D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lapis:#7FC9C3;--lapis-soft:#173634;--ochre:#F0A487;--ochre-soft:#3D241B}}
+:root[data-theme="dark"]{--lapis:#7FC9C3;--lapis-soft:#173634;--ochre:#F0A487;--ochre-soft:#3D241B}
+.prog{display:flex;flex-direction:column;gap:6px}
+.prog .row{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)}
+.prog .track{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog .track span{display:block;height:100%;background:var(--lapis);transition:width .4s}
+.step{display:flex;flex-direction:column;gap:14px;animation:rise .35s ease}
+@keyframes rise{from{opacity:.55;transform:translateY(8px)}to{opacity:1;transform:none}}
+.step h2{font-size:clamp(1.4rem,4.6vw,1.9rem)}
+.step .txt{font-size:1.08rem;line-height:1.6;max-width:62ch}
+.step .txt p+p{margin-top:10px}
+.chat{display:flex;flex-direction:column;gap:8px;background:#E7DED3;border-radius:18px;padding:14px;max-width:520px}
+.chat .hd{display:flex;align-items:center;gap:10px;font-weight:700;color:#1F2A2E;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,.08)}
+.chat .hd i{width:34px;height:34px;border-radius:50%;background:#1F6563;display:grid;place-items:center;color:#fff;font-style:normal;font-size:.8rem}
+.msg{max-width:82%;padding:8px 12px;border-radius:14px;background:#FFFFFF;color:#1F2A2E;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.msg b{display:block;font-size:.78rem;color:#9A4A2E}
+.msg.me{align-self:flex-end;background:#D3F0D9}
+.msg.media{font-style:italic;color:#4A5866}
+.opt-list{display:flex;flex-direction:column;gap:10px}
+.opt-list .choice{line-height:1.45}
+.conseq{background:var(--ochre-soft);border-radius:14px;padding:14px 16px;line-height:1.55}
+.conseq strong{display:block;margin-bottom:4px;color:var(--ochre)}
+.voices{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.voice{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.voice .who{display:flex;gap:10px;align-items:center}
+.voice .av{flex:none;width:42px;height:42px;border-radius:50%;background:var(--lapis-soft);color:var(--lapis);display:grid;place-items:center;font-family:var(--display);font-size:1.1rem}
+.voice .who b{display:block;line-height:1.2}
+.voice .who span{font-size:.8rem;color:var(--muted)}
+.voice q{font-size:1rem;line-height:1.5;quotes:"«" "»"}
+.agree{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.agree button{min-height:44px;font:inherit;font-size:.82rem;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:4px}
+.agree button.is-sel{background:var(--lapis);color:var(--lapis-ink);border-color:var(--lapis)}
+textarea.big{width:100%;font:inherit;font-size:1.02rem;line-height:1.55;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);resize:vertical;min-height:140px}
+.wc{font-size:.85rem;color:var(--muted)}
+.sortbox{display:flex;flex-direction:column;gap:12px}
+.pool2{display:flex;flex-wrap:wrap;gap:8px}
+.pill{min-height:44px;padding:8px 14px;font:inherit;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.pill.is-sel{border-color:var(--lapis);background:var(--lapis-soft)}
+.pill.done-a{border-color:var(--lapis);background:var(--lapis-soft)}
+.pill.done-b{border-color:var(--ochre);background:var(--ochre-soft)}
+.bins2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bin2{min-height:64px;font:inherit;border-radius:14px;border:2px dashed;cursor:pointer;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px}
+.bin2 b{font-family:var(--display);font-weight:400;font-size:1.1rem}
+.bin2.a{border-color:var(--lapis);color:var(--lapis)} .bin2.b{border-color:var(--ochre);color:var(--ochre)}
+.emos{display:flex;flex-wrap:wrap;gap:8px}
+.range{display:flex;flex-direction:column;gap:6px}
+.range input{width:100%;accent-color:var(--lapis)}
+.range .ends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.breath{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;background:var(--lapis-soft);border-radius:18px}
+.orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#BFE6E1,#1F6563);transform:scale(.6);transition:transform 4s ease-in-out}
+.orb.in{transform:scale(1.15)}
+.breath p{font-family:var(--display);font-size:1.4rem}
+.quote{font-family:var(--display);font-size:1.25rem;line-height:1.45;padding:14px 18px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.quote small{display:block;font-family:var(--body);font-size:.85rem;color:var(--muted);margin-top:6px}
+.bitacora{display:flex;flex-direction:column;gap:14px}
+.bitacora ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:12px}
+.bitacora li b{display:block}
+.bitacora li span{display:block;color:var(--muted);white-space:pre-wrap}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+#end .score{display:none}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Dilema 2 de 5</span>
+    <span class="top-r"><span class="chip">Convivencia</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 240" role="img" aria-label="Tres estudiantes conversan en el patio del colegio bajo un árbol" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r2sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D9B8"/><stop offset="1" stop-color="#F3E8DA"/></linearGradient>
+<linearGradient id="r2gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9B59A"/><stop offset="1" stop-color="#B39C7E"/></linearGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r2sky)"/>
+<circle cx="520" cy="56" r="30" fill="#F9C784" opacity=".8"/>
+<g fill="#E9D3BA"><rect x="300" y="70" width="290" height="110"/></g>
+<path d="M292 72 L445 30 L598 72Z" fill="#C8553D" opacity=".85"/>
+<g fill="#B8D8D5"><rect x="318" y="90" width="34" height="28" rx="3"/><rect x="368" y="90" width="34" height="28" rx="3"/><rect x="418" y="90" width="34" height="28" rx="3"/><rect x="468" y="90" width="34" height="28" rx="3"/><rect x="518" y="90" width="34" height="28" rx="3"/><rect x="318" y="130" width="34" height="28" rx="3"/><rect x="368" y="130" width="34" height="28" rx="3"/><rect x="468" y="130" width="34" height="28" rx="3"/><rect x="518" y="130" width="34" height="28" rx="3"/></g>
+<rect x="420" y="128" width="30" height="52" fill="#8A5B3D"/>
+<rect x="0" y="178" width="600" height="62" fill="url(#r2gr)"/>
+<rect x="116" y="94" width="18" height="90" fill="#6B4A33"/>
+<g fill="#4F8A5B"><circle cx="96" cy="78" r="42"/><circle cx="150" cy="70" r="46"/><circle cx="124" cy="40" r="38"/><circle cx="70" cy="104" r="26"/></g>
+<g fill="#3E7349" opacity=".8"><circle cx="112" cy="92" r="24"/><circle cx="168" cy="96" r="22"/></g>
+<rect x="160" y="166" width="150" height="10" rx="3" fill="#7A5236"/><rect x="170" y="176" width="8" height="20" fill="#5E3F2A"/><rect x="292" y="176" width="8" height="20" fill="#5E3F2A"/>
+<g>
+<circle cx="196" cy="118" r="15" fill="#6B4A33"/><path d="M180 112 c4-12 28-12 32 0 c-6-4-26-4-32 0z" fill="#1F2A2E"/>
+<path d="M176 166 c0-22 8-34 20-34 c12 0 20 12 20 34z" fill="#1F6563"/>
+<path d="M180 166 l-4 26 h12 l4-26z M208 166 l6 26 h12 l-6-26z" fill="#2B3A4A"/>
+</g>
+<g>
+<circle cx="270" cy="114" r="15" fill="#C08A63"/><path d="M254 112 c0-16 32-16 32 0 c2 10-2 20-4 26 c-2-14-24-14-28-26z" fill="#3A2416"/>
+<path d="M250 166 c0-22 8-36 20-36 c12 0 20 14 20 36z" fill="#C8553D"/>
+<path d="M254 166 l-4 26 h12 l4-26z M280 166 l4 26 h12 l-4-26z" fill="#2B3A4A"/>
+</g>
+<g>
+<circle cx="350" cy="104" r="15" fill="#8A5B3D"/><path d="M336 100 c2-12 26-14 30 0 c-8-3-22-3-30 0z" fill="#1F2A2E"/>
+<path d="M330 178 c0-30 8-58 20-58 c12 0 20 28 20 58z" fill="#D9A441"/>
+<path d="M334 178 l-2 30 h12 l2-30z M356 178 l2 30 h12 l-2-30z" fill="#2B3A4A"/>
+<path d="M330 140 l-16 14" stroke="#8A5B3D" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="13">
+<g transform="translate(150 44)"><rect width="88" height="32" rx="14" fill="#FFFFFF"/><path d="M40 32 l6 10 l6-10z" fill="#FFFFFF"/><text x="44" y="21" fill="#1F2A2E" text-anchor="middle">Yo sentí…</text></g>
+<g transform="translate(244 30)"><rect width="104" height="32" rx="14" fill="#FFFFFF"/><path d="M30 32 l-2 12 l12-12z" fill="#FFFFFF"/><text x="52" y="21" fill="#1F2A2E" text-anchor="middle">Te escucho</text></g>
+<g transform="translate(372 66)"><rect width="104" height="32" rx="14" fill="#DCEDEB"/><path d="M14 32 l-12 8 l22-8z" fill="#DCEDEB"/><text x="52" y="21" fill="#1F6563" text-anchor="middle">¿Qué proponen?</text></g>
+</g>
+</svg></figure>
+    <p class="eyebrow">Dilemas de hoy · convivencia</p>
+    <h1>Hablemos en el patio</h1>
+    <p class="lead">Un rumor, un grito en el patio y un amigo atrapado en medio. Cada persona vive el mismo conflicto de una manera distinta. Vas a escuchar las tres versiones, ponerte en el lugar de cada una y proponer un acuerdo.</p>
+    <div class="how"><strong>Cómo funciona</strong>
+      <ol><li>Lee lo que pasó y la versión de cada protagonista.</li><li>Reconoce con quién te identificas y por qué.</li><li>Escucha tres voces sobre el diálogo y la convivencia.</li><li>Escribe en primera persona lo que siente quien menos entendías y propón un acuerdo. Al final tendrás tu <strong>bitácora</strong>.</li></ol>
+      <p class="small" style="margin-top:8px">No se trata de encontrar culpables, sino caminos para convivir.</p></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="prog"><div class="row"><span id="pTitle"></span><span id="pNum"></span></div><div class="track"><span id="pBar" style="width:0%"></span></div></div>
+    <div id="stepBox" aria-live="polite"></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Hablemos en el patio</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+/* ===== Motor de experiencias de reflexión ===== */
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let LOG=[], si=0, breathT=0;
+function words(t){ return (String(t).trim().match(/\S+/g)||[]).length; }
+function logIt(q,a){ LOG.push({q,a}); }
+function start(){ LOG=[]; si=0; render(); }
+function prog(){ const n=STEPS.length; $('#pNum').textContent='Paso '+(si+1)+' de '+n; $('#pBar').style.width=((si)/n*100)+'%'; $('#pTitle').textContent=STEPS[si].label||''; }
+function nextBtn(label,disabled){ return '<div class="nav"><button class="btn primary" id="nx" type="button"'+(disabled?' disabled':'')+'>'+(label||'Continuar')+'</button></div>'; }
+function bindNext(fn){ const b=$('#nx'); if(b) b.addEventListener('click',()=>{ if(fn&&fn()===false) return; go(); }); }
+function go(){ clearTimeout(breathT); si++; if(si>=STEPS.length) renderEnd(); else render(); window.scrollTo({top:0,behavior:RM?'auto':'smooth'}); }
+function head(s){ return (s.tag?'<p class="eyebrow">'+esc(s.tag)+'</p>':'')+(s.title?'<h2>'+esc(s.title)+'</h2>':''); }
+function paras(t){ return '<div class="txt">'+String(t||'').split('\n').filter(Boolean).map(p=>'<p>'+esc(p)+'</p>').join('')+'</div>'; }
+function render(){
+  const s=STEPS[si], box=$('#stepBox'); prog();
+  let h='<div class="step">'+head(s);
+  if(s.type==='story'){ h+=paras(s.text); if(s.quote) h+='<div class="quote">'+esc(s.quote)+'<small>'+esc(s.cite||'')+'</small></div>'; h+=nextBtn(s.btn); box.innerHTML=h+'</div>'; bindNext(); return; }
+  if(s.type==='chat'){ h+=paras(s.text)+'<div class="chat" role="log"><div class="hd"><i aria-hidden="true">'+esc(s.group.slice(0,2))+'</i>'+esc(s.group)+'</div>'+s.msgs.map(m=>'<div class="msg'+(m.me?' me':'')+(m.media?' media':'')+'">'+(m.me?'':'<b>'+esc(m.who)+'</b>')+esc(m.t)+'</div>').join('')+'</div>'+nextBtn(s.btn); box.innerHTML=h+'</div>'; bindNext(); return; }
+  if(s.type==='choice'){ h+=paras(s.text)+'<p class="txt"><strong>'+esc(s.q)+'</strong></p><div class="opt-list">'+s.opts.map((o,i)=>'<button type="button" class="choice" data-i="'+i+'">'+esc(o.t)+'</button>').join('')+'</div><div id="cq"></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>';
+    document.querySelectorAll('.opt-list .choice').forEach(b=>b.addEventListener('click',()=>{ const o=s.opts[+b.dataset.i];
+      document.querySelectorAll('.opt-list .choice').forEach(x=>{ x.disabled=true; x.classList.toggle('is-sel',x===b); });
+      $('#cq').innerHTML='<div class="conseq"><strong>'+esc(s.cqTitle||'Lo que pasó después')+'</strong>'+esc(o.then)+'</div>'; logIt(s.q,o.t); $('#nx').disabled=false; }));
+    bindNext(); return; }
+  if(s.type==='voices'){ h+=paras(s.text)+'<div class="voices">'+s.voices.map((v,i)=>'<div class="voice"><div class="who"><span class="av" aria-hidden="true">'+esc(v.ini)+'</span><span><b>'+esc(v.who)+'</b><span>'+esc(v.school)+'</span></span></div><q>'+esc(v.t)+'</q><div class="agree" role="group" aria-label="¿Qué tan de acuerdo estás con '+esc(v.who)+'?">'+['De acuerdo','En parte','En desacuerdo'].map(a=>'<button type="button" data-v="'+i+'" data-a="'+a+'">'+a+'</button>').join('')+'</div></div>').join('')+'</div><p class="small">Marca tu posición frente a cada voz para continuar.</p>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const pick={};
+    document.querySelectorAll('.agree button').forEach(b=>b.addEventListener('click',()=>{ const v=+b.dataset.v; pick[v]=b.dataset.a;
+      b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('is-sel',x===b)); $('#nx').disabled=Object.keys(pick).length<s.voices.length; }));
+    bindNext(()=>{ logIt(s.q||'Posición frente a las voces',s.voices.map((v,i)=>v.who+': '+pick[i]).join(' · ')); }); return; }
+  if(s.type==='write'){ const min=s.min||12; h+=paras(s.text)+(s.quote?'<div class="quote">'+esc(s.quote)+'<small>'+esc(s.cite||'')+'</small></div>':'')+'<label for="wt"><strong>'+esc(s.q)+'</strong></label><textarea class="big" id="wt" placeholder="'+esc(s.ph||'Escribe aquí…')+'"></textarea><span class="wc" id="wc">0 palabras · mínimo '+min+'</span>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const t=$('#wt'); t.addEventListener('input',()=>{ const n=words(t.value); $('#wc').textContent=n+(n===1?' palabra':' palabras')+' · mínimo '+min; $('#nx').disabled=n<min; });
+    bindNext(()=>{ logIt(s.q,t.value.trim()); }); return; }
+  if(s.type==='sort'){ h+=paras(s.text)+'<div class="sortbox"><div class="pool2" id="pool2">'+s.items.map((it,i)=>'<button type="button" class="pill" data-i="'+i+'">'+esc(it.t)+'</button>').join('')+'</div><div class="bins2"><button type="button" class="bin2 a" data-g="a"><b>'+esc(s.a)+'</b></button><button type="button" class="bin2 b" data-g="b"><b>'+esc(s.b)+'</b></button></div><div id="sfb" aria-live="polite"></div></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; let sel=null, done=0;
+    document.querySelectorAll('.pill').forEach(c=>c.addEventListener('click',()=>{ if(c.disabled) return; sel=+c.dataset.i; document.querySelectorAll('.pill').forEach(x=>x.classList.toggle('is-sel',x===c)); }));
+    document.querySelectorAll('.bin2').forEach(b=>b.addEventListener('click',()=>{ if(sel===null){ $('#sfb').innerHTML='<p class="small">Primero toca una tarjeta.</p>'; return; }
+      const it=s.items[sel], c=document.querySelector('.pill[data-i="'+sel+'"]'), g=b.dataset.g, okk=g===it.g;
+      c.disabled=true; c.classList.remove('is-sel'); c.classList.add('done-'+it.g); done++; sel=null;
+      $('#sfb').innerHTML='<div class="feedback '+(okk?'ok':'bad')+'"><strong>'+(okk?'Bien visto.':'Míralo de nuevo.')+' «'+esc(it.t)+'»: '+esc(it.g==='a'?s.a:s.b).toLowerCase()+'.</strong>'+esc(it.why)+'</div>';
+      if(done===s.items.length) $('#nx').disabled=false; }));
+    bindNext(()=>{ logIt(s.q||(s.a+' / '+s.b),'Clasificó '+s.items.length+' situaciones'); }); return; }
+  if(s.type==='feel'){ h+=paras(s.text)+'<div class="emos">'+s.emotions.map(e=>'<button type="button" class="pill" data-e="'+esc(e)+'">'+esc(e)+'</button>').join('')+'</div><div class="range"><label for="rg"><strong>¿Qué tan intensa es? <span id="rgv">5</span> de 10</strong></label><input type="range" id="rg" min="1" max="10" value="5"><div class="ends"><span>Leve</span><span>Muy intensa</span></div></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const chosen=new Set();
+    document.querySelectorAll('.emos .pill').forEach(c=>c.addEventListener('click',()=>{ const e=c.dataset.e; if(chosen.has(e)) chosen.delete(e); else chosen.add(e); c.classList.toggle('is-sel',chosen.has(e)); $('#nx').disabled=chosen.size===0; }));
+    $('#rg').addEventListener('input',()=>$('#rgv').textContent=$('#rg').value);
+    bindNext(()=>{ logIt(s.q,[...chosen].join(', ')+' · intensidad '+$('#rg').value+'/10'); }); return; }
+  if(s.type==='mean'){ h+=paras(s.text)+'<p class="txt"><strong>'+esc(s.q)+'</strong></p><div class="opt-list">'+shuffle(s.opts.map((o,i)=>({...o,i}))).map(o=>'<button type="button" class="choice" data-i="'+o.i+'">'+esc(o.t)+'</button>').join('')+'</div><div id="cq"></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>';
+    document.querySelectorAll('.opt-list .choice').forEach(b=>b.addEventListener('click',()=>{ const o=s.opts[+b.dataset.i];
+      document.querySelectorAll('.opt-list .choice').forEach(x=>{ x.disabled=true; const oo=s.opts[+x.dataset.i]; if(oo.k==='medio') x.classList.add('is-ok'); else if(x===b) x.classList.add('is-bad'); });
+      const lab={defecto:'Por defecto',medio:'Término medio',exceso:'Por exceso'};
+      $('#cq').innerHTML='<div class="conseq"><strong>'+lab[o.k]+'</strong>'+esc(o.why)+'</div>'; logIt(s.q,o.t+' ('+lab[o.k].toLowerCase()+')'); $('#nx').disabled=false; }));
+    bindNext(); return; }
+  if(s.type==='scale'){ h+=paras(s.text)+'<div class="range"><label for="rg"><strong>'+esc(s.q)+'</strong></label><input type="range" id="rg" min="0" max="10" value="5"><div class="ends"><span>'+esc(s.left)+'</span><span>'+esc(s.right)+'</span></div></div>'+nextBtn(s.btn);
+    box.innerHTML=h+'</div>'; bindNext(()=>{ const v=+$('#rg').value; logIt(s.q,(v<4?s.left:v>6?s.right:'Una posición intermedia')+' ('+v+'/10)'); }); return; }
+  if(s.type==='breath'){ h+=paras(s.text)+'<div class="breath"><div class="orb" id="orb" aria-hidden="true"></div><p id="bt">Cuando quieras, empieza.</p><button class="btn primary" id="bgo" type="button">Empezar la pausa</button></div>'+nextBtn(s.btn);
+    box.innerHTML=h+'</div>'; let n=0;
+    function cyc(){ if(n>=4){ $('#bt').textContent='Muy bien. ¿Cómo te sientes ahora?'; $('#orb').classList.remove('in'); return; }
+      $('#bt').textContent='Inhala… 4'; $('#orb').classList.add('in'); let c=4; const tick=()=>{ c--; if(c>0){ $('#bt').textContent=($('#orb').classList.contains('in')?'Inhala… ':'Exhala… ')+c; breathT=setTimeout(tick,1000); } else if($('#orb').classList.contains('in')){ $('#orb').classList.remove('in'); c=4; $('#bt').textContent='Exhala… 4'; breathT=setTimeout(tick,1000); } else { n++; cyc(); } };
+      breathT=setTimeout(tick,1000); }
+    $('#bgo').addEventListener('click',()=>{ $('#bgo').hidden=true; n=0; cyc(); });
+    bindNext(()=>{ logIt('Pausa de respiración','Realizada'); }); return; }
+}
+function renderEnd(){
+  $('#pNum').textContent='Terminado'; $('#pBar').style.width='100%'; $('#pTitle').textContent='Tu bitácora';
+  const name=($('#nombre').value||'').trim(), date=new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  const txt=TITLE+'\n'+(name?name+' · ':'')+date+'\n\n'+LOG.map((l,i)=>(i+1)+'. '+l.q+'\n   '+l.a).join('\n\n');
+  $('#stepBox').innerHTML='<div class="step bitacora"><p class="eyebrow">Bitácora de reflexión</p><h2>'+(name?esc(name):'Tu bitácora')+'</h2><p class="small">'+esc(TITLE)+' · '+esc(date)+'</p>'
+    +'<ol>'+LOG.map(l=>'<li><b>'+esc(l.q)+'</b><span>'+esc(l.a)+'</span></li>').join('')+'</ol>'
+    +(CLOSE?'<div class="quote">'+esc(CLOSE.t)+'<small>'+esc(CLOSE.c)+'</small></div>':'')
+    +'<p class="small">Toma una captura de esta bitácora o cópiala para enviársela a tu docente. Aquí no hay respuestas correctas o incorrectas: lo valioso es cómo razonaste.</p>'
+    +'<div class="nav"><button class="btn primary" id="copyB" type="button">Copiar mi bitácora</button><button class="btn" id="againB" type="button">Volver a empezar</button></div><p class="small" id="copyMsg" aria-live="polite"></p></div>';
+  $('#copyB').addEventListener('click',()=>{ const done=()=>{$('#copyMsg').textContent='Copiada. Ya puedes pegarla en un mensaje para tu docente.';};
+    try{ navigator.clipboard.writeText(txt).then(done,()=>fallback()); }catch(e){ fallback(); }
+    function fallback(){ const ta=document.createElement('textarea'); ta.value=txt; ta.className='big'; ta.readOnly=true; $('#copyMsg').textContent='Selecciona el texto y cópialo:'; $('#copyMsg').after(ta); ta.select(); } });
+  $('#againB').addEventListener('click',()=>{ start(); window.scrollTo(0,0); });
+}
+/* ===== fin del motor ===== */
+const TITLE='Hablemos en el patio · Convivencia';
+const CLOSE={t:'Escuchar no es estar de acuerdo: es reconocer que la otra persona también tiene sus razones.',c:'Para conversar en clase'};
+const STEPS=[
+ {type:'story',label:'Lo que pasó',tag:'El conflicto',title:'Martes, en el descanso',text:'En 10.° B hay tensión. Camila dejó de hablarle a Sofía después de que en el salón empezó a correr un rumor sobre ella.\nHoy, en el patio, Camila le gritó a Sofía delante de todos. Sofía se fue llorando. Tomás, amigo de las dos, quedó en medio.'},
+ {type:'story',label:'Camila',tag:'Versión 1 de 3',title:'Lo que cuenta Camila',text:'«Desde que salió ese chisme todo el mundo me mira raro. Una amiga me dijo que Sofía lo había empezado. Me sentí traicionada: a ella le había contado cosas que no le cuento a nadie.\nSí, le grité. No estuvo bien, pero estaba cansada de aguantar.»'},
+ {type:'story',label:'Sofía',tag:'Versión 2 de 3',title:'Lo que cuenta Sofía',text:'«Yo no inventé nada. En un grupo alguien preguntó por Camila y yo conté algo que ella me había dicho, sin pensar que se iba a regar.\nCuando me gritó delante de todos me sentí humillada. Ahora todos creen que soy la mala.»'},
+ {type:'story',label:'Tomás',tag:'Versión 3 de 3',title:'Lo que cuenta Tomás',text:'«Las dos son mis amigas. Si defiendo a una, la otra se enoja. Prefiero no meterme.\nPero me duele ver cómo el salón se está dividiendo en dos bandos.»'},
+ {type:'choice',label:'Tu mirada',tag:'Reconoce',title:'Primera impresión',q:'¿Con quién te identificas más al comienzo?',cqTitle:'Para pensar',opts:[
+   {t:'Con Camila',then:'Entiendes la traición que sintió. ¿Puedes entender también la vergüenza que vivió Sofía al ser gritada en público?'},
+   {t:'Con Sofía',then:'Entiendes que no quiso hacer daño. ¿Puedes entender también que, para Camila, contar un secreto fue romper su confianza?'},
+   {t:'Con Tomás',then:'Entiendes lo difícil de estar en medio. ¿Puede un amigo ayudar sin tomar partido, por ejemplo, invitando a las dos a hablar?'},
+   {t:'Con ninguna',then:'Mirar desde fuera ayuda a ver todo el cuadro. Pero recuerda: detrás de cada versión hay una persona que siente.'}]},
+ {type:'voices',label:'Tres voces',tag:'Escucha',title:'¿Qué hace posible convivir?',q:'Tu posición frente a las tres voces',text:'Estas voces resumen ideas de tres pensadores sobre el diálogo y la convivencia. Marca qué tan de acuerdo estás.',voices:[
+   {ini:'H',who:'Jürgen Habermas',school:'Ética del discurso · Alemania, siglo XX',t:'Un acuerdo es justo cuando todos los afectados pueden hablar, ser escuchados y aceptar las razones, sin presiones ni amenazas.'},
+   {ini:'AC',who:'Adela Cortina',school:'Ética cívica · España, siglos XX–XXI',t:'Podemos pensar distinto y aun así compartir unos mínimos: respeto, diálogo y no hacer daño. Sin esos mínimos no hay convivencia posible.'},
+   {ini:'PF',who:'Paulo Freire',school:'Pedagogía del diálogo · Brasil, siglo XX',t:'El diálogo verdadero exige humildad: escuchar al otro como alguien que también sabe y tiene algo que enseñarme.'}]},
+ {type:'write',label:'En sus zapatos',tag:'Empatiza',title:'Ponte en sus zapatos',q:'Elige a quien menos entendías. Escribe en primera persona qué siente y qué necesita.',min:20,ph:'Yo me siento… y necesito…'},
+ {type:'write',label:'El acuerdo',tag:'Propón',title:'Eres el mediador',q:'Escribe una propuesta de acuerdo: qué haría Camila, qué haría Sofía y cómo se repararía el daño en el salón.',min:25,ph:'Camila se compromete a… Sofía se compromete a…'},
+ {type:'scale',label:'Tú',tag:'Mírate',title:'Una pregunta para ti',q:'¿Qué tan fácil te resulta pedir perdón cuando te equivocas?',left:'Muy difícil',right:'Muy fácil'}
+];
+
+</script>
+
+</html>

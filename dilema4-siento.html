@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lo Que Siento, Lo Que Elijo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+:root{--lapis:#1F6563;--lapis-soft:#DCEDEB;--ochre:#9A4A2E;--ochre-soft:#F6E1D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lapis:#7FC9C3;--lapis-soft:#173634;--ochre:#F0A487;--ochre-soft:#3D241B}}
+:root[data-theme="dark"]{--lapis:#7FC9C3;--lapis-soft:#173634;--ochre:#F0A487;--ochre-soft:#3D241B}
+.prog{display:flex;flex-direction:column;gap:6px}
+.prog .row{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)}
+.prog .track{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog .track span{display:block;height:100%;background:var(--lapis);transition:width .4s}
+.step{display:flex;flex-direction:column;gap:14px;animation:rise .35s ease}
+@keyframes rise{from{opacity:.55;transform:translateY(8px)}to{opacity:1;transform:none}}
+.step h2{font-size:clamp(1.4rem,4.6vw,1.9rem)}
+.step .txt{font-size:1.08rem;line-height:1.6;max-width:62ch}
+.step .txt p+p{margin-top:10px}
+.chat{display:flex;flex-direction:column;gap:8px;background:#E7DED3;border-radius:18px;padding:14px;max-width:520px}
+.chat .hd{display:flex;align-items:center;gap:10px;font-weight:700;color:#1F2A2E;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,.08)}
+.chat .hd i{width:34px;height:34px;border-radius:50%;background:#1F6563;display:grid;place-items:center;color:#fff;font-style:normal;font-size:.8rem}
+.msg{max-width:82%;padding:8px 12px;border-radius:14px;background:#FFFFFF;color:#1F2A2E;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.msg b{display:block;font-size:.78rem;color:#9A4A2E}
+.msg.me{align-self:flex-end;background:#D3F0D9}
+.msg.media{font-style:italic;color:#4A5866}
+.opt-list{display:flex;flex-direction:column;gap:10px}
+.opt-list .choice{line-height:1.45}
+.conseq{background:var(--ochre-soft);border-radius:14px;padding:14px 16px;line-height:1.55}
+.conseq strong{display:block;margin-bottom:4px;color:var(--ochre)}
+.voices{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.voice{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.voice .who{display:flex;gap:10px;align-items:center}
+.voice .av{flex:none;width:42px;height:42px;border-radius:50%;background:var(--lapis-soft);color:var(--lapis);display:grid;place-items:center;font-family:var(--display);font-size:1.1rem}
+.voice .who b{display:block;line-height:1.2}
+.voice .who span{font-size:.8rem;color:var(--muted)}
+.voice q{font-size:1rem;line-height:1.5;quotes:"«" "»"}
+.agree{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.agree button{min-height:44px;font:inherit;font-size:.82rem;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;padding:4px}
+.agree button.is-sel{background:var(--lapis);color:var(--lapis-ink);border-color:var(--lapis)}
+textarea.big{width:100%;font:inherit;font-size:1.02rem;line-height:1.55;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);resize:vertical;min-height:140px}
+.wc{font-size:.85rem;color:var(--muted)}
+.sortbox{display:flex;flex-direction:column;gap:12px}
+.pool2{display:flex;flex-wrap:wrap;gap:8px}
+.pill{min-height:44px;padding:8px 14px;font:inherit;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.pill.is-sel{border-color:var(--lapis);background:var(--lapis-soft)}
+.pill.done-a{border-color:var(--lapis);background:var(--lapis-soft)}
+.pill.done-b{border-color:var(--ochre);background:var(--ochre-soft)}
+.bins2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bin2{min-height:64px;font:inherit;border-radius:14px;border:2px dashed;cursor:pointer;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px}
+.bin2 b{font-family:var(--display);font-weight:400;font-size:1.1rem}
+.bin2.a{border-color:var(--lapis);color:var(--lapis)} .bin2.b{border-color:var(--ochre);color:var(--ochre)}
+.emos{display:flex;flex-wrap:wrap;gap:8px}
+.range{display:flex;flex-direction:column;gap:6px}
+.range input{width:100%;accent-color:var(--lapis)}
+.range .ends{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.breath{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;background:var(--lapis-soft);border-radius:18px}
+.orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#BFE6E1,#1F6563);transform:scale(.6);transition:transform 4s ease-in-out}
+.orb.in{transform:scale(1.15)}
+.breath p{font-family:var(--display);font-size:1.4rem}
+.quote{font-family:var(--display);font-size:1.25rem;line-height:1.45;padding:14px 18px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.quote small{display:block;font-family:var(--body);font-size:.85rem;color:var(--muted);margin-top:6px}
+.bitacora{display:flex;flex-direction:column;gap:14px}
+.bitacora ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:12px}
+.bitacora li b{display:block}
+.bitacora li span{display:block;color:var(--muted);white-space:pre-wrap}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+#end .score{display:none}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Dilema 4 de 5</span>
+    <span class="top-r"><span class="chip">Manejo de emociones</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 240" role="img" aria-label="Perfil de una persona frente al mar: sus emociones salen en ondas de color y se vuelven calma" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="r4sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#244A5C"/><stop offset=".6" stop-color="#7FB3AE"/><stop offset="1" stop-color="#F3D9C4"/></linearGradient>
+<linearGradient id="r4sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E7E86"/><stop offset="1" stop-color="#1F4A55"/></linearGradient>
+</defs>
+<rect width="600" height="240" fill="url(#r4sky)"/>
+<circle cx="470" cy="140" r="26" fill="#FBE7C8" opacity=".9"/>
+<rect y="150" width="600" height="90" fill="url(#r4sea)"/>
+<g stroke="#BFE6E1" stroke-width="2" opacity=".5" fill="none"><path d="M260 170 h120 M300 186 h160 M240 204 h110 M400 214 h140 M330 228 h90"/></g>
+<path d="M0 240 V60 C30 50 70 52 92 70 C110 84 112 104 118 116 C122 124 132 128 128 136 C124 142 116 142 118 150 C120 158 112 160 112 168 C112 176 106 182 96 184 C86 186 86 198 90 214 L96 240Z" fill="#14262E"/>
+<g fill="none" stroke-linecap="round" stroke-width="9">
+<path d="M126 104 C170 70 210 120 250 90 C290 60 320 110 360 96" stroke="#E9785B" opacity=".9"/>
+<path d="M128 120 C180 110 210 140 260 122 C300 108 330 132 380 124" stroke="#E2B547" opacity=".9"/>
+<path d="M126 136 C180 140 220 150 270 142 C320 136 360 144 420 140" stroke="#B49AD8" opacity=".85"/>
+<path d="M124 152 C190 156 250 154 320 154 C380 154 430 154 500 152" stroke="#9FD8CF" opacity=".9"/>
+</g>
+<g font-family="Atkinson Hyperlegible, sans-serif" font-weight="700" font-size="13" fill="#FFFFFF">
+<text x="372" y="92">ira</text><text x="392" y="120">miedo</text><text x="430" y="138">tristeza</text><text x="512" y="156">calma</text>
+</g>
+</svg></figure>
+    <p class="eyebrow">Dilemas de hoy · manejo de emociones</p>
+    <h1>Lo que siento, lo que elijo</h1>
+    <p class="lead">No elegimos lo que sentimos, pero sí lo que hacemos con eso que sentimos. Hace más de 2.000 años, Epicteto y Aristóteles ya pensaban en esto. Vas a vivir una mañana difícil y a usar sus ideas para decidir con más calma.</p>
+    <div class="how"><strong>Cómo funciona</strong>
+      <ol><li>Vive la situación y ponle nombre a lo que sientes.</li><li>Separa lo que depende de ti de lo que no, con Epicteto.</li><li>Busca el término medio entre el exceso y el defecto, con Aristóteles.</li><li>Haz una pausa para respirar y escribe qué harías distinto. Al final tendrás tu <strong>bitácora</strong>.</li></ol>
+      <p class="small" style="margin-top:8px">Todas las emociones son válidas. Aquí aprendemos a escucharlas, no a esconderlas.</p></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="prog"><div class="row"><span id="pTitle"></span><span id="pNum"></span></div><div class="track"><span id="pBar" style="width:0%"></span></div></div>
+    <div id="stepBox" aria-live="polite"></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Lo que siento, lo que elijo</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+/* ===== Motor de experiencias de reflexión ===== */
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let LOG=[], si=0, breathT=0;
+function words(t){ return (String(t).trim().match(/\S+/g)||[]).length; }
+function logIt(q,a){ LOG.push({q,a}); }
+function start(){ LOG=[]; si=0; render(); }
+function prog(){ const n=STEPS.length; $('#pNum').textContent='Paso '+(si+1)+' de '+n; $('#pBar').style.width=((si)/n*100)+'%'; $('#pTitle').textContent=STEPS[si].label||''; }
+function nextBtn(label,disabled){ return '<div class="nav"><button class="btn primary" id="nx" type="button"'+(disabled?' disabled':'')+'>'+(label||'Continuar')+'</button></div>'; }
+function bindNext(fn){ const b=$('#nx'); if(b) b.addEventListener('click',()=>{ if(fn&&fn()===false) return; go(); }); }
+function go(){ clearTimeout(breathT); si++; if(si>=STEPS.length) renderEnd(); else render(); window.scrollTo({top:0,behavior:RM?'auto':'smooth'}); }
+function head(s){ return (s.tag?'<p class="eyebrow">'+esc(s.tag)+'</p>':'')+(s.title?'<h2>'+esc(s.title)+'</h2>':''); }
+function paras(t){ return '<div class="txt">'+String(t||'').split('\n').filter(Boolean).map(p=>'<p>'+esc(p)+'</p>').join('')+'</div>'; }
+function render(){
+  const s=STEPS[si], box=$('#stepBox'); prog();
+  let h='<div class="step">'+head(s);
+  if(s.type==='story'){ h+=paras(s.text); if(s.quote) h+='<div class="quote">'+esc(s.quote)+'<small>'+esc(s.cite||'')+'</small></div>'; h+=nextBtn(s.btn); box.innerHTML=h+'</div>'; bindNext(); return; }
+  if(s.type==='chat'){ h+=paras(s.text)+'<div class="chat" role="log"><div class="hd"><i aria-hidden="true">'+esc(s.group.slice(0,2))+'</i>'+esc(s.group)+'</div>'+s.msgs.map(m=>'<div class="msg'+(m.me?' me':'')+(m.media?' media':'')+'">'+(m.me?'':'<b>'+esc(m.who)+'</b>')+esc(m.t)+'</div>').join('')+'</div>'+nextBtn(s.btn); box.innerHTML=h+'</div>'; bindNext(); return; }
+  if(s.type==='choice'){ h+=paras(s.text)+'<p class="txt"><strong>'+esc(s.q)+'</strong></p><div class="opt-list">'+s.opts.map((o,i)=>'<button type="button" class="choice" data-i="'+i+'">'+esc(o.t)+'</button>').join('')+'</div><div id="cq"></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>';
+    document.querySelectorAll('.opt-list .choice').forEach(b=>b.addEventListener('click',()=>{ const o=s.opts[+b.dataset.i];
+      document.querySelectorAll('.opt-list .choice').forEach(x=>{ x.disabled=true; x.classList.toggle('is-sel',x===b); });
+      $('#cq').innerHTML='<div class="conseq"><strong>'+esc(s.cqTitle||'Lo que pasó después')+'</strong>'+esc(o.then)+'</div>'; logIt(s.q,o.t); $('#nx').disabled=false; }));
+    bindNext(); return; }
+  if(s.type==='voices'){ h+=paras(s.text)+'<div class="voices">'+s.voices.map((v,i)=>'<div class="voice"><div class="who"><span class="av" aria-hidden="true">'+esc(v.ini)+'</span><span><b>'+esc(v.who)+'</b><span>'+esc(v.school)+'</span></span></div><q>'+esc(v.t)+'</q><div class="agree" role="group" aria-label="¿Qué tan de acuerdo estás con '+esc(v.who)+'?">'+['De acuerdo','En parte','En desacuerdo'].map(a=>'<button type="button" data-v="'+i+'" data-a="'+a+'">'+a+'</button>').join('')+'</div></div>').join('')+'</div><p class="small">Marca tu posición frente a cada voz para continuar.</p>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const pick={};
+    document.querySelectorAll('.agree button').forEach(b=>b.addEventListener('click',()=>{ const v=+b.dataset.v; pick[v]=b.dataset.a;
+      b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('is-sel',x===b)); $('#nx').disabled=Object.keys(pick).length<s.voices.length; }));
+    bindNext(()=>{ logIt(s.q||'Posición frente a las voces',s.voices.map((v,i)=>v.who+': '+pick[i]).join(' · ')); }); return; }
+  if(s.type==='write'){ const min=s.min||12; h+=paras(s.text)+(s.quote?'<div class="quote">'+esc(s.quote)+'<small>'+esc(s.cite||'')+'</small></div>':'')+'<label for="wt"><strong>'+esc(s.q)+'</strong></label><textarea class="big" id="wt" placeholder="'+esc(s.ph||'Escribe aquí…')+'"></textarea><span class="wc" id="wc">0 palabras · mínimo '+min+'</span>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const t=$('#wt'); t.addEventListener('input',()=>{ const n=words(t.value); $('#wc').textContent=n+(n===1?' palabra':' palabras')+' · mínimo '+min; $('#nx').disabled=n<min; });
+    bindNext(()=>{ logIt(s.q,t.value.trim()); }); return; }
+  if(s.type==='sort'){ h+=paras(s.text)+'<div class="sortbox"><div class="pool2" id="pool2">'+s.items.map((it,i)=>'<button type="button" class="pill" data-i="'+i+'">'+esc(it.t)+'</button>').join('')+'</div><div class="bins2"><button type="button" class="bin2 a" data-g="a"><b>'+esc(s.a)+'</b></button><button type="button" class="bin2 b" data-g="b"><b>'+esc(s.b)+'</b></button></div><div id="sfb" aria-live="polite"></div></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; let sel=null, done=0;
+    document.querySelectorAll('.pill').forEach(c=>c.addEventListener('click',()=>{ if(c.disabled) return; sel=+c.dataset.i; document.querySelectorAll('.pill').forEach(x=>x.classList.toggle('is-sel',x===c)); }));
+    document.querySelectorAll('.bin2').forEach(b=>b.addEventListener('click',()=>{ if(sel===null){ $('#sfb').innerHTML='<p class="small">Primero toca una tarjeta.</p>'; return; }
+      const it=s.items[sel], c=document.querySelector('.pill[data-i="'+sel+'"]'), g=b.dataset.g, okk=g===it.g;
+      c.disabled=true; c.classList.remove('is-sel'); c.classList.add('done-'+it.g); done++; sel=null;
+      $('#sfb').innerHTML='<div class="feedback '+(okk?'ok':'bad')+'"><strong>'+(okk?'Bien visto.':'Míralo de nuevo.')+' «'+esc(it.t)+'»: '+esc(it.g==='a'?s.a:s.b).toLowerCase()+'.</strong>'+esc(it.why)+'</div>';
+      if(done===s.items.length) $('#nx').disabled=false; }));
+    bindNext(()=>{ logIt(s.q||(s.a+' / '+s.b),'Clasificó '+s.items.length+' situaciones'); }); return; }
+  if(s.type==='feel'){ h+=paras(s.text)+'<div class="emos">'+s.emotions.map(e=>'<button type="button" class="pill" data-e="'+esc(e)+'">'+esc(e)+'</button>').join('')+'</div><div class="range"><label for="rg"><strong>¿Qué tan intensa es? <span id="rgv">5</span> de 10</strong></label><input type="range" id="rg" min="1" max="10" value="5"><div class="ends"><span>Leve</span><span>Muy intensa</span></div></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>'; const chosen=new Set();
+    document.querySelectorAll('.emos .pill').forEach(c=>c.addEventListener('click',()=>{ const e=c.dataset.e; if(chosen.has(e)) chosen.delete(e); else chosen.add(e); c.classList.toggle('is-sel',chosen.has(e)); $('#nx').disabled=chosen.size===0; }));
+    $('#rg').addEventListener('input',()=>$('#rgv').textContent=$('#rg').value);
+    bindNext(()=>{ logIt(s.q,[...chosen].join(', ')+' · intensidad '+$('#rg').value+'/10'); }); return; }
+  if(s.type==='mean'){ h+=paras(s.text)+'<p class="txt"><strong>'+esc(s.q)+'</strong></p><div class="opt-list">'+shuffle(s.opts.map((o,i)=>({...o,i}))).map(o=>'<button type="button" class="choice" data-i="'+o.i+'">'+esc(o.t)+'</button>').join('')+'</div><div id="cq"></div>'+nextBtn(s.btn,true);
+    box.innerHTML=h+'</div>';
+    document.querySelectorAll('.opt-list .choice').forEach(b=>b.addEventListener('click',()=>{ const o=s.opts[+b.dataset.i];
+      document.querySelectorAll('.opt-list .choice').forEach(x=>{ x.disabled=true; const oo=s.opts[+x.dataset.i]; if(oo.k==='medio') x.classList.add('is-ok'); else if(x===b) x.classList.add('is-bad'); });
+      const lab={defecto:'Por defecto',medio:'Término medio',exceso:'Por exceso'};
+      $('#cq').innerHTML='<div class="conseq"><strong>'+lab[o.k]+'</strong>'+esc(o.why)+'</div>'; logIt(s.q,o.t+' ('+lab[o.k].toLowerCase()+')'); $('#nx').disabled=false; }));
+    bindNext(); return; }
+  if(s.type==='scale'){ h+=paras(s.text)+'<div class="range"><label for="rg"><strong>'+esc(s.q)+'</strong></label><input type="range" id="rg" min="0" max="10" value="5"><div class="ends"><span>'+esc(s.left)+'</span><span>'+esc(s.right)+'</span></div></div>'+nextBtn(s.btn);
+    box.innerHTML=h+'</div>'; bindNext(()=>{ const v=+$('#rg').value; logIt(s.q,(v<4?s.left:v>6?s.right:'Una posición intermedia')+' ('+v+'/10)'); }); return; }
+  if(s.type==='breath'){ h+=paras(s.text)+'<div class="breath"><div class="orb" id="orb" aria-hidden="true"></div><p id="bt">Cuando quieras, empieza.</p><button class="btn primary" id="bgo" type="button">Empezar la pausa</button></div>'+nextBtn(s.btn);
+    box.innerHTML=h+'</div>'; let n=0;
+    function cyc(){ if(n>=4){ $('#bt').textContent='Muy bien. ¿Cómo te sientes ahora?'; $('#orb').classList.remove('in'); return; }
+      $('#bt').textContent='Inhala… 4'; $('#orb').classList.add('in'); let c=4; const tick=()=>{ c--; if(c>0){ $('#bt').textContent=($('#orb').classList.contains('in')?'Inhala… ':'Exhala… ')+c; breathT=setTimeout(tick,1000); } else if($('#orb').classList.contains('in')){ $('#orb').classList.remove('in'); c=4; $('#bt').textContent='Exhala… 4'; breathT=setTimeout(tick,1000); } else { n++; cyc(); } };
+      breathT=setTimeout(tick,1000); }
+    $('#bgo').addEventListener('click',()=>{ $('#bgo').hidden=true; n=0; cyc(); });
+    bindNext(()=>{ logIt('Pausa de respiración','Realizada'); }); return; }
+}
+function renderEnd(){
+  $('#pNum').textContent='Terminado'; $('#pBar').style.width='100%'; $('#pTitle').textContent='Tu bitácora';
+  const name=($('#nombre').value||'').trim(), date=new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  const txt=TITLE+'\n'+(name?name+' · ':'')+date+'\n\n'+LOG.map((l,i)=>(i+1)+'. '+l.q+'\n   '+l.a).join('\n\n');
+  $('#stepBox').innerHTML='<div class="step bitacora"><p class="eyebrow">Bitácora de reflexión</p><h2>'+(name?esc(name):'Tu bitácora')+'</h2><p class="small">'+esc(TITLE)+' · '+esc(date)+'</p>'
+    +'<ol>'+LOG.map(l=>'<li><b>'+esc(l.q)+'</b><span>'+esc(l.a)+'</span></li>').join('')+'</ol>'
+    +(CLOSE?'<div class="quote">'+esc(CLOSE.t)+'<small>'+esc(CLOSE.c)+'</small></div>':'')
+    +'<p class="small">Toma una captura de esta bitácora o cópiala para enviársela a tu docente. Aquí no hay respuestas correctas o incorrectas: lo valioso es cómo razonaste.</p>'
+    +'<div class="nav"><button class="btn primary" id="copyB" type="button">Copiar mi bitácora</button><button class="btn" id="againB" type="button">Volver a empezar</button></div><p class="small" id="copyMsg" aria-live="polite"></p></div>';
+  $('#copyB').addEventListener('click',()=>{ const done=()=>{$('#copyMsg').textContent='Copiada. Ya puedes pegarla en un mensaje para tu docente.';};
+    try{ navigator.clipboard.writeText(txt).then(done,()=>fallback()); }catch(e){ fallback(); }
+    function fallback(){ const ta=document.createElement('textarea'); ta.value=txt; ta.className='big'; ta.readOnly=true; $('#copyMsg').textContent='Selecciona el texto y cópialo:'; $('#copyMsg').after(ta); ta.select(); } });
+  $('#againB').addEventListener('click',()=>{ start(); window.scrollTo(0,0); });
+}
+/* ===== fin del motor ===== */
+const TITLE='Lo que siento, lo que elijo · Manejo de emociones';
+const CLOSE={t:'No nos perturban las cosas, sino las opiniones que tenemos sobre las cosas.',c:'Epicteto, Enquiridión (siglo II)'};
+const EMO=['Ira','Vergüenza','Tristeza','Frustración','Miedo','Ansiedad','Decepción','Impotencia','Calma','Indiferencia'];
+const STEPS=[
+ {type:'story',label:'La situación',tag:'Una mañana difícil',title:'Lunes, 7:15 a. m.',text:'Te entregan el examen para el que estudiaste toda la semana: sacaste 2,1.\nEn el pasillo, un compañero mira tu hoja y se ríe: «¿Otra vez rajado?». Sientes calor en la cara y ganas de responderle feo.'},
+ {type:'feel',label:'Nombrar',tag:'Nombra',title:'¿Qué sientes?',text:'Ponerle nombre a lo que sentimos es el primer paso para que la emoción no decida por nosotros. Puedes elegir varias.',q:'Lo que sentí en la situación',emotions:EMO},
+ {type:'story',label:'Epicteto',tag:'Epicteto',title:'Lo que depende de mí',text:'Epicteto nació esclavo en el Imperio romano y llegó a ser uno de los grandes maestros estoicos. Enseñaba que mucho de nuestro sufrimiento viene de querer controlar lo que no está en nuestras manos.',quote:'De las cosas existentes, unas dependen de nosotros; otras no dependen de nosotros.',cite:'Epicteto, Enquiridión (siglo II)'},
+ {type:'sort',label:'¿Depende de mí?',tag:'Separa',title:'¿Depende de mí o no?',text:'Toca cada tarjeta y luego el grupo al que pertenece.',q:'Separar lo que depende de mí',a:'Depende de mí',b:'No depende de mí',items:[
+   {t:'La nota que ya me pusieron',g:'b',why:'Ya pasó. Puedes pedir una revisión, pero el resultado no lo controlas.'},
+   {t:'Cómo le respondo al compañero',g:'a',why:'Tu respuesta es tuya: puedes elegir el tono y las palabras.'},
+   {t:'Lo que el compañero piensa de mí',g:'b',why:'Las opiniones de otros están en su cabeza, no en la tuya.'},
+   {t:'Cómo me preparo para el próximo examen',g:'a',why:'Tu esfuerzo y tu método dependen de ti.'},
+   {t:'Pedir ayuda al profesor',g:'a',why:'Buscar apoyo es una decisión tuya.'},
+   {t:'Que el compañero se burle',g:'b',why:'Su conducta es suya. Tú decides cómo responder, y si se repite, puedes informarlo.'}]},
+ {type:'story',label:'Aristóteles',tag:'Aristóteles',title:'Ni mucho ni poco: el término medio',text:'Para Aristóteles, la virtud está en el término medio entre dos extremos: el exceso y el defecto. La valentía, por ejemplo, está entre la temeridad y la cobardía.\nCon el enojo pasa igual: no se trata de no sentirlo, sino de sentirlo con la persona adecuada, en la medida justa, en el momento oportuno y de la manera correcta.',quote:'Enojarse es fácil. Lo difícil es enojarse con la persona adecuada, en el grado justo, en el momento oportuno y del modo correcto.',cite:'Idea de Aristóteles en la Ética a Nicómaco (paráfrasis)'},
+ {type:'mean',label:'Término medio 1',tag:'Busca el medio',title:'En el pasillo',q:'El compañero se burla de tu nota. ¿Qué haces?',opts:[
+   {t:'Lo insultas y lo empujas.',k:'exceso',why:'La ira toma el control y el problema crece: ahora tú también quedas en falta.'},
+   {t:'Le dices con firmeza y calma que no te gustó el comentario.',k:'medio',why:'Expresas tu enojo en la medida justa, con la persona correcta y de buen modo.'},
+   {t:'Te quedas callado y te tragas la rabia toda la semana.',k:'defecto',why:'No expresar nada también hace daño: la emoción se acumula por dentro.'}]},
+ {type:'mean',label:'Término medio 2',tag:'Busca el medio',title:'La exposición',q:'Tienes que exponer frente al curso y estás muy nervioso.',opts:[
+   {t:'Expones sin preparar nada: «yo puedo con todo».',k:'exceso',why:'Es temeridad: un exceso de confianza que ignora el riesgo.'},
+   {t:'Te preparas y expones aunque sientas nervios.',k:'medio',why:'Es valentía: sentir miedo y actuar de todos modos con prudencia.'},
+   {t:'Inventas una excusa para no exponer.',k:'defecto',why:'Es cobardía: el miedo decide por ti.'}]},
+ {type:'mean',label:'Término medio 3',tag:'Busca el medio',title:'La final',q:'Tu equipo gana la final del intercolegiado.',opts:[
+   {t:'Te burlas del equipo que perdió.',k:'exceso',why:'La alegría se vuelve arrogancia y hiere a otros.'},
+   {t:'Celebras con tu equipo y reconoces el esfuerzo del rival.',k:'medio',why:'Disfrutas el triunfo con respeto: alegría en su justa medida.'},
+   {t:'No te permites alegrarte: «no es para tanto».',k:'defecto',why:'Negarse la alegría también es un extremo: está bien celebrar lo logrado.'}]},
+ {type:'breath',label:'Respirar',tag:'Pausa',title:'Una pausa para respirar',text:'Respirar despacio ayuda a bajar la intensidad antes de decidir. Inhala durante 4 segundos y exhala durante 4 segundos, cuatro veces. Si no te sientes cómodo, puedes continuar sin hacerla.'},
+ {type:'feel',label:'Ahora',tag:'Nombra',title:'¿Y ahora qué sientes?',text:'Vuelve a mirar por dentro. ¿Cambió algo?',q:'Lo que siento después de la pausa',emotions:EMO},
+ {type:'write',label:'Tu historia',tag:'Escribe',title:'Una situación tuya',q:'Recuerda una situación reciente en la que una emoción te ganó. ¿Qué dependía de ti y qué harías distinto hoy?',min:20,ph:'Una vez…'}
+];
+
+</script>
+
+</html>
