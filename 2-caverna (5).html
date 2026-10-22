@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salida de la Caverna</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.cave{position:relative;height:96px;border-radius:14px;overflow:hidden;background:linear-gradient(90deg,#0B0E13 0%,#1E1A16 30%,#5A3E1E 58%,#C98B2E 82%,#F6D27A 100%)}
+.cave .floor{position:absolute;left:0;right:0;bottom:0;height:22px;background:rgba(0,0,0,.35)}
+.walker{position:absolute;bottom:14px;transform:translateX(-50%);transition:left .6s ease;color:#FFFFFF}
+.walker svg{display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.sun{position:absolute;right:14px;top:14px;width:30px;height:30px;border-radius:50%;background:#FFF3C4;box-shadow:0 0 22px 8px rgba(255,236,170,.75);opacity:.25;transition:opacity .6s}
+.stage{font-weight:700;color:var(--ochre)}
+.q{font-size:1.2rem;font-weight:700;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:10px}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 2 de 7</span>
+    <span class="top-r"><span class="chip">Sócrates y Platón</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="La caverna: prisioneros encadenados miran sombras mientras uno sube hacia la luz del sol" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#14202C"/>
+<rect width="150" height="220" fill="#1E2A38"/>
+<path d="M470 0 H600 V220 H420 C452 160 438 80 470 0Z" fill="#F6D27A"/>
+<circle cx="548" cy="58" r="40" fill="#FFF3C4" opacity=".55"/>
+<circle cx="548" cy="58" r="22" fill="#FFFFFF"/>
+<g fill="#0B0E13">
+ <path d="M38 70 a14 14 0 1 1 28 0 v4 c10 6 14 22 12 40 h-52 c-2 -18 2 -34 12 -40z"/>
+ <path d="M96 64 c10 0 14 8 12 16 c14 4 22 18 20 34 h-50 c-2 -16 4 -30 18 -34 c-4 -8 0 -16 0 -16z"/>
+</g>
+<circle cx="268" cy="150" r="44" fill="#C98B2E" opacity=".22"/>
+<path d="M268 122 C282 140 290 150 284 164 C280 174 256 174 252 164 C246 150 262 142 260 130 C264 136 266 140 268 122Z" fill="#C98B2E"/>
+<path d="M268 146 C274 154 276 160 273 166 C270 170 264 170 262 166 C260 160 266 156 268 146Z" fill="#F6D27A"/>
+<rect x="196" y="128" width="40" height="8" fill="#3A4654"/>
+<path d="M206 128 c0 -10 4 -16 8 -18 c4 2 8 8 8 18z" fill="#3A4654"/>
+<g fill="#3A4654">
+ <circle cx="166" cy="150" r="9"/><path d="M158 160 h18 l6 30 h-30z"/>
+ <circle cx="196" cy="156" r="9"/><path d="M188 166 h18 l6 26 h-30z"/>
+</g>
+<path d="M150 196 H226" stroke="#8E9BA8" stroke-width="3" stroke-dasharray="5 4"/>
+<path d="M300 220 L470 116 L484 132 L330 220Z" fill="#2A3440"/>
+<g stroke="#F3E3C2" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="404" cy="140" r="6" fill="#F3E3C2"/><path d="M404 146 v16 M404 152 l10 -8 M404 152 l-9 4 M404 162 l9 10 M404 162 l-6 12"/></g>
+</svg></figure>
+    <p class="eyebrow">Filosofía clásica · siglos V–IV a. C.</p>
+    <h1>Salida de la caverna</h1>
+    <p class="lead">En el libro VII de <em>La República</em>, Platón imagina prisioneros que solo ven sombras. Uno se libera y asciende hasta ver el sol. Responde bien y ayuda al prisionero a salir de la oscuridad.</p>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Lee cada pregunta sobre Sócrates y Platón y elige una respuesta.</li><li>Cada acierto acerca al prisionero un paso a la luz.</li><li>Después de responder verás la explicación. Son 8 preguntas.</li></ol></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="cave" aria-hidden="true">
+      <div class="sun" id="sun"></div><div class="floor"></div>
+      <div class="walker" id="walker" style="left:6%"><svg width="26" height="44" viewBox="0 0 26 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="13" cy="7" r="5"/><path d="M13 12v16M13 17l-8 6M13 17l8 6M13 28l-6 14M13 28l6 14"/></svg></div>
+    </div>
+    <p>Etapa: <span class="stage" id="stage">Encadenado ante las sombras</span></p>
+    <div class="meta"><span id="qn">Pregunta 1 de 8</span><span id="pts">0 aciertos</span></div>
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="btn-row"><button class="btn primary" id="nextBtn" type="button" hidden>Siguiente</button></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Salida de la caverna</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+const STAGES=['Encadenado ante las sombras','Se libera y ve el fuego','Ve los objetos que proyectan las sombras','Sube por la cuesta hacia la salida','Mira los reflejos en el agua','Mira las cosas mismas','Contempla el cielo nocturno','Ve la luz del día','Contempla el sol: la Idea del Bien'];
+const QS=[
+ {q:'¿Qué método usaba Sócrates para que su interlocutor descubriera la verdad por sí mismo?',o:['La mayéutica','El método experimental','La duda metódica','La observación de la naturaleza'],c:0,why:'Sócrates comparaba su labor con la de una partera: con preguntas ayudaba a "dar a luz" ideas. La acompañaba de la ironía, que mostraba al otro su ignorancia.'},
+ {q:'La frase que la tradición atribuye a Sócrates, "Solo sé que no sé nada", expresa…',o:['Que el conocimiento es imposible','El reconocimiento de la propia ignorancia como punto de partida','Que los sentidos siempre engañan','Que solo los dioses piensan'],c:1,why:'Reconocer que no se sabe es la condición para empezar a buscar la verdad con honestidad.'},
+ {q:'Para Sócrates, ¿por qué una persona actúa mal?',o:['Porque nace malvada','Porque los dioses lo deciden','Por ignorancia: no conoce el verdadero bien','Porque las leyes son injustas'],c:2,why:'Es el intelectualismo moral: quien conoce de verdad el bien, lo practica. La virtud es conocimiento.'},
+ {q:'En la alegoría de la caverna, ¿qué representan las sombras en la pared?',o:['Las Ideas eternas','Las apariencias del mundo sensible, la simple opinión','Los recuerdos del alma','Las leyes de la ciudad'],c:1,why:'Las sombras son copias de copias: lo que la mayoría toma por real sin examinarlo. Platón lo llama doxa, opinión.'},
+ {q:'¿Qué simboliza el sol que el prisionero ve al salir?',o:['El poder del gobernante','La naturaleza física','La Idea del Bien','El fuego de la caverna'],c:2,why:'Así como el sol permite ver las cosas, la Idea del Bien hace inteligible todo lo demás. Es la cima del conocimiento.'},
+ {q:'Para Platón, el mundo de las Ideas es…',o:['Cambiante y material','Eterno, inmutable y objeto del verdadero conocimiento','Una invención de los poetas','Igual al mundo que vemos'],c:1,why:'Platón distingue el mundo sensible, cambiante, del mundo inteligible de las Ideas, que no cambia y solo se conoce con la razón.'},
+ {q:'Platón sostiene que conocer es, en el fondo, recordar lo que el alma contempló antes de nacer. ¿Cómo se llama esta teoría?',o:['Reminiscencia (anámnesis)','Empirismo','Mayéutica','Hilemorfismo'],c:0,why:'En diálogos como el Menón, Platón defiende que el alma ya conoció las Ideas y aprender es recordarlas.'},
+ {q:'En La República, ¿quiénes deberían gobernar la ciudad ideal?',o:['Los más ricos','Los guerreros más fuertes','Todos los ciudadanos por sorteo','Los filósofos'],c:3,why:'Solo quien ha salido de la caverna y conoce el Bien puede gobernar con justicia: es la figura del filósofo gobernante.'}
+];
+let i, score, review, order;
+function start(){ i=0; score=0; review=[]; order=QS; render(); }
+function render(){
+  const it=order[i];
+  $('#qn').textContent='Pregunta '+(i+1)+' de '+order.length;
+  $('#pts').textContent=score+(score===1?' acierto':' aciertos');
+  $('#stage').textContent=STAGES[score];
+  $('#walker').style.left=(6+score*(84/8))+'%';
+  $('#sun').style.opacity=.25+score*.75/8;
+  $('#q').textContent=it.q; $('#fb').innerHTML=''; $('#nextBtn').hidden=true;
+  $('#opts').innerHTML=it.o.map((t,k)=>'<button type="button" class="choice" data-k="'+k+'">'+t+'</button>').join('');
+  document.querySelectorAll('#opts .choice').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.k)));
+}
+function answer(k){
+  const it=order[i], ok=k===it.c; tone(ok);
+  document.querySelectorAll('#opts .choice').forEach(b=>{b.disabled=true; const kk=+b.dataset.k; if(kk===it.c) b.classList.add('is-ok'); else if(kk===k) b.classList.add('is-bad');});
+  if(ok){ score++; $('#stage').textContent=STAGES[score]; $('#walker').style.left=(6+score*(84/8))+'%'; $('#sun').style.opacity=.25+score*.75/8; $('#pts').textContent=score+(score===1?' acierto':' aciertos'); }
+  review.push({ok,q:it.q,a:it.o[it.c],why:it.why});
+  $('#fb').innerHTML='<div class="feedback '+(ok?'ok':'bad')+'"><strong>'+(ok?'¡Un paso más hacia la luz!':'El prisionero no avanza.')+'</strong>'+it.why+'</div>';
+  $('#nextBtn').hidden=false; $('#nextBtn').textContent= i===order.length-1?'Ver resultado':'Siguiente'; $('#nextBtn').focus();
+}
+$('#nextBtn').addEventListener('click',()=>{ i++; if(i<order.length) render(); else finish(score,order.length,score/order.length,review); });
+
+</script>
+
+</html>

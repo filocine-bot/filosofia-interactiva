@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Tribunal de Kant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.maxim{font-family:var(--display);font-size:clamp(1.45rem,5vw,1.9rem);line-height:1.3;text-align:center;padding:34px 22px;border-radius:18px;background:var(--surface);border:1px solid var(--line);min-height:170px;display:grid;place-items:center}
+.verdict{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vbtn{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;min-height:84px;padding:14px 16px;font:inherit;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.vbtn b{font-family:var(--display);font-weight:400;font-size:1.25rem}
+.vbtn span{font-size:.85rem;color:var(--muted)}
+.vbtn:hover:not(:disabled){border-color:var(--lapis)}
+.def{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:520px){.def{grid-template-columns:minmax(0,1fr)}}
+.def div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 6 de 7</span>
+    <span class="top-r"><span class="chip">Kant e Ilustración</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="Cielo estrellado sobre un mazo de juez, con la frase de Kant: el cielo estrellado sobre mí y la ley moral en mí" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#14202C"/>
+<g fill="#FFFFFF"><circle cx="40" cy="30" r="1.8"/><circle cx="92" cy="58" r="1.2"/><circle cx="130" cy="22" r="2.2"/><circle cx="176" cy="48" r="1.4"/><circle cx="214" cy="18" r="1.6"/><circle cx="258" cy="64" r="1.2"/><circle cx="300" cy="26" r="2"/><circle cx="346" cy="52" r="1.4"/><circle cx="388" cy="16" r="1.8"/><circle cx="436" cy="44" r="1.2"/><circle cx="470" cy="20" r="2.2"/><circle cx="512" cy="60" r="1.4"/><circle cx="560" cy="28" r="1.8"/><circle cx="66" cy="96" r="1.2"/><circle cx="150" cy="88" r="1.6"/><circle cx="454" cy="92" r="1.6"/><circle cx="540" cy="100" r="1.2"/><circle cx="24" cy="120" r="1.4"/><circle cx="584" cy="70" r="1.2"/></g>
+<g stroke="#8EA7F2" stroke-width="1" opacity=".7" fill="none"><path d="M388 16 L436 44 L470 20 L512 60 L560 28"/></g>
+<g fill="#F6D27A"><path d="M130 22 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z"/><path d="M470 20 l2.5 -7 l2.5 7 l7 2.5 l-7 2.5 l-2.5 7 l-2.5 -7 l-7 -2.5z"/></g>
+<rect x="238" y="134" width="124" height="16" rx="3" fill="#8E5C0E"/>
+<rect x="250" y="126" width="100" height="10" rx="3" fill="#C98B2E"/>
+<g transform="rotate(-28 300 100)"><rect x="296" y="70" width="10" height="84" rx="4" fill="#C98B2E"/><rect x="270" y="52" width="62" height="28" rx="6" fill="#E3B45E" stroke="#8E5C0E" stroke-width="2"/><rect x="264" y="56" width="8" height="20" rx="2" fill="#8E5C0E"/><rect x="330" y="56" width="8" height="20" rx="2" fill="#8E5C0E"/></g>
+<text x="300" y="190" font-family="Marcellus, Georgia, serif" font-size="17" fill="#F3E3C2" text-anchor="middle">«El cielo estrellado sobre mí y la ley moral en mí»</text>
+<text x="300" y="210" font-family="Atkinson Hyperlegible, sans-serif" font-size="11" fill="#A6B3C0" text-anchor="middle">Kant, Crítica de la razón práctica</text>
+</svg></figure>
+    <p class="eyebrow">Ilustración · siglo XVIII</p>
+    <h1>El tribunal de Kant</h1>
+    <p class="lead">"¡Sapere aude! Ten el valor de servirte de tu propio entendimiento", escribió Kant al definir la Ilustración. En su ética distingue dos clases de mandatos o imperativos. Tú serás el juez.</p>
+    <div class="def">
+      <div><strong>Imperativo hipotético</strong><p class="small">Manda algo como medio para lograr un fin: "Si quieres X, haz Y". Depende de lo que desees.</p></div>
+      <div><strong>Imperativo categórico</strong><p class="small">Manda de forma incondicional, por deber, valga para todos. No depende de ningún deseo.</p></div>
+    </div>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Lee cada mandato.</li><li>Dicta tu veredicto: ¿hipotético o categórico?</li><li>Son 10 casos.</li></ol></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="meta"><span id="qn">Caso 1 de 10</span><span id="pts">0 aciertos</span></div>
+    <div class="bar"><span id="bar" style="width:0%"></span></div>
+    <p class="maxim" id="q"></p>
+    <div class="verdict">
+      <button type="button" class="vbtn" data-v="H"><b>Hipotético</b><span>Si quieres esto, haz aquello</span></button>
+      <button type="button" class="vbtn" data-v="C"><b>Categórico</b><span>Haz esto, sin condiciones</span></button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="btn-row"><button class="btn primary" id="nextBtn" type="button" hidden>Siguiente caso</button></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · El tribunal de Kant</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+const QS=[
+ {q:'Si quieres aprobar el examen Saber 11, estudia todos los días.',a:'H',why:'Estudiar es un medio para un fin que tú deseas. Si no quisieras aprobar, el mandato no te obligaría.'},
+ {q:'No mientas.',a:'C',why:'Manda sin condición alguna: vale para todos, quieras lo que quieras.'},
+ {q:'Si quieres que tus amigos confíen en ti, no les mientas.',a:'H',why:'Aunque la acción parezca moral, aquí se manda por conveniencia: para lograr la confianza.'},
+ {q:'Obra solo según aquella máxima que puedas querer al mismo tiempo que se convierta en ley universal.',a:'C',why:'Es la fórmula de la ley universal, del libro Fundamentación de la metafísica de las costumbres (1785).'},
+ {q:'Trata a la humanidad, en tu persona y en la de cualquier otro, siempre como un fin y nunca solo como un medio.',a:'C',why:'Es la fórmula de la humanidad: cada persona tiene dignidad, no precio.'},
+ {q:'Si quieres estar sano, haz ejercicio.',a:'H',why:'Es un consejo de prudencia: depende de que desees la salud.'},
+ {q:'Cumple tus promesas.',a:'C',why:'Kant usa el ejemplo de la promesa falsa: si todos prometieran en falso, las promesas dejarían de existir.'},
+ {q:'Ayuda a tu compañero, así después él te ayudará a ti.',a:'H',why:'La ayuda se presenta como medio para obtener un beneficio. Para Kant, esa acción no tendría valor moral.'},
+ {q:'Si deseas comprar una moto, ahorra parte de tu dinero.',a:'H',why:'Es una regla técnica o de habilidad: indica el medio para alcanzar un fin deseado.'},
+ {q:'Di la verdad, aunque decirla te perjudique.',a:'C',why:'El deber de veracidad no depende de las consecuencias ni de tus intereses.'}
+];
+let i, score, review, order;
+function start(){ i=0; score=0; review=[]; order=shuffle(QS); render(); }
+function render(){
+  const it=order[i];
+  $('#qn').textContent='Caso '+(i+1)+' de '+order.length; $('#pts').textContent=score+(score===1?' acierto':' aciertos'); $('#bar').style.width=(i/order.length*100)+'%';
+  $('#q').textContent='"'+it.q+'"'; $('#fb').innerHTML=''; $('#nextBtn').hidden=true;
+  document.querySelectorAll('.vbtn').forEach(b=>{b.disabled=false; b.classList.remove('is-ok','is-bad');});
+}
+document.querySelectorAll('.vbtn').forEach(b=>b.addEventListener('click',()=>{
+  const it=order[i], ok=b.dataset.v===it.a; tone(ok);
+  document.querySelectorAll('.vbtn').forEach(x=>{x.disabled=true; if(x.dataset.v===it.a) x.classList.add('is-ok'); else x.classList.add('is-bad');});
+  if(ok) score++; $('#pts').textContent=score+(score===1?' acierto':' aciertos');
+  const name=it.a==='C'?'Imperativo categórico':'Imperativo hipotético';
+  review.push({ok,q:'"'+it.q+'"',a:name,why:it.why});
+  $('#fb').innerHTML='<div class="feedback '+(ok?'ok':'bad')+'"><strong>'+(ok?'Veredicto correcto: ':'Es un ')+name.toLowerCase()+'.</strong>'+it.why+'</div>';
+  $('#nextBtn').hidden=false; $('#nextBtn').textContent=i===order.length-1?'Ver resultado':'Siguiente caso'; $('#nextBtn').focus();
+}));
+$('#nextBtn').addEventListener('click',()=>{ i++; if(i<order.length) render(); else finish(score,order.length,score/order.length,review); });
+
+</script>
+
+</html>

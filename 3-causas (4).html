@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Las Cuatro Causas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.obj{font-family:var(--display);font-size:1.6rem}
+.cards{display:flex;flex-wrap:wrap;gap:10px}
+.card{min-height:48px;padding:10px 14px;font:inherit;font-size:.98rem;border:1.5px solid var(--ochre);border-radius:999px;background:var(--ochre-soft);color:var(--ink);cursor:pointer;text-align:left}
+.card.used{opacity:.35}
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.slots{grid-template-columns:minmax(0,1fr)}}
+.slot{display:flex;flex-direction:column;gap:6px;text-align:left;min-height:110px;padding:14px;font:inherit;border:1.5px dashed var(--line);border-radius:14px;background:var(--surface);color:var(--ink);cursor:pointer}
+.slot .cn{font-family:var(--display);font-size:1.2rem}
+.slot .cq{font-size:.86rem;color:var(--muted)}
+.slot .val{font-weight:700;min-height:1.4em}
+.slot.filled{border-style:solid;border-color:var(--lapis)}
+.slot .fix{font-size:.86rem}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 3 de 7</span>
+    <span class="top-r"><span class="chip">Aristóteles</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="Un bloque de mármol se convierte en estatua: de la potencia al acto" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#DCE3F5"/>
+<rect y="176" width="600" height="44" fill="#C3CED8"/>
+<g fill="#FFFFFF" stroke="#14202C" stroke-width="2.5">
+ <rect x="48" y="40" width="64" height="12"/>
+ <circle cx="50" cy="60" r="10"/><circle cx="110" cy="60" r="10"/>
+ <rect x="56" y="54" width="48" height="10"/>
+ <rect x="60" y="64" width="40" height="104"/>
+ <rect x="50" y="168" width="60" height="10"/>
+</g>
+<g stroke="#14202C" stroke-width="1.5"><path d="M70 68 V164 M80 68 V164 M90 68 V164"/></g>
+<rect x="190" y="96" width="96" height="80" fill="#FFFFFF" stroke="#14202C" stroke-width="2.5"/>
+<path d="M200 112 l18 10 M250 104 l14 18 M226 150 l22 -6" stroke="#9AA8B5" stroke-width="1.5"/>
+<g transform="rotate(-35 300 90)"><rect x="286" y="84" width="46" height="8" rx="2" fill="#8E5C0E"/><rect x="332" y="82" width="16" height="12" fill="#9AA8B5" stroke="#14202C" stroke-width="1.5"/></g>
+<path d="M318 140 H398" stroke="#23439B" stroke-width="4" stroke-linecap="round"/>
+<path d="M390 130 L402 140 L390 150" stroke="#23439B" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#FFFFFF" stroke="#14202C" stroke-width="2.5">
+ <rect x="440" y="138" width="80" height="38"/>
+ <path d="M446 138 c2 -26 14 -36 34 -36 c20 0 32 10 34 36z"/>
+ <path d="M470 104 v-8 h20 v8"/>
+ <circle cx="480" cy="76" r="22"/>
+</g>
+<path d="M462 66 c6 -14 30 -14 36 0" stroke="#14202C" stroke-width="2" fill="none"/>
+<g font-family="Marcellus, Georgia, serif" font-size="16" fill="#14202C" text-anchor="middle"><text x="238" y="202">Potencia</text><text x="358" y="128">forma</text><text x="480" y="202">Acto</text><text x="80" y="202">Columna jónica</text></g>
+</svg></figure>
+    <p class="eyebrow">Filosofía clásica · siglo IV a. C.</p>
+    <h1>Las cuatro causas</h1>
+    <p class="lead">Para Aristóteles, conocer algo es conocer sus causas. Toda cosa se explica respondiendo cuatro preguntas: de qué está hecha, qué forma tiene, quién o qué la produjo y para qué existe.</p>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Verás un objeto y cuatro tarjetas.</li><li>Toca una tarjeta y luego la causa a la que corresponde.</li><li>Cuando completes las cuatro, toca <em>Revisar</em>. Son 4 objetos.</li></ol></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="meta"><span id="rn">Objeto 1 de 4</span><span id="pts">0 de 16</span></div>
+    <div class="bar"><span id="bar" style="width:0%"></span></div>
+    <p class="obj" id="obj"></p>
+    <div class="cards" id="cards"></div>
+    <div class="slots" id="slots"></div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="btn-row"><button class="btn primary" id="checkBtn" type="button" disabled>Revisar</button><button class="btn primary" id="nextBtn" type="button" hidden>Siguiente objeto</button></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Las cuatro causas</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+const CAUSES=[
+ {k:'mat',n:'Causa material',q:'¿De qué está hecho?'},
+ {k:'for',n:'Causa formal',q:'¿Qué es? ¿Qué forma o estructura tiene?'},
+ {k:'efi',n:'Causa eficiente',q:'¿Quién o qué lo produjo?'},
+ {k:'fin',n:'Causa final',q:'¿Para qué existe?'}
+];
+const ROUNDS=[
+ {o:'Una estatua de Atenea',c:{mat:'El mármol',for:'La figura de la diosa Atenea',efi:'El escultor que la talló',fin:'Honrar a la diosa en el templo'}},
+ {o:'Una casa',c:{mat:'Los ladrillos, el cemento y la madera',for:'El plano y la estructura de la casa',efi:'Los albañiles que la construyeron',fin:'Dar refugio a una familia'}},
+ {o:'Una silla de madera',c:{mat:'La madera',for:'El diseño: asiento, patas y espaldar',efi:'El carpintero',fin:'Servir para sentarse'}},
+ {o:'Un roble que crece de una bellota',c:{mat:'La materia de la bellota y los nutrientes que absorbe',for:'La esencia o estructura propia del roble',efi:'El roble progenitor que produjo la bellota',fin:'Llegar a ser un roble pleno: pasar de la potencia al acto'}}
+];
+let r, place, sel, score, review;
+function start(){ r=0; score=0; review=[]; renderRound(); }
+function renderRound(){
+  const R=ROUNDS[r]; place={}; sel=null;
+  $('#rn').textContent='Objeto '+(r+1)+' de 4'; $('#pts').textContent=score+' de 16'; $('#bar').style.width=(r/4*100)+'%';
+  $('#obj').textContent=R.o; $('#fb').innerHTML=''; $('#checkBtn').hidden=false; $('#checkBtn').disabled=true; $('#nextBtn').hidden=true;
+  const items=shuffle(CAUSES.map(c=>({k:c.k,t:R.c[c.k]})));
+  $('#cards').innerHTML=items.map(it=>'<button type="button" class="card" data-card="'+it.k+'">'+it.t+'</button>').join('');
+  $('#slots').innerHTML=CAUSES.map(c=>'<button type="button" class="slot" data-slot="'+c.k+'"><span class="cn">'+c.n+'</span><span class="cq">'+c.q+'</span><span class="val" data-val="'+c.k+'"></span><span class="fix" data-fix="'+c.k+'"></span></button>').join('');
+  document.querySelectorAll('[data-card]').forEach(b=>b.addEventListener('click',()=>{ if(locked()) return; document.querySelectorAll('[data-card]').forEach(x=>x.classList.remove('is-sel')); b.classList.add('is-sel'); sel=b.dataset.card; }));
+  document.querySelectorAll('[data-slot]').forEach(b=>b.addEventListener('click',()=>putIn(b.dataset.slot)));
+}
+function locked(){ return !$('#nextBtn').hidden; }
+function putIn(slot){
+  if(locked()) return;
+  if(!sel){ if(place[slot]){ delete place[slot]; paint(); } return; }
+  for(const s in place) if(place[s]===sel) delete place[s];
+  place[slot]=sel; sel=null; paint();
+}
+function paint(){
+  const R=ROUNDS[r], used=new Set(Object.values(place));
+  document.querySelectorAll('[data-card]').forEach(b=>{b.classList.remove('is-sel'); b.classList.toggle('used',used.has(b.dataset.card));});
+  CAUSES.forEach(c=>{ const v=place[c.k]; document.querySelector('[data-val="'+c.k+'"]').textContent=v?R.c[v]:'Toca una tarjeta y luego aquí'; document.querySelector('[data-slot="'+c.k+'"]').classList.toggle('filled',!!v); });
+  $('#checkBtn').disabled=Object.keys(place).length<4;
+}
+$('#checkBtn').addEventListener('click',()=>{
+  const R=ROUNDS[r]; let ok=0;
+  CAUSES.forEach(c=>{ const good=place[c.k]===c.k, el=document.querySelector('[data-slot="'+c.k+'"]');
+    el.classList.add(good?'is-ok':'is-bad'); if(good) ok++;
+    if(!good) document.querySelector('[data-fix="'+c.k+'"]').textContent='Correcta: '+R.c[c.k];
+    review.push({ok:good,q:R.o+' · '+c.n,a:R.c[c.k],why:c.q});
+  });
+  score+=ok; tone(ok>=3); $('#pts').textContent=score+' de 16';
+  $('#fb').innerHTML='<div class="feedback '+(ok===4?'ok':'bad')+'"><strong>'+ok+' de 4 causas bien ubicadas.</strong>'+(ok===4?'Explicaste el objeto como lo haría Aristóteles.':'Recuerda: la material es la materia; la formal, la forma; la eficiente, el agente; la final, el propósito.')+'</div>';
+  $('#checkBtn').hidden=true; $('#nextBtn').hidden=false; $('#nextBtn').textContent=r===3?'Ver resultado':'Siguiente objeto'; $('#nextBtn').focus();
+});
+$('#nextBtn').addEventListener('click',()=>{ r++; if(r<4) renderRound(); else finish(score,16,score/16,review); });
+
+</script>
+
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Razón o Experiencia</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.pool:empty::after{content:"Todas las tarjetas están ubicadas. Toca Revisar.";color:var(--muted)}
+.tk{min-height:46px;padding:9px 14px;font:inherit;font-size:.96rem;line-height:1.3;text-align:left;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer}
+.tk.person{font-family:var(--display);font-size:1.08rem}
+.camps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.camp{display:flex;flex-direction:column;gap:10px;padding:14px;border:2px solid var(--line);border-radius:14px;background:var(--surface);min-height:180px}
+.camp-h{display:flex;flex-direction:column;gap:2px;text-align:left;font:inherit;padding:10px 12px;min-height:64px;border-radius:10px;border:1.5px dashed var(--lapis);background:var(--lapis-soft);color:var(--ink);cursor:pointer}
+.camp-h b{font-family:var(--display);font-weight:400;font-size:1.25rem}
+.camp-h span{font-size:.82rem;color:var(--muted)}
+.camp .list{display:flex;flex-direction:column;gap:8px}
+.camp .tk{width:100%}
+.hint{font-size:.9rem;color:var(--muted)}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 5 de 7</span>
+    <span class="top-r"><span class="chip">Filosofía moderna</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="Una balanza pesa la razón, con figuras geométricas, frente a la experiencia, con un ojo" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#F3E3C2"/>
+<path d="M260 196 H340 L326 180 H274Z" fill="#14202C"/>
+<rect x="296" y="56" width="8" height="126" fill="#14202C"/>
+<circle cx="300" cy="52" r="9" fill="#C98B2E"/>
+<rect x="150" y="62" width="300" height="7" rx="3" fill="#14202C"/>
+<g stroke="#14202C" stroke-width="2" fill="none"><path d="M160 66 V84 M112 84 H208 M112 84 V132 M208 84 V132 M440 66 V84 M392 84 H488 M392 84 V132 M488 84 V132"/></g>
+<path d="M112 132 H208 a48 22 0 0 1 -96 0z" fill="#23439B"/>
+<path d="M392 132 H488 a48 22 0 0 1 -96 0z" fill="#C98B2E"/>
+<g fill="none" stroke="#23439B" stroke-width="3"><path d="M134 126 L160 84 L186 126Z"/><circle cx="160" cy="112" r="13"/></g>
+<g><path d="M410 112 C422 92 458 92 470 112 C458 132 422 132 410 112Z" fill="#FFFFFF" stroke="#8E5C0E" stroke-width="3"/><circle cx="440" cy="112" r="11" fill="#8E5C0E"/><circle cx="440" cy="112" r="4" fill="#14202C"/></g>
+<g font-family="Marcellus, Georgia, serif" font-size="18" fill="#14202C" text-anchor="middle"><text x="160" y="186">Razón</text><text x="440" y="186">Experiencia</text></g>
+</svg></figure>
+    <p class="eyebrow">Modernidad · siglos XVII–XVIII</p>
+    <h1>Razón o experiencia</h1>
+    <p class="lead">¿De dónde viene el conocimiento? Los racionalistas confiaron en la razón y en ideas que no proceden de los sentidos. Los empiristas sostuvieron que todo conocimiento llega por la experiencia.</p>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Toca una tarjeta (un filósofo o una idea).</li><li>Toca el encabezado de la corriente donde va: <em>Racionalismo</em> o <em>Empirismo</em>.</li><li>Si te equivocas, toca la tarjeta en la columna para devolverla. Al final toca <em>Revisar</em>.</li></ol></div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="meta"><span id="left">14 tarjetas por ubicar</span><span class="hint" id="selTxt">Ninguna tarjeta seleccionada</span></div>
+    <div class="pool" id="pool"></div>
+    <div class="camps">
+      <div class="camp"><button type="button" class="camp-h" data-camp="R"><b>Racionalismo</b><span>La razón es la fuente</span></button><div class="list" id="listR"></div></div>
+      <div class="camp"><button type="button" class="camp-h" data-camp="E"><b>Empirismo</b><span>La experiencia es la fuente</span></button><div class="list" id="listE"></div></div>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="btn-row"><button class="btn primary" id="checkBtn" type="button" disabled>Revisar</button></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Razón o experiencia</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+const CARDS=[
+ {id:1,t:'René Descartes',p:1,c:'R',why:'Padre del racionalismo moderno: buscó una certeza indudable mediante la razón.'},
+ {id:2,t:'Baruch Spinoza',p:1,c:'R',why:'Construyó su Ética "a la manera geométrica", deduciendo todo desde definiciones y axiomas.'},
+ {id:3,t:'Gottfried W. Leibniz',p:1,c:'R',why:'Distinguió verdades de razón, necesarias, de verdades de hecho, y confió en la razón como guía.'},
+ {id:4,t:'John Locke',p:1,c:'E',why:'En su Ensayo sobre el entendimiento humano negó las ideas innatas.'},
+ {id:5,t:'George Berkeley',p:1,c:'E',why:'Llevó el empirismo al extremo: solo conocemos percepciones.'},
+ {id:6,t:'David Hume',p:1,c:'E',why:'Todo contenido de la mente procede de impresiones de los sentidos.'},
+ {id:7,t:'Pienso, luego existo',c:'R',why:'Es la primera certeza de Descartes, alcanzada por la razón al dudar de todo.'},
+ {id:8,t:'Hay ideas innatas, que la mente posee sin aprenderlas de los sentidos',c:'R',why:'Para Descartes, ideas como la de Dios o la de infinito no vienen de la experiencia.'},
+ {id:9,t:'Dios o la naturaleza (Deus sive natura)',c:'R',why:'Spinoza identifica a Dios con la única sustancia, que se conoce por la razón.'},
+ {id:10,t:'La realidad está formada por mónadas',c:'R',why:'Leibniz concibe sustancias simples, inextensas, comprendidas por la razón.'},
+ {id:11,t:'La mente nace como una hoja en blanco (tabula rasa)',c:'E',why:'Locke: la experiencia escribe en la mente todas sus ideas.'},
+ {id:12,t:'Ser es ser percibido (esse est percipi)',c:'E',why:'Berkeley: las cosas existen en cuanto son percibidas.'},
+ {id:13,t:'La idea de causa y efecto nace de la costumbre o el hábito',c:'E',why:'Hume: vemos que un hecho sigue a otro y el hábito nos hace esperar la conexión.'},
+ {id:14,t:'No hay nada en el entendimiento que antes no haya pasado por los sentidos',c:'E',why:'Es el principio que resume la tesis empirista sobre el origen del conocimiento.'}
+];
+let where, sel, checked, deck;
+function start(){ deck=shuffle(CARDS); where={}; sel=null; checked=false; $('#fb').innerHTML=''; $('#checkBtn').disabled=true; $('#checkBtn').textContent='Revisar'; paint(); }
+function tk(c){ return '<button type="button" class="tk'+(c.p?' person':'')+(sel===c.id?' is-sel':'')+'" data-id="'+c.id+'">'+c.t+'</button>'; }
+function paint(){
+  const order=deck.filter(c=>!where[c.id]);
+  $('#pool').innerHTML=order.map(tk).join('');
+  $('#listR').innerHTML=CARDS.filter(c=>where[c.id]==='R').map(tk).join('');
+  $('#listE').innerHTML=CARDS.filter(c=>where[c.id]==='E').map(tk).join('');
+  document.querySelectorAll('.tk').forEach(b=>b.addEventListener('click',()=>tapCard(+b.dataset.id)));
+  $('#left').textContent=order.length+(order.length===1?' tarjeta por ubicar':' tarjetas por ubicar');
+  const s=CARDS.find(c=>c.id===sel); $('#selTxt').textContent=s?'Seleccionada: '+s.t:'Ninguna tarjeta seleccionada';
+  $('#checkBtn').disabled=order.length>0;
+}
+function tapCard(id){
+  if(checked) return;
+  if(where[id]){ delete where[id]; sel=null; paint(); return; }
+  sel = sel===id?null:id; paint();
+}
+document.querySelectorAll('[data-camp]').forEach(b=>b.addEventListener('click',()=>{ if(checked||!sel) return; where[sel]=b.dataset.camp; sel=null; paint(); }));
+$('#checkBtn').addEventListener('click',()=>{
+  if(checked){ finishNow(); return; }
+  checked=true; let ok=0;
+  document.querySelectorAll('.camp .tk').forEach(b=>{ const c=CARDS.find(x=>x.id===+b.dataset.id), good=where[c.id]===c.c; if(good) ok++; b.classList.add(good?'is-ok':'is-bad'); });
+  tone(ok>=11);
+  $('#fb').innerHTML='<div class="feedback '+(ok===14?'ok':'bad')+'"><strong>'+ok+' de 14 tarjetas bien ubicadas.</strong>Las marcadas en rojo están en la corriente equivocada. En el resultado verás por qué.</div>';
+  $('#checkBtn').textContent='Ver resultado';
+});
+function finishNow(){ let ok=0; const review=CARDS.map(c=>{const g=where[c.id]===c.c; if(g) ok++; return {ok:g,q:c.t,a:c.c==='R'?'Racionalismo':'Empirismo',why:c.why};}); finish(ok,14,ok/14,review); }
+
+</script>
+
+</html>
