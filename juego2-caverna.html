@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salida de la Caverna</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.target{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 14px;min-width:0;flex:1 1 220px}
+.target small{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.target b{font-family:var(--display);font-weight:400;font-size:1.4rem;line-height:1.2;display:block}
+.stats{display:flex;gap:14px;align-items:center;font-variant-numeric:tabular-nums;font-weight:700}
+.lives{display:flex;gap:4px;color:var(--bad)}
+.combo{color:var(--ochre);min-width:4.5em}
+.stage{position:relative;border-radius:16px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#142347}
+#cv{display:block;width:100%}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;padding:16px}
+.banner{background:rgba(14,21,29,.9);color:#FFFFFF;padding:14px 20px;border-radius:14px;text-align:center;max-width:90%}
+.banner b{display:block;font-family:var(--display);font-weight:400;font-size:1.5rem;color:#F6D27A}
+.toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#F6D27A;color:#14202C;font-weight:700;padding:8px 14px;border-radius:99px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;z-index:3}
+.ctrl{display:grid;grid-template-columns:1fr auto 1fr;gap:10px}
+.ctrl .btn{min-height:58px;font-size:1.5rem;touch-action:none}
+.ctrl .btn.small-t{font-size:1rem}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.badge{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.badge .med{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.badge.on .med{background:var(--ochre-soft);color:var(--ochre);box-shadow:inset 0 0 0 2px var(--ochre)}
+.badge b{display:block;font-size:.92rem;line-height:1.2}
+.badge span{font-size:.8rem;color:var(--muted);line-height:1.25;display:block}
+.badge.new{border-color:var(--ochre);animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.05)}}
+.stars{display:flex;gap:6px;color:var(--ochre)}
+.stars svg.off{color:var(--line)}
+.rewards{display:flex;flex-direction:column;gap:12px}
+.target b{font-family:var(--body);font-weight:700;font-size:1.08rem}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 2 de 7</span>
+    <span class="top-r"><span class="chip">Sócrates y Platón</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="La caverna: prisioneros encadenados miran sombras mientras uno sube hacia la luz del sol" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#14202C"/>
+<rect width="150" height="220" fill="#1E2A38"/>
+<path d="M470 0 H600 V220 H420 C452 160 438 80 470 0Z" fill="#F6D27A"/>
+<circle cx="548" cy="58" r="40" fill="#FFF3C4" opacity=".55"/>
+<circle cx="548" cy="58" r="22" fill="#FFFFFF"/>
+<g fill="#0B0E13">
+ <path d="M38 70 a14 14 0 1 1 28 0 v4 c10 6 14 22 12 40 h-52 c-2 -18 2 -34 12 -40z"/>
+ <path d="M96 64 c10 0 14 8 12 16 c14 4 22 18 20 34 h-50 c-2 -16 4 -30 18 -34 c-4 -8 0 -16 0 -16z"/>
+</g>
+<circle cx="268" cy="150" r="44" fill="#C98B2E" opacity=".22"/>
+<path d="M268 122 C282 140 290 150 284 164 C280 174 256 174 252 164 C246 150 262 142 260 130 C264 136 266 140 268 122Z" fill="#C98B2E"/>
+<path d="M268 146 C274 154 276 160 273 166 C270 170 264 170 262 166 C260 160 266 156 268 146Z" fill="#F6D27A"/>
+<rect x="196" y="128" width="40" height="8" fill="#3A4654"/>
+<path d="M206 128 c0 -10 4 -16 8 -18 c4 2 8 8 8 18z" fill="#3A4654"/>
+<g fill="#3A4654">
+ <circle cx="166" cy="150" r="9"/><path d="M158 160 h18 l6 30 h-30z"/>
+ <circle cx="196" cy="156" r="9"/><path d="M188 166 h18 l6 26 h-30z"/>
+</g>
+<path d="M150 196 H226" stroke="#8E9BA8" stroke-width="3" stroke-dasharray="5 4"/>
+<path d="M300 220 L470 116 L484 132 L330 220Z" fill="#2A3440"/>
+<g stroke="#F3E3C2" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="404" cy="140" r="6" fill="#F3E3C2"/><path d="M404 146 v16 M404 152 l10 -8 M404 152 l-9 4 M404 162 l9 10 M404 162 l-6 12"/></g>
+</svg></figure>
+    <p class="eyebrow">Filosofía clásica · siglos V–IV a. C.</p>
+    <h1>Escape de la caverna</h1>
+    <p class="lead">En el libro VII de <em>La República</em>, Platón imagina prisioneros que solo ven sombras. Uno se libera y asciende hasta ver el sol. Corre por la caverna y cruza solo las puertas de la verdad.</p>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Arriba aparece una pregunta sobre Sócrates o Platón.</li><li>Bajan tres puertas con respuestas. Cambia de carril tocando a la izquierda o a la derecha del juego, con los botones ← → o con las flechas.</li><li>Cruza la puerta correcta: la caverna se ilumina. Una puerta equivocada te quita una de tus 3 vidas.</li><li>Cada pregunta llega más rápido. Son 8 puertas hasta el sol.</li></ol></div>
+    <div class="stack" style="gap:10px">
+      <h3>Retos e insignias</h3>
+      <p class="small" id="collTxt">Cumple los retos para ganar insignias.</p>
+      <div class="badges" id="introBadges"></div>
+    </div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="hud">
+      <div class="target"><small id="whoLbl">Objetivo</small><b id="who">—</b></div>
+      <div class="stats"><span class="lives" id="lives"></span><span id="score">0 pts</span><span class="combo" id="combo"></span></div>
+    </div>
+    <div class="meta"><span id="round"></span><span id="best"></span></div>
+    <div class="stage" id="stage">
+      <canvas id="cv" role="img" aria-label="Caverna con tres carriles y puertas de respuesta"></canvas>
+      <div class="overlay"><div class="banner" id="banner" hidden></div></div>
+      <div class="toast" id="toast" hidden></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="leftBtn" type="button" aria-label="Carril izquierdo">←</button>
+      <button class="btn small-t" id="pauseBtn" type="button">Pausa</button>
+      <button class="btn" id="rightBtn" type="button" aria-label="Carril derecho">→</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Escape de la caverna</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+/* ===== Motor común de los videojuegos ===== */
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MED={
+ rayo:'<path d="M11 2 4 12h5l-1 8 7-11h-5l1-7z" fill="currentColor"/>',
+ racha:'<path d="M10 2c4 5 6 7 5 11-1 4-9 4-10 0-1-3 2-5 1-8 2 2 3 3 4-3z" fill="currentColor"/>',
+ mitad:'<path d="M5 2v16M5 3h10l-2.5 3.5L15 10H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
+ intacto:'<path fill="currentColor" d="M10 17.5s-6.2-3.8-8-7.6C.8 7 2.5 3.8 5.6 3.8c1.8 0 3 1 4.4 2.6 1.4-1.6 2.6-2.6 4.4-2.6 3.1 0 4.8 3.2 3.6 6.1-1.8 3.8-8 7.6-8 7.6z"/>',
+ sabio:'<path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/>',
+ puntos:'<path d="M6 3h8v4a4 4 0 0 1-8 0zM6 5H3a3 3 0 0 0 3 3M14 5h3a3 3 0 0 1-3 3M10 11v4M7 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+};
+const A={key:'',ch:[],coll:new Set(),earned:new Set(),best:0,lives:3,maxLives:3,score:0,combo:0,goal:1500};
+function arcSetup(key,ch,goal){
+  A.key=key; A.ch=ch; A.goal=goal||1500;
+  try{ A.coll=new Set(JSON.parse(localStorage.getItem(key+'-insignias')||'[]')); A.best=+(localStorage.getItem(key+'-best')||0); }catch(e){}
+  renderIntroBadges();
+}
+function badgeHtml(c,on,isNew){ return '<div class="badge'+(on?' on':'')+(isNew?' new':'')+'"><span class="med"><svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true">'+MED[c.id]+'</svg></span><span><b>'+c.n+'</b><span>'+(on?'Ganada · ':'Bloqueada · ')+c.d+'</span></span></div>'; }
+function renderIntroBadges(){
+  $('#introBadges').innerHTML=A.ch.map(c=>badgeHtml(c,A.coll.has(c.id),false)).join('');
+  $('#collTxt').textContent='Cumple los retos para ganar insignias. Tienes '+A.coll.size+' de '+A.ch.length+'. Tu colección se guarda en este celular.';
+}
+function mult(){ return Math.min(4,1+Math.floor(A.combo/2)); }
+function heart(){ return '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.2 0 3.6 1.2 5.3 3.2 1.7-2 3.1-3.2 5.3-3.2 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>'; }
+function arcHud(roundTxt){
+  $('#lives').innerHTML=heart().repeat(Math.max(0,A.lives)); $('#lives').setAttribute('aria-label',A.lives+' vidas');
+  $('#score').textContent=A.score+' pts';
+  const m=mult(); $('#combo').textContent=m>1?'Racha ×'+m:'';
+  if(roundTxt) $('#round').textContent=roundTxt;
+  $('#best').textContent=A.best?'Tu récord: '+A.best+' pts':'';
+}
+function arcReset(lives){
+  A.lives=lives||3; A.maxLives=A.lives; A.score=0; A.combo=0; A.earned=new Set();
+  $('#toast').hidden=true; $('#banner').hidden=true; $('#fb').innerHTML=''; arcHud();
+}
+function arcHit(base){ A.combo++; const p=(base||100)*mult(); A.score+=p; tone(true); if(mult()>=4) unlock('racha'); if(A.score>=A.goal) unlock('puntos'); arcHud(); return p; }
+function arcMiss(){ A.lives--; A.combo=0; tone(false); arcHud(); return A.lives<=0; }
+let toastTimer=0;
+function unlock(id){
+  if(A.earned.has(id)||!A.ch.find(x=>x.id===id)) return; A.earned.add(id); A.coll.add(id);
+  try{ localStorage.setItem(A.key+'-insignias',JSON.stringify([...A.coll])); }catch(e){}
+  const c=A.ch.find(x=>x.id===id), t=$('#toast'); t.textContent='Insignia ganada: '+c.n; t.hidden=false;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.hidden=true;},2300);
+  setTimeout(()=>tone(true),130);
+}
+let bannerTimer=0;
+function banner(title,text,ms,then){
+  const b=$('#banner'); b.innerHTML='<b>'+esc(title)+'</b>'+esc(text||''); b.hidden=false;
+  clearTimeout(bannerTimer); bannerTimer=setTimeout(()=>{ b.hidden=true; if(then) then(); },ms||1400);
+}
+function fbOk(t,why){ $('#fb').innerHTML='<div class="feedback ok"><strong>'+esc(t)+'</strong>'+esc(why)+'</div>'; }
+function fbBad(t,why){ $('#fb').innerHTML='<div class="feedback bad"><strong>'+esc(t)+'</strong>'+esc(why)+'</div>'; }
+function starsHtml(n){ let s=''; for(let i=0;i<3;i++) s+='<svg class="'+(i<n?'':'off')+'" width="40" height="40" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/></svg>'; return '<div class="stars" role="img" aria-label="'+n+' de 3 estrellas">'+s+'</div>'; }
+function arcEnd(o){
+  loopStop(); clearTimeout(bannerTimer);
+  if(o.won){ unlock('sabio'); if(A.lives===A.maxLives) unlock('intacto'); }
+  const stars=o.won?(o.clean===o.total?3:o.clean>=Math.ceil(o.total*0.75)?2:1):0, wasBest=A.score>A.best&&A.score>0;
+  if(A.score>A.best){ A.best=A.score; try{ localStorage.setItem(A.key+'-best',String(A.best)); }catch(e){} }
+  setTimeout(()=>{
+    finish(o.clean,o.total,o.clean/o.total,o.review);
+    $('#endAciertos').textContent=(o.won?'¡Completaste el juego! ':(o.reason||'Te quedaste sin vidas. '))+o.clean+' de '+o.total+' sin errores · '+A.score+' puntos';
+    let rw=$('#rewards'); if(!rw){ rw=document.createElement('div'); rw.id='rewards'; rw.className='rewards'; $('#end .score').after(rw); }
+    const earned=A.ch.filter(c=>A.earned.has(c.id));
+    rw.innerHTML=starsHtml(stars)
+      +'<p><strong>'+(wasBest?'¡Nuevo récord personal! ':'')+(stars===3?'Partida perfecta.':stars===2?'¡Muy bien! Juega sin errores para la tercera estrella.':stars===1?'Completaste el juego. Menos errores te dan más estrellas.':'Completa el juego para ganar estrellas.')+'</strong></p>'
+      +'<h3>'+(earned.length?'Insignias ganadas en esta partida':'Esta vez no ganaste insignias')+'</h3>'
+      +(earned.length?'<div class="badges">'+earned.map(c=>badgeHtml(c,true,true)).join('')+'</div>':'')
+      +'<p class="small">Tu colección: '+A.coll.size+' de '+A.ch.length+' insignias. '+(A.coll.size<A.ch.length?'Te faltan: '+A.ch.filter(c=>!A.coll.has(c.id)).map(c=>c.n).join(', ')+'.':'¡Las tienes todas!')+'</p>';
+    renderIntroBadges();
+  }, o.won?900:1100);
+}
+/* lienzo, bucle y efectos */
+const C={cv:null,ctx:null,W:600,H:440,dpr:1};
+function cvResize(minH,maxH){
+  C.cv=$('#cv'); C.ctx=C.cv.getContext('2d'); const st=$('#stage');
+  C.dpr=Math.min(2,window.devicePixelRatio||1); C.W=st.clientWidth||600;
+  C.H=Math.round(Math.min(maxH||520,Math.max(minH||380,window.innerHeight*0.56)));
+  C.cv.width=C.W*C.dpr; C.cv.height=C.H*C.dpr; C.cv.style.height=C.H+'px'; C.ctx.setTransform(C.dpr,0,0,C.dpr,0,0);
+}
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrap(ctx,text,maxW){ const words=String(text).split(' '); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
+const FONT='"Atkinson Hyperlegible", system-ui, sans-serif';
+let RAF=0, LAST=0, RUN=false, PAUSED=false, STEP=null;
+function loopStart(step){ STEP=step; RUN=true; PAUSED=false; cancelAnimationFrame(RAF); LAST=performance.now(); const pb=$('#pauseBtn'); if(pb) pb.textContent='Pausa';
+  const f=t=>{ const dt=Math.min(0.05,(t-LAST)/1000); LAST=t; STEP(PAUSED?0:dt); if(RUN) RAF=requestAnimationFrame(f); }; RAF=requestAnimationFrame(f); }
+function loopStop(){ RUN=false; cancelAnimationFrame(RAF); }
+function setPause(v){ if(!RUN) return; PAUSED=v; const pb=$('#pauseBtn'); if(pb) pb.textContent=PAUSED?'Seguir':'Pausa'; }
+if($('#pauseBtn')) $('#pauseBtn').addEventListener('click',()=>setPause(!PAUSED));
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) setPause(true); });
+window.addEventListener('resize',()=>{ if(RUN&&window.onArcResize) window.onArcResize(); });
+let FX=[], FL=[];
+function burst(x,y,color,n){ if(RM) return; for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=80+Math.random()*220; FX.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-90,life:0.7+Math.random()*0.4,c:color}); } }
+function floatTxt(x,y,text,color){ FL.push({x,y,text,color,life:1.1}); }
+function fxUpdate(dt){ for(const p of FX){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; p.life-=dt; } FX=FX.filter(p=>p.life>0); for(const f of FL){ f.y-=50*dt; f.life-=dt; } FL=FL.filter(f=>f.life>0); }
+function fxDraw(ctx){
+  for(const p of FX){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill(); }
+  for(const f of FL){ ctx.globalAlpha=Math.max(0,Math.min(1,f.life)); ctx.fillStyle=f.color; ctx.font='700 20px '+FONT; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(f.text,f.x,f.y); }
+  ctx.globalAlpha=1;
+}
+function pausedOverlay(ctx){ if(!PAUSED) return; ctx.fillStyle='rgba(14,21,29,.6)'; ctx.fillRect(0,0,C.W,C.H); ctx.fillStyle='#FFFFFF'; ctx.font='28px Marcellus, Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('En pausa',C.W/2,C.H/2); }
+function holdBtn(id,down,up){ const b=$(id); if(!b) return;
+  b.addEventListener('pointerdown',e=>{ e.preventDefault(); down(); });
+  if(up) ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,up)); }
+/* ===== fin del motor ===== */
+const STAGES=['Encadenado ante las sombras','Ve el fuego','Ve los objetos','Sube la cuesta','Reflejos en el agua','Las cosas mismas','El cielo nocturno','La luz del día','El sol: la Idea del Bien'];
+const QS=[
+ {q:'¿Qué método usaba Sócrates?',o:['Mayéutica','Duda metódica','Experimento'],why:'Con preguntas ayudaba a "dar a luz" las ideas, como una partera. La acompañaba de la ironía.'},
+ {q:'"Solo sé que no sé nada" expresa…',o:['Reconocer la ignorancia','Nada se puede saber','Los sentidos engañan'],why:'Reconocer que no se sabe es el punto de partida para buscar la verdad.'},
+ {q:'Para Sócrates, ¿por qué se actúa mal?',o:['Por ignorancia','Por naturaleza','Por los dioses'],why:'Es el intelectualismo moral: quien conoce el bien, lo practica.'},
+ {q:'En la caverna, las sombras son…',o:['Apariencias, opinión','Ideas eternas','Recuerdos del alma'],why:'Las sombras son lo que la mayoría toma por real sin examinarlo: la doxa u opinión.'},
+ {q:'El sol fuera de la caverna simboliza…',o:['La Idea del Bien','El poder del rey','El fuego'],why:'Como el sol permite ver las cosas, la Idea del Bien hace inteligible todo lo demás.'},
+ {q:'Para Platón, el mundo de las Ideas es…',o:['Eterno e inmutable','Cambiante','Material'],why:'Solo se conoce con la razón y no cambia, a diferencia del mundo sensible.'},
+ {q:'Conocer es recordar lo que el alma ya vio:',o:['Reminiscencia','Empirismo','Mayéutica'],why:'Es la teoría de la anámnesis, presente en diálogos como el Menón.'},
+ {q:'En La República, ¿quién debe gobernar?',o:['Los filósofos','Los más ricos','Los guerreros'],why:'Solo quien conoce el Bien puede gobernar con justicia: el filósofo gobernante.'}
+];
+arcSetup('caverna',[
+ {id:'mitad',n:'Mitad del ascenso',d:'Cruza 4 puertas correctas'},
+ {id:'rayo',n:'Luz veloz',d:'Termina en menos de 75 segundos'},
+ {id:'racha',n:'Racha imparable',d:'Llega a una racha ×4'},
+ {id:'sabio',n:'Ver el sol',d:'Llega al final de la caverna'},
+ {id:'intacto',n:'Sin un rasguño',d:'Termina sin perder vidas'},
+ {id:'puntos',n:'Filósofo gobernante',d:'Supera 1.500 puntos'}
+],1500);
+let order,qi,lane,px,gate,speed,light,clean,review,elapsed,rocks,wait;
+function lanesX(i){ return C.W*(i+0.5)/3; }
+function start(){
+  arcReset(3); order=shuffle(QS).map(q=>({...q,opts:shuffle(q.o.map((t,k)=>({t,ok:k===0})))}));
+  qi=0; lane=1; light=0; clean=0; review=[]; elapsed=0; speed=95; gate=null; wait=0; FX=[]; FL=[];
+  requestAnimationFrame(()=>{ cvResize(400,540); px=lanesX(1); rocks=Array.from({length:14},()=>({x:Math.random()*C.W,y:Math.random()*C.H,s:8+Math.random()*18}));
+    nextQ(true); loopStart(step); });
+}
+window.onArcResize=()=>{ cvResize(400,540); };
+function nextQ(first){
+  const it=order[qi]; $('#whoLbl').textContent='Pregunta '+(qi+1)+' de 8'; $('#who').textContent=it.q;
+  arcHud('Etapa: '+STAGES[light]);
+  gate={y:-70,opts:it.opts,done:false};
+  if(first) banner('¡Escapa!','Cruza la puerta correcta',1300);
+  wait=first?1.3:0.2;
+}
+function judge(){
+  const it=order[qi], pick=gate.opts[lane]; gate.done=true;
+  if(pick.ok){ const p=arcHit(); clean+= it.miss?0:1; light++; burst(lanesX(lane),C.H-90,'#F6D27A',28); floatTxt(lanesX(lane),C.H-120,'+'+p,'#F6D27A');
+    if(light>=4) unlock('mitad');
+    fbOk('¡Correcto! '+pick.t+'.',it.why); review.push({ok:true,q:it.q,a:it.o[0],why:it.why}); }
+  else { const dead=arcMiss(); floatTxt(lanesX(lane),C.H-120,'−1 vida','#F2A097'); burst(lanesX(lane),C.H-90,'#F2A097',12);
+    fbBad('Esa puerta llevaba a «'+pick.t+'».','La respuesta era: '+it.o[0]+'. '+it.why); review.push({ok:false,q:it.q,a:it.o[0],why:it.why});
+    if(dead){ finishRun(false); return; } }
+  qi++;
+  if(qi>=order.length){ finishRun(true); return; }
+  speed+=16; setTimeout(()=>{ if(RUN) nextQ(false); },600);
+}
+function finishRun(won){ if(won&&elapsed<75) unlock('rayo'); arcEnd({won,clean,total:8,review:review.concat(order.slice(review.length).map(it=>({ok:false,q:it.q,a:it.o[0],why:it.why})))}); }
+function step(dt){
+  elapsed+=dt; fxUpdate(dt);
+  px+= (lanesX(lane)-px)*Math.min(1,dt*14);
+  for(const r of rocks){ r.y+=speed*0.6*dt; if(r.y>C.H+20){ r.y=-20; r.x=Math.random()*C.W; } }
+  if(wait>0) wait-=dt;
+  else if(gate&&!gate.done){ gate.y+=speed*dt; if(gate.y>=C.H-120) judge(); }
+  draw();
+}
+function mix(a,b,t){ const p=s=>[1,3,5].map(i=>parseInt(s.substr(i,2),16)); const A1=p(a),B1=p(b); return 'rgb('+A1.map((v,i)=>Math.round(v+(B1[i]-v)*t)).join(',')+')'; }
+function draw(){
+  const ctx=C.ctx, W=C.W, H=C.H, t=light/8;
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,mix('#1A1F2A','#F6D27A',t)); g.addColorStop(1,mix('#07090D','#C98B2E',t*0.8)); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  if(t>0){ ctx.globalAlpha=t; ctx.fillStyle='#FFF3C4'; ctx.beginPath(); ctx.arc(W/2,-30,60+t*80,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
+  ctx.fillStyle=mix('#2A3440','#8E5C0E',t);
+  for(const r of rocks){ ctx.beginPath(); ctx.moveTo(r.x-r.s,r.y); ctx.lineTo(r.x+r.s,r.y); ctx.lineTo(r.x,r.y+r.s*1.6); ctx.closePath(); ctx.fill(); }
+  ctx.strokeStyle='rgba(255,255,255,.14)'; ctx.lineWidth=2; ctx.setLineDash([10,14]);
+  for(let i=1;i<3;i++){ ctx.beginPath(); ctx.moveTo(W*i/3,0); ctx.lineTo(W*i/3,H); ctx.stroke(); } ctx.setLineDash([]);
+  if(gate&&!gate.done){
+    const gw=W/3-14, gh=86;
+    gate.opts.forEach((o,i)=>{ const x=lanesX(i)-gw/2, y=gate.y;
+      ctx.fillStyle='#3A2A18'; rr(ctx,x,y,gw,gh,10); ctx.fill();
+      ctx.fillStyle='#F3E3C2'; rr(ctx,x+5,y+5,gw-10,gh-10,8); ctx.fill();
+      ctx.fillStyle='#14202C'; ctx.font='700 '+(W<420?13:15)+'px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle';
+      const lines=wrap(ctx,o.t,gw-18).slice(0,3); lines.forEach((l,k)=>ctx.fillText(l,lanesX(i),y+gh/2+(k-(lines.length-1)/2)*17));
+    });
+  }
+  const y=H-84; ctx.save(); ctx.translate(px,y);
+  ctx.fillStyle='#F3E3C2'; ctx.strokeStyle='#F3E3C2'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(0,-26,10,0,Math.PI*2); ctx.fill();
+  const leg=Math.sin(performance.now()/110)*(RM?0:8);
+  ctx.beginPath(); ctx.moveTo(0,-16); ctx.lineTo(0,10); ctx.moveTo(0,-8); ctx.lineTo(-12,4+leg/2); ctx.moveTo(0,-8); ctx.lineTo(12,4-leg/2);
+  ctx.moveTo(0,10); ctx.lineTo(-9+leg,32); ctx.moveTo(0,10); ctx.lineTo(9-leg,32); ctx.stroke();
+  if(light<2){ ctx.strokeStyle='#8E9BA8'; ctx.lineWidth=2; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(-14,34); ctx.lineTo(14,34); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.restore();
+  fxDraw(ctx);
+  ctx.fillStyle='rgba(0,0,0,.35)'; ctx.fillRect(0,H-26,W,26); ctx.fillStyle='#FFFFFF'; ctx.font='700 13px '+FONT; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('Luz: '+STAGES[light],10,H-13);
+  pausedOverlay(ctx);
+}
+function move(d){ if(!RUN||PAUSED) return; lane=Math.max(0,Math.min(2,lane+d)); }
+holdBtn('#leftBtn',()=>move(-1)); holdBtn('#rightBtn',()=>move(1));
+$('#cv').addEventListener('pointerdown',e=>{ const r=e.currentTarget.getBoundingClientRect(), x=(e.clientX-r.left)/r.width; move(x<0.5?-1:1); });
+window.addEventListener('keydown',e=>{ if(!RUN) return; if(e.key==='ArrowLeft'){ move(-1); e.preventDefault(); } else if(e.key==='ArrowRight'){ move(1); e.preventDefault(); } else if(e.key==='p'||e.key==='P') setPause(!PAUSED); });
+
+</script>
+
+</html>

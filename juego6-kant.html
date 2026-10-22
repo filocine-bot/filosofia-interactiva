@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Tribunal de Kant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.target{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 14px;min-width:0;flex:1 1 220px}
+.target small{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.target b{font-family:var(--display);font-weight:400;font-size:1.4rem;line-height:1.2;display:block}
+.stats{display:flex;gap:14px;align-items:center;font-variant-numeric:tabular-nums;font-weight:700}
+.lives{display:flex;gap:4px;color:var(--bad)}
+.combo{color:var(--ochre);min-width:4.5em}
+.stage{position:relative;border-radius:16px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#142347}
+#cv{display:block;width:100%}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;padding:16px}
+.banner{background:rgba(14,21,29,.9);color:#FFFFFF;padding:14px 20px;border-radius:14px;text-align:center;max-width:90%}
+.banner b{display:block;font-family:var(--display);font-weight:400;font-size:1.5rem;color:#F6D27A}
+.toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#F6D27A;color:#14202C;font-weight:700;padding:8px 14px;border-radius:99px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;z-index:3}
+.ctrl{display:grid;grid-template-columns:1fr auto 1fr;gap:10px}
+.ctrl .btn{min-height:58px;font-size:1.5rem;touch-action:none}
+.ctrl .btn.small-t{font-size:1rem}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.badge{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.badge .med{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.badge.on .med{background:var(--ochre-soft);color:var(--ochre);box-shadow:inset 0 0 0 2px var(--ochre)}
+.badge b{display:block;font-size:.92rem;line-height:1.2}
+.badge span{font-size:.8rem;color:var(--muted);line-height:1.25;display:block}
+.badge.new{border-color:var(--ochre);animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.05)}}
+.stars{display:flex;gap:6px;color:var(--ochre)}
+.stars svg.off{color:var(--line)}
+.rewards{display:flex;flex-direction:column;gap:12px}
+.stamps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stamp{min-height:70px;font:inherit;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:3px solid;background:var(--surface);touch-action:manipulation}
+.stamp b{font-family:var(--display);font-weight:400;font-size:1.25rem}
+.stamp span{font-size:.78rem;color:var(--muted)}
+.stamp.c{border-color:var(--lapis);color:var(--lapis)} .stamp.h{border-color:var(--ochre);color:var(--ochre)}
+.def{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:520px){.def{grid-template-columns:minmax(0,1fr)}}
+.def div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 6 de 7</span>
+    <span class="top-r"><span class="chip">Kant e Ilustración</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="Cielo estrellado sobre un mazo de juez, con la frase de Kant: el cielo estrellado sobre mí y la ley moral en mí" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#14202C"/>
+<g fill="#FFFFFF"><circle cx="40" cy="30" r="1.8"/><circle cx="92" cy="58" r="1.2"/><circle cx="130" cy="22" r="2.2"/><circle cx="176" cy="48" r="1.4"/><circle cx="214" cy="18" r="1.6"/><circle cx="258" cy="64" r="1.2"/><circle cx="300" cy="26" r="2"/><circle cx="346" cy="52" r="1.4"/><circle cx="388" cy="16" r="1.8"/><circle cx="436" cy="44" r="1.2"/><circle cx="470" cy="20" r="2.2"/><circle cx="512" cy="60" r="1.4"/><circle cx="560" cy="28" r="1.8"/><circle cx="66" cy="96" r="1.2"/><circle cx="150" cy="88" r="1.6"/><circle cx="454" cy="92" r="1.6"/><circle cx="540" cy="100" r="1.2"/><circle cx="24" cy="120" r="1.4"/><circle cx="584" cy="70" r="1.2"/></g>
+<g stroke="#8EA7F2" stroke-width="1" opacity=".7" fill="none"><path d="M388 16 L436 44 L470 20 L512 60 L560 28"/></g>
+<g fill="#F6D27A"><path d="M130 22 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z"/><path d="M470 20 l2.5 -7 l2.5 7 l7 2.5 l-7 2.5 l-2.5 7 l-2.5 -7 l-7 -2.5z"/></g>
+<rect x="238" y="134" width="124" height="16" rx="3" fill="#8E5C0E"/>
+<rect x="250" y="126" width="100" height="10" rx="3" fill="#C98B2E"/>
+<g transform="rotate(-28 300 100)"><rect x="296" y="70" width="10" height="84" rx="4" fill="#C98B2E"/><rect x="270" y="52" width="62" height="28" rx="6" fill="#E3B45E" stroke="#8E5C0E" stroke-width="2"/><rect x="264" y="56" width="8" height="20" rx="2" fill="#8E5C0E"/><rect x="330" y="56" width="8" height="20" rx="2" fill="#8E5C0E"/></g>
+<text x="300" y="190" font-family="Marcellus, Georgia, serif" font-size="17" fill="#F3E3C2" text-anchor="middle">«El cielo estrellado sobre mí y la ley moral en mí»</text>
+<text x="300" y="210" font-family="Atkinson Hyperlegible, sans-serif" font-size="11" fill="#A6B3C0" text-anchor="middle">Kant, Crítica de la razón práctica</text>
+</svg></figure>
+    <p class="eyebrow">Ilustración · siglo XVIII</p>
+    <h1>Sello del tribunal</h1>
+    <p class="lead">"¡Sapere aude! Ten el valor de servirte de tu propio entendimiento." Kant distinguió dos clases de mandatos. Hoy eres juez del tribunal de la razón: los mandatos pasan por la banda y debes sellarlos antes de que se vayan.</p>
+    <div class="def">
+      <div><strong>Imperativo hipotético</strong><p class="small">"Si quieres X, haz Y". Manda algo como medio para un fin que deseas.</p></div>
+      <div><strong>Imperativo categórico</strong><p class="small">Manda sin condiciones, por deber, y vale para todos.</p></div>
+    </div>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Los mandatos avanzan por una banda transportadora.</li><li>Séllalos con <em>Categórico</em> o <em>Hipotético</em> (botones, o teclas C y H).</li><li>Si sellas en la franja dorada ganas el bono «Puntual como Kant», famoso por la puntualidad de sus paseos en Königsberg.</li><li>Un error o un mandato sin sellar te quita una de tus 3 vidas. Son 10 mandatos.</li></ol></div>
+    <div class="stack" style="gap:10px">
+      <h3>Retos e insignias</h3>
+      <p class="small" id="collTxt">Cumple los retos para ganar insignias.</p>
+      <div class="badges" id="introBadges"></div>
+    </div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="hud">
+      <div class="target"><small id="whoLbl">Objetivo</small><b id="who">—</b></div>
+      <div class="stats"><span class="lives" id="lives"></span><span id="score">0 pts</span><span class="combo" id="combo"></span></div>
+    </div>
+    <div class="meta"><span id="round"></span><span id="best"></span></div>
+    <div class="stage" id="stage">
+      <canvas id="cv" role="img" aria-label="Banda transportadora con mandatos para sellar"></canvas>
+      <div class="overlay"><div class="banner" id="banner" hidden></div></div>
+      <div class="toast" id="toast" hidden></div>
+    </div>
+    <div class="stamps">
+      <button class="stamp c" type="button" data-v="C"><b>Categórico</b><span>Sin condiciones · tecla C</span></button>
+      <button class="stamp h" type="button" data-v="H"><b>Hipotético</b><span>Si quieres…, haz… · tecla H</span></button>
+    </div>
+    <div class="btn-row"><button class="btn" id="pauseBtn" type="button">Pausa</button></div>
+    <div id="fb" aria-live="polite"></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · Sello del tribunal</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+/* ===== Motor común de los videojuegos ===== */
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MED={
+ rayo:'<path d="M11 2 4 12h5l-1 8 7-11h-5l1-7z" fill="currentColor"/>',
+ racha:'<path d="M10 2c4 5 6 7 5 11-1 4-9 4-10 0-1-3 2-5 1-8 2 2 3 3 4-3z" fill="currentColor"/>',
+ mitad:'<path d="M5 2v16M5 3h10l-2.5 3.5L15 10H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
+ intacto:'<path fill="currentColor" d="M10 17.5s-6.2-3.8-8-7.6C.8 7 2.5 3.8 5.6 3.8c1.8 0 3 1 4.4 2.6 1.4-1.6 2.6-2.6 4.4-2.6 3.1 0 4.8 3.2 3.6 6.1-1.8 3.8-8 7.6-8 7.6z"/>',
+ sabio:'<path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/>',
+ puntos:'<path d="M6 3h8v4a4 4 0 0 1-8 0zM6 5H3a3 3 0 0 0 3 3M14 5h3a3 3 0 0 1-3 3M10 11v4M7 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+};
+const A={key:'',ch:[],coll:new Set(),earned:new Set(),best:0,lives:3,maxLives:3,score:0,combo:0,goal:1500};
+function arcSetup(key,ch,goal){
+  A.key=key; A.ch=ch; A.goal=goal||1500;
+  try{ A.coll=new Set(JSON.parse(localStorage.getItem(key+'-insignias')||'[]')); A.best=+(localStorage.getItem(key+'-best')||0); }catch(e){}
+  renderIntroBadges();
+}
+function badgeHtml(c,on,isNew){ return '<div class="badge'+(on?' on':'')+(isNew?' new':'')+'"><span class="med"><svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true">'+MED[c.id]+'</svg></span><span><b>'+c.n+'</b><span>'+(on?'Ganada · ':'Bloqueada · ')+c.d+'</span></span></div>'; }
+function renderIntroBadges(){
+  $('#introBadges').innerHTML=A.ch.map(c=>badgeHtml(c,A.coll.has(c.id),false)).join('');
+  $('#collTxt').textContent='Cumple los retos para ganar insignias. Tienes '+A.coll.size+' de '+A.ch.length+'. Tu colección se guarda en este celular.';
+}
+function mult(){ return Math.min(4,1+Math.floor(A.combo/2)); }
+function heart(){ return '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.2 0 3.6 1.2 5.3 3.2 1.7-2 3.1-3.2 5.3-3.2 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>'; }
+function arcHud(roundTxt){
+  $('#lives').innerHTML=heart().repeat(Math.max(0,A.lives)); $('#lives').setAttribute('aria-label',A.lives+' vidas');
+  $('#score').textContent=A.score+' pts';
+  const m=mult(); $('#combo').textContent=m>1?'Racha ×'+m:'';
+  if(roundTxt) $('#round').textContent=roundTxt;
+  $('#best').textContent=A.best?'Tu récord: '+A.best+' pts':'';
+}
+function arcReset(lives){
+  A.lives=lives||3; A.maxLives=A.lives; A.score=0; A.combo=0; A.earned=new Set();
+  $('#toast').hidden=true; $('#banner').hidden=true; $('#fb').innerHTML=''; arcHud();
+}
+function arcHit(base){ A.combo++; const p=(base||100)*mult(); A.score+=p; tone(true); if(mult()>=4) unlock('racha'); if(A.score>=A.goal) unlock('puntos'); arcHud(); return p; }
+function arcMiss(){ A.lives--; A.combo=0; tone(false); arcHud(); return A.lives<=0; }
+let toastTimer=0;
+function unlock(id){
+  if(A.earned.has(id)||!A.ch.find(x=>x.id===id)) return; A.earned.add(id); A.coll.add(id);
+  try{ localStorage.setItem(A.key+'-insignias',JSON.stringify([...A.coll])); }catch(e){}
+  const c=A.ch.find(x=>x.id===id), t=$('#toast'); t.textContent='Insignia ganada: '+c.n; t.hidden=false;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.hidden=true;},2300);
+  setTimeout(()=>tone(true),130);
+}
+let bannerTimer=0;
+function banner(title,text,ms,then){
+  const b=$('#banner'); b.innerHTML='<b>'+esc(title)+'</b>'+esc(text||''); b.hidden=false;
+  clearTimeout(bannerTimer); bannerTimer=setTimeout(()=>{ b.hidden=true; if(then) then(); },ms||1400);
+}
+function fbOk(t,why){ $('#fb').innerHTML='<div class="feedback ok"><strong>'+esc(t)+'</strong>'+esc(why)+'</div>'; }
+function fbBad(t,why){ $('#fb').innerHTML='<div class="feedback bad"><strong>'+esc(t)+'</strong>'+esc(why)+'</div>'; }
+function starsHtml(n){ let s=''; for(let i=0;i<3;i++) s+='<svg class="'+(i<n?'':'off')+'" width="40" height="40" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/></svg>'; return '<div class="stars" role="img" aria-label="'+n+' de 3 estrellas">'+s+'</div>'; }
+function arcEnd(o){
+  loopStop(); clearTimeout(bannerTimer);
+  if(o.won){ unlock('sabio'); if(A.lives===A.maxLives) unlock('intacto'); }
+  const stars=o.won?(o.clean===o.total?3:o.clean>=Math.ceil(o.total*0.75)?2:1):0, wasBest=A.score>A.best&&A.score>0;
+  if(A.score>A.best){ A.best=A.score; try{ localStorage.setItem(A.key+'-best',String(A.best)); }catch(e){} }
+  setTimeout(()=>{
+    finish(o.clean,o.total,o.clean/o.total,o.review);
+    $('#endAciertos').textContent=(o.won?'¡Completaste el juego! ':(o.reason||'Te quedaste sin vidas. '))+o.clean+' de '+o.total+' sin errores · '+A.score+' puntos';
+    let rw=$('#rewards'); if(!rw){ rw=document.createElement('div'); rw.id='rewards'; rw.className='rewards'; $('#end .score').after(rw); }
+    const earned=A.ch.filter(c=>A.earned.has(c.id));
+    rw.innerHTML=starsHtml(stars)
+      +'<p><strong>'+(wasBest?'¡Nuevo récord personal! ':'')+(stars===3?'Partida perfecta.':stars===2?'¡Muy bien! Juega sin errores para la tercera estrella.':stars===1?'Completaste el juego. Menos errores te dan más estrellas.':'Completa el juego para ganar estrellas.')+'</strong></p>'
+      +'<h3>'+(earned.length?'Insignias ganadas en esta partida':'Esta vez no ganaste insignias')+'</h3>'
+      +(earned.length?'<div class="badges">'+earned.map(c=>badgeHtml(c,true,true)).join('')+'</div>':'')
+      +'<p class="small">Tu colección: '+A.coll.size+' de '+A.ch.length+' insignias. '+(A.coll.size<A.ch.length?'Te faltan: '+A.ch.filter(c=>!A.coll.has(c.id)).map(c=>c.n).join(', ')+'.':'¡Las tienes todas!')+'</p>';
+    renderIntroBadges();
+  }, o.won?900:1100);
+}
+/* lienzo, bucle y efectos */
+const C={cv:null,ctx:null,W:600,H:440,dpr:1};
+function cvResize(minH,maxH){
+  C.cv=$('#cv'); C.ctx=C.cv.getContext('2d'); const st=$('#stage');
+  C.dpr=Math.min(2,window.devicePixelRatio||1); C.W=st.clientWidth||600;
+  C.H=Math.round(Math.min(maxH||520,Math.max(minH||380,window.innerHeight*0.56)));
+  C.cv.width=C.W*C.dpr; C.cv.height=C.H*C.dpr; C.cv.style.height=C.H+'px'; C.ctx.setTransform(C.dpr,0,0,C.dpr,0,0);
+}
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrap(ctx,text,maxW){ const words=String(text).split(' '); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
+const FONT='"Atkinson Hyperlegible", system-ui, sans-serif';
+let RAF=0, LAST=0, RUN=false, PAUSED=false, STEP=null;
+function loopStart(step){ STEP=step; RUN=true; PAUSED=false; cancelAnimationFrame(RAF); LAST=performance.now(); const pb=$('#pauseBtn'); if(pb) pb.textContent='Pausa';
+  const f=t=>{ const dt=Math.min(0.05,(t-LAST)/1000); LAST=t; STEP(PAUSED?0:dt); if(RUN) RAF=requestAnimationFrame(f); }; RAF=requestAnimationFrame(f); }
+function loopStop(){ RUN=false; cancelAnimationFrame(RAF); }
+function setPause(v){ if(!RUN) return; PAUSED=v; const pb=$('#pauseBtn'); if(pb) pb.textContent=PAUSED?'Seguir':'Pausa'; }
+if($('#pauseBtn')) $('#pauseBtn').addEventListener('click',()=>setPause(!PAUSED));
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) setPause(true); });
+window.addEventListener('resize',()=>{ if(RUN&&window.onArcResize) window.onArcResize(); });
+let FX=[], FL=[];
+function burst(x,y,color,n){ if(RM) return; for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=80+Math.random()*220; FX.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-90,life:0.7+Math.random()*0.4,c:color}); } }
+function floatTxt(x,y,text,color){ FL.push({x,y,text,color,life:1.1}); }
+function fxUpdate(dt){ for(const p of FX){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; p.life-=dt; } FX=FX.filter(p=>p.life>0); for(const f of FL){ f.y-=50*dt; f.life-=dt; } FL=FL.filter(f=>f.life>0); }
+function fxDraw(ctx){
+  for(const p of FX){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill(); }
+  for(const f of FL){ ctx.globalAlpha=Math.max(0,Math.min(1,f.life)); ctx.fillStyle=f.color; ctx.font='700 20px '+FONT; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(f.text,f.x,f.y); }
+  ctx.globalAlpha=1;
+}
+function pausedOverlay(ctx){ if(!PAUSED) return; ctx.fillStyle='rgba(14,21,29,.6)'; ctx.fillRect(0,0,C.W,C.H); ctx.fillStyle='#FFFFFF'; ctx.font='28px Marcellus, Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('En pausa',C.W/2,C.H/2); }
+function holdBtn(id,down,up){ const b=$(id); if(!b) return;
+  b.addEventListener('pointerdown',e=>{ e.preventDefault(); down(); });
+  if(up) ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,up)); }
+/* ===== fin del motor ===== */
+const QS=[
+ {q:'Si quieres aprobar el Saber 11, estudia todos los días.',a:'H',why:'Estudiar es un medio para un fin que deseas.'},
+ {q:'No mientas.',a:'C',why:'Manda sin condición alguna y vale para todos.'},
+ {q:'Si quieres que confíen en ti, no mientas.',a:'H',why:'Aquí no mentir es un medio para lograr la confianza.'},
+ {q:'Obra según una máxima que puedas querer como ley universal.',a:'C',why:'Fórmula de la ley universal, en la Fundamentación de la metafísica de las costumbres (1785).'},
+ {q:'Trata a la humanidad siempre como un fin y nunca solo como un medio.',a:'C',why:'Fórmula de la humanidad: cada persona tiene dignidad, no precio.'},
+ {q:'Si quieres estar sano, haz ejercicio.',a:'H',why:'Consejo de prudencia: depende de que desees la salud.'},
+ {q:'Cumple tus promesas.',a:'C',why:'Si todos prometieran en falso, las promesas dejarían de existir.'},
+ {q:'Ayuda a tu compañero, así después él te ayudará.',a:'H',why:'La ayuda es un medio para un beneficio; para Kant no tendría valor moral.'},
+ {q:'Si deseas comprar una moto, ahorra.',a:'H',why:'Regla de habilidad: indica el medio para un fin deseado.'},
+ {q:'Di la verdad, aunque te perjudique.',a:'C',why:'El deber de veracidad no depende de las consecuencias.'}
+];
+const NAME={C:'Imperativo categórico',H:'Imperativo hipotético'};
+arcSetup('tribunal',[
+ {id:'mitad',n:'Juez en formación',d:'Sella bien 5 mandatos'},
+ {id:'rayo',n:'Puntual como Kant',d:'Sella 3 mandatos en la franja dorada'},
+ {id:'racha',n:'Racha imparable',d:'Llega a una racha ×4'},
+ {id:'sabio',n:'Sapere aude',d:'Juzga los 10 mandatos'},
+ {id:'intacto',n:'Sin un rasguño',d:'Termina sin perder vidas'},
+ {id:'puntos',n:'Razón práctica',d:'Supera 2.500 puntos'}
+],2500);
+let order,qi,doc,speed,clean,review,goodN,punct,stampFx;
+function start(){
+  arcReset(3); order=shuffle(QS); qi=0; clean=0; review=[]; goodN=0; punct=0; speed=55; doc=null; stampFx=null; FX=[]; FL=[];
+  requestAnimationFrame(()=>{ cvResize(330,420); banner('Se abre la sesión','Sella cada mandato',1300,()=>spawn()); loopStart(step); });
+}
+window.onArcResize=()=>{ cvResize(330,420); };
+function docW(){ return Math.min(250,C.W*0.62); }
+function spawn(){ if(!RUN) return; doc={x:-docW()/2-10,d:order[qi],stamp:null}; $('#whoLbl').textContent='Mandato '+(qi+1)+' de 10'; $('#who').textContent='Séllalo antes de que salga'; arcHud('Velocidad de la banda: '+Math.round(speed)); }
+function zone(){ const zw=Math.min(120,C.W*0.26); return [C.W/2-zw/2,C.W/2+zw/2]; }
+function stampIt(v){
+  if(!RUN||PAUSED||!doc||doc.stamp) return;
+  const d=doc.d, ok=v===d.a, [z1,z2]=zone(), inZone=doc.x>z1&&doc.x<z2;
+  doc.stamp=v; stampFx={t:0.25};
+  if(ok){ const p=arcHit(inZone?150:100); clean++; goodN++; if(goodN>=5) unlock('mitad'); if(inZone){ punct++; if(punct>=3) unlock('rayo'); }
+    burst(doc.x,C.H*0.45,'#F6D27A',22); floatTxt(doc.x,C.H*0.25,(inZone?'¡Puntual! ':'')+'+'+p,'#F6D27A');
+    fbOk(NAME[d.a]+'.',d.why); review.push({ok:true,q:d.q,a:NAME[d.a],why:d.why}); }
+  else { const dead=arcMiss(); floatTxt(doc.x,C.H*0.25,'−1 vida','#F2A097');
+    fbBad('Sello equivocado: era '+NAME[d.a].toLowerCase()+'.',d.why); review.push({ok:false,q:d.q,a:NAME[d.a],why:d.why});
+    if(dead){ finishRun(false); } }
+}
+function finishRun(won){ arcEnd({won,clean,total:10,review:review.concat(order.slice(review.length).map(x=>({ok:false,q:x.q,a:NAME[x.a],why:x.why})))}); doc=null; }
+function step(dt){
+  fxUpdate(dt); if(stampFx){ stampFx.t-=dt; if(stampFx.t<=0) stampFx=null; }
+  if(doc){ doc.x+=(doc.stamp?speed*2.2:speed)*dt;
+    if(doc.x-docW()/2>C.W+10){
+      if(!doc.stamp){ const d=doc.d; const dead=arcMiss(); fbBad('¡El mandato salió sin sello!','Era '+NAME[d.a].toLowerCase()+'. '+d.why); review.push({ok:false,q:d.q,a:NAME[d.a],why:d.why}); if(dead){ finishRun(false); draw(); return; } }
+      qi++; doc=null; if(qi>=order.length){ finishRun(true); draw(); return; }
+      speed+=9; setTimeout(spawn,350);
+    } }
+  draw();
+}
+function draw(){
+  const ctx=C.ctx, W=C.W, H=C.H;
+  ctx.fillStyle='#2B2118'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#3A2E22'; for(let x=0;x<W;x+=48){ ctx.fillRect(x,0,2,H*0.7); }
+  ctx.fillStyle='#F3E3C2'; ctx.font='22px Marcellus, Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.globalAlpha=0.18; ctx.fillText('SAPERE AUDE',W/2,28); ctx.globalAlpha=1;
+  const by=H*0.72; ctx.fillStyle='#14202C'; ctx.fillRect(0,by,W,26);
+  const off=(performance.now()/1000*speed)%30; ctx.fillStyle='#3A4654'; for(let x=-30+off;x<W;x+=30) ctx.fillRect(x,by+4,14,18);
+  ctx.fillStyle='#0E151D'; ctx.fillRect(0,by+26,W,H-by-26);
+  const [z1,z2]=zone(); ctx.fillStyle='rgba(246,210,122,.22)'; ctx.fillRect(z1,46,z2-z1,by-46); ctx.strokeStyle='#F6D27A'; ctx.setLineDash([6,6]); ctx.lineWidth=2; ctx.strokeRect(z1,46,z2-z1,by-46); ctx.setLineDash([]);
+  ctx.fillStyle='#F6D27A'; ctx.font='700 11px '+FONT; ctx.fillText('FRANJA PUNTUAL',W/2,by+40);
+  if(doc){
+    const w=docW(), h=Math.min(150,by-60), x=doc.x-w/2, y=by-h-4;
+    ctx.fillStyle='rgba(0,0,0,.35)'; rr(ctx,x+4,y+6,w,h,8); ctx.fill();
+    ctx.fillStyle='#F8F1E0'; rr(ctx,x,y,w,h,8); ctx.fill();
+    ctx.fillStyle='#8E5C0E'; ctx.font='700 10px '+FONT; ctx.fillText('MANDATO',doc.x,y+14);
+    ctx.fillStyle='#14202C'; ctx.font='700 '+(W<420?14:16)+'px '+FONT;
+    const lines=wrap(ctx,'«'+doc.d.q+'»',w-22).slice(0,5); lines.forEach((l,k)=>ctx.fillText(l,doc.x,y+h/2+6+(k-(lines.length-1)/2)*19));
+    if(doc.stamp){ const ok=doc.stamp===doc.d.a; ctx.save(); ctx.translate(doc.x,y+h/2); ctx.rotate(-0.22); const s=stampFx&&!RM?1+stampFx.t*1.5:1; ctx.scale(s,s);
+      ctx.strokeStyle=doc.stamp==='C'?'#23439B':'#B4532A'; ctx.globalAlpha=0.85; ctx.lineWidth=4; rr(ctx,-78,-20,156,40,6); ctx.stroke();
+      ctx.fillStyle=ctx.strokeStyle; ctx.font='700 18px '+FONT; ctx.fillText(doc.stamp==='C'?'CATEGÓRICO':'HIPOTÉTICO',0,1); ctx.globalAlpha=1;
+      ctx.fillStyle=ok?'#1D6E46':'#A3271E'; ctx.beginPath(); ctx.arc(70,-24,11,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#FFFFFF'; ctx.font='700 14px '+FONT; ctx.fillText(ok?'✓':'✗',70,-23); ctx.restore(); }
+  }
+  fxDraw(ctx); pausedOverlay(ctx);
+}
+document.querySelectorAll('.stamp').forEach(b=>b.addEventListener('click',()=>stampIt(b.dataset.v)));
+window.addEventListener('keydown',e=>{ if(!RUN) return; const k=e.key.toLowerCase(); if(k==='c') stampIt('C'); else if(k==='h') stampIt('H'); else if(k==='p') setPause(!PAUSED); });
+
+</script>
+
+</html>

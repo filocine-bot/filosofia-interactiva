@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Arjé</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Marcellus&display=swap">
+<style>
+/* Layout: una columna de aula (máx. 760px), pantallas intro → juego → resultado; la tipografía romana marca la época, la cuerpo hiperlegible sirve a la lectura en celular. */
+:root{
+  --bg:#E9EEF2; --surface:#F8FAFB; --ink:#14202C; --muted:#4A5866; --line:#C3CED8;
+  --lapis:#23439B; --lapis-ink:#FFFFFF; --lapis-soft:#DCE3F5;
+  --ochre:#8E5C0E; --ochre-soft:#F3E3C2;
+  --ok:#1D6E46; --ok-soft:#DCEFE4; --bad:#A3271E; --bad-soft:#F6DEDB;
+  --display:"Marcellus","Trajan Pro",Georgia,serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151D; --surface:#17212C; --ink:#E6ECF1; --muted:#A6B3C0; --line:#2E3C4A;
+  --lapis:#93ABF3; --lapis-ink:#0E151D; --lapis-soft:#1F2C4A;
+  --ochre:#E3B45E; --ochre-soft:#3A2E17;
+  --ok:#72CF9D; --ok-soft:#163326; --bad:#F2A097; --bad-soft:#3B1E1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--line);margin-bottom:24px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.05rem;letter-spacing:.04em}
+.brand b{color:var(--lapis);font-weight:400}
+.top-r{display:flex;gap:10px;align-items:center}
+.chip{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ochre);background:var(--ochre-soft);padding:4px 10px;border-radius:99px;font-weight:700}
+.icon-btn{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ochre);font-weight:700;margin:0}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05}
+h2{font-size:clamp(1.5rem,4.5vw,2rem);line-height:1.15}
+h3{font-size:1.25rem}
+p{margin:0;text-wrap:pretty}
+.stack{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:1.08rem;color:var(--muted);max-width:62ch}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.how ol{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.95rem}
+input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.btn{min-height:50px;padding:12px 22px;font:inherit;font-weight:700;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--lapis);border-color:var(--lapis);color:var(--lapis-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:3px solid var(--ochre);outline-offset:2px}
+.choice{display:block;width:100%;text-align:left;min-height:52px;padding:12px 16px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--lapis)}
+.is-sel{border-color:var(--lapis)!important;background:var(--lapis-soft)!important}
+.is-ok{border-color:var(--ok)!important;background:var(--ok-soft)!important;color:var(--ink)}
+.is-bad{border-color:var(--bad)!important;background:var(--bad-soft)!important;color:var(--ink)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--lapis);transition:width .3s}
+.meta{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.feedback{border-radius:12px;padding:14px 16px;border:1.5px solid}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback strong{display:block;margin-bottom:4px}
+.score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.nota{font-family:var(--display);font-size:4.4rem;line-height:1;color:var(--lapis);font-variant-numeric:tabular-nums}
+.desemp{font-weight:700;font-size:1.2rem}
+.small{font-size:.88rem;color:var(--muted)}
+.review{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px}
+.review li{padding-left:4px}
+.review .tag{font-weight:700}
+.review .tag.ok{color:var(--ok)} .review .tag.bad{color:var(--bad)}
+.ill{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.ill svg{display:block;width:100%;height:auto}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.target{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 14px;min-width:0}
+.target small{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.target b{font-family:var(--display);font-weight:400;font-size:1.45rem;line-height:1.15}
+.stats{display:flex;gap:14px;align-items:center;font-variant-numeric:tabular-nums;font-weight:700}
+.lives{display:flex;gap:4px;color:var(--bad)}
+.combo{color:var(--ochre);min-width:4.5em}
+.stage{position:relative;border-radius:16px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#142347}
+#cv{display:block;width:100%;cursor:grab}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;padding:16px}
+.banner{background:rgba(14,21,29,.88);color:#FFFFFF;padding:14px 20px;border-radius:14px;text-align:center;max-width:90%}
+.banner b{display:block;font-family:var(--display);font-weight:400;font-size:1.5rem;color:#F6D27A}
+.ctrl{display:grid;grid-template-columns:1fr auto 1fr;gap:10px}
+.ctrl .btn{min-height:58px;font-size:1.5rem;touch-action:none}
+.ctrl #pauseBtn{font-size:1rem}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.badge{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.badge .med{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.badge.on .med{background:var(--ochre-soft);color:var(--ochre);box-shadow:inset 0 0 0 2px var(--ochre)}
+.badge b{display:block;font-size:.92rem;line-height:1.2}
+.badge span{font-size:.8rem;color:var(--muted);line-height:1.25;display:block}
+.badge.new{border-color:var(--ochre);animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.05)}}
+.stars{display:flex;gap:6px;color:var(--ochre)}
+.stars svg.off{color:var(--line)}
+.toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#F6D27A;color:#14202C;font-weight:700;padding:8px 14px;border-radius:99px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}
+.rewards{display:flex;flex-direction:column;gap:12px}
+
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Filosof<b>IA</b> · Juego 1 de 7</span>
+    <span class="top-r"><span class="chip">Presocráticos</span>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Silenciar sonidos" aria-pressed="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path id="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button></span>
+  </header>
+
+  <section id="intro" data-screen class="stack">
+    <figure class="ill"><svg viewBox="0 0 600 220" role="img" aria-label="Los seis principios: agua, aire, fuego, ápeiron, número y átomos" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="220" fill="#F3E3C2"/>
+<g fill="#E8D3A6"><circle cx="60" cy="112" r="44"/><circle cx="156" cy="112" r="44"/><circle cx="252" cy="112" r="44"/><circle cx="348" cy="112" r="44"/><circle cx="444" cy="112" r="44"/><circle cx="540" cy="112" r="44"/></g>
+<path d="M60 66 C60 66 34 100 34 120 a26 26 0 0 0 52 0 C86 100 60 66 60 66Z" fill="#23439B"/>
+<path d="M48 118 a12 12 0 0 0 10 14" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round"/>
+<g stroke="#23439B" stroke-width="5" fill="none" stroke-linecap="round"><path d="M122 96 h44 a11 11 0 1 0 -11 -11"/><path d="M114 114 h62 a13 13 0 1 1 -13 13"/><path d="M128 132 h26"/></g>
+<path d="M252 62 C274 92 290 106 281 134 C274 156 230 156 223 134 C216 112 240 100 236 80 C246 92 250 100 252 62Z" fill="#C98B2E"/>
+<path d="M252 104 C262 118 268 126 263 140 C258 150 246 150 241 140 C237 130 248 122 252 104Z" fill="#F6D27A"/>
+<path d="M348 112 a5 5 0 1 1 10 0 a10 10 0 1 1 -20 0 a15 15 0 1 1 30 0 a20 20 0 1 1 -40 0 a25 25 0 1 1 50 0 a30 30 0 1 1 -60 0" stroke="#14202C" stroke-width="3" fill="none"/>
+<g fill="#23439B"><circle cx="444" cy="76" r="7"/><circle cx="433" cy="96" r="7"/><circle cx="455" cy="96" r="7"/><circle cx="422" cy="116" r="7"/><circle cx="444" cy="116" r="7"/><circle cx="466" cy="116" r="7"/><circle cx="411" cy="136" r="7"/><circle cx="433" cy="136" r="7"/><circle cx="455" cy="136" r="7"/><circle cx="477" cy="136" r="7"/></g>
+<g fill="#14202C"><circle cx="522" cy="86" r="8"/><circle cx="556" cy="80" r="5"/><circle cx="540" cy="110" r="9"/><circle cx="514" cy="128" r="5"/><circle cx="566" cy="122" r="7"/><circle cx="548" cy="142" r="4"/><circle cx="526" cy="104" r="3"/></g>
+<g fill="none" stroke="#14202C" stroke-width="1.5" stroke-dasharray="3 4"><path d="M522 86 L540 110 L566 122"/><path d="M556 80 L540 110 L514 128"/></g>
+<g font-family="Marcellus, Georgia, serif" font-size="16" fill="#14202C" text-anchor="middle"><text x="60" y="198">Agua</text><text x="156" y="198">Aire</text><text x="252" y="198">Fuego</text><text x="348" y="198">Ápeiron</text><text x="444" y="198">Número</text><text x="540" y="198">Átomos</text></g>
+</svg></figure>
+    <p class="eyebrow">Filosofía antigua · siglos VI–V a. C.</p>
+    <h1>Cazador del arjé</h1>
+    <p class="lead">Los primeros filósofos griegos buscaron el <em>arjé</em>: el principio del que procede todo. Del cielo caen respuestas. Atrapa con tu ánfora la que corresponde a cada filósofo.</p>
+    <div class="how"><strong>Cómo se juega</strong>
+      <ol><li>Arriba verás el nombre de un filósofo.</li><li>Mueve el ánfora deslizando el dedo sobre el juego, con los botones ← → o con las flechas del teclado.</li><li>Atrapa su arjé y esquiva los demás: cada error te quita una de tus 3 vidas.</li><li>Las rachas multiplican tus puntos y cada ronda cae todo más rápido. Son 8 filósofos.</li></ol></div>
+    <div class="stack" style="gap:10px">
+      <h3>Retos e insignias</h3>
+      <p class="small" id="collTxt">Cumple los retos para ganar insignias. Tu colección se guarda en este celular.</p>
+      <div class="badges" id="introBadges"></div>
+    </div>
+    <div class="stack" style="gap:8px">
+      <label for="nombre">Tu nombre (aparece en el resultado para tu evidencia)</label>
+      <input type="text" id="nombre" autocomplete="name" placeholder="Nombre y apellido · grado">
+    </div>
+    <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Empezar</button></div>
+  </section>
+
+  <section id="play" data-screen class="stack" hidden>
+    <div class="hud">
+      <div class="target"><small>Atrapa el arjé de</small><b id="who">—</b></div>
+      <div class="stats"><span class="lives" id="lives" aria-label="Vidas"></span><span id="score">0 pts</span><span class="combo" id="combo"></span></div>
+    </div>
+    <div class="meta"><span id="round">Filósofo 1 de 8</span><span id="best"></span></div>
+    <div class="stage" id="stage">
+      <canvas id="cv" role="img" aria-label="Zona de juego: mueve el ánfora para atrapar el arjé correcto"></canvas>
+      <div class="overlay"><div class="banner" id="banner" hidden></div></div>
+      <div class="toast" id="toast" hidden></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="leftBtn" type="button" aria-label="Mover a la izquierda">←</button>
+      <button class="btn" id="pauseBtn" type="button">Pausa</button>
+      <button class="btn" id="rightBtn" type="button" aria-label="Mover a la derecha">→</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+  </section>
+
+  <section id="end" data-screen class="stack" hidden>
+    <p class="eyebrow">Resultado · El arjé</p>
+    <h2 id="endName">Tu resultado</h2>
+    <div class="score">
+      <span class="nota" id="endNota">0.0</span>
+      <div class="stack" style="gap:4px">
+        <p class="desemp" id="endDesemp"></p>
+        <p id="endAciertos"></p>
+        <p class="small" id="endFecha"></p>
+      </div>
+    </div>
+    <p class="small">Escala de 1.0 a 5.0 · Bajo 1.0–2.9 · Básico 3.0–3.9 · Alto 4.0–4.5 · Superior 4.6–5.0</p>
+    <h3>Repasa</h3>
+    <ol class="review" id="review"></ol>
+    <div class="btn-row"><button class="btn primary" id="againBtn" type="button">Volver a jugar</button></div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nota(r){return Math.round((1+4*Math.max(0,Math.min(1,r)))*10)/10}
+function desempeno(n){return n>=4.6?'Desempeño superior':n>=4.0?'Desempeño alto':n>=3.0?'Desempeño básico':'Desempeño bajo'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+let audioCtx=null, soundOn=true;
+function tone(ok){ if(!soundOn) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=audioCtx.currentTime, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(ok?523:247,t); if(ok) o.frequency.setValueAtTime(784,t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.14,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+.35);}catch(e){} }
+$('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn; $('#soundBtn').setAttribute('aria-pressed',String(!soundOn));
+  $('#soundBtn').setAttribute('aria-label',soundOn?'Silenciar sonidos':'Activar sonidos'); $('#waves').style.display=soundOn?'':'none';});
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.hidden=(s.id!==id)); window.scrollTo(0,0);}
+function finish(correct,total,ratio,review){
+  const n=nota(ratio), name=($('#nombre').value||'').trim();
+  $('#endName').textContent = name ? name : 'Tu resultado';
+  $('#endNota').textContent = n.toFixed(1);
+  $('#endDesemp').textContent = desempeno(n);
+  $('#endAciertos').textContent = correct+' de '+total+' aciertos';
+  $('#endFecha').textContent = new Date().toLocaleString('es-CO',{dateStyle:'long',timeStyle:'short'});
+  $('#review').innerHTML = review.map(r=>'<li><span class="tag '+(r.ok?'ok':'bad')+'">'+(r.ok?'Correcto':'Revisa')+'.</span> <strong>'+esc(r.q)+'</strong> → '+esc(r.a)+'. <span class="small">'+esc(r.why)+'</span></li>').join('');
+  show('end');
+}
+$('#startBtn').addEventListener('click',()=>{ start(); show('play'); });
+$('#againBtn').addEventListener('click',()=>{ start(); show('play'); });
+const PAIRS=[
+ {id:'tales',who:'Tales de Mileto',what:'Agua',why:'Observó que la humedad está presente en todo lo vivo: el agua sería el origen de todas las cosas.'},
+ {id:'anaximandro',who:'Anaximandro',what:'Ápeiron',why:'Propuso el ápeiron, lo indeterminado: un principio sin límites del que surgen los opuestos.'},
+ {id:'anaximenes',who:'Anaxímenes',what:'Aire',why:'El aire, al condensarse o enrarecerse, se transforma en las demás sustancias.'},
+ {id:'heraclito',who:'Heráclito de Éfeso',what:'Fuego',why:'Todo fluye: la realidad es devenir, y el fuego simboliza ese cambio regido por el logos.'},
+ {id:'pitagoras',who:'Pitágoras',what:'Número',why:'Para los pitagóricos, la armonía del cosmos se expresa en proporciones numéricas.'},
+ {id:'parmenides',who:'Parménides de Elea',what:'El ser inmóvil',why:'El ser es y el no ser no es; el cambio sería apariencia. Comparó el ser con una esfera perfecta.'},
+ {id:'empedocles',who:'Empédocles',what:'Cuatro raíces',why:'Agua, aire, tierra y fuego se unen por el amor y se separan por el odio.'},
+ {id:'democrito',who:'Demócrito',what:'Átomos',why:'La realidad está hecha de partículas indivisibles que se mueven en el vacío.'}
+];
+const ICON_SVG={
+ tales:'<path d="M20 4C20 4 8 20 8 27a12 12 0 0 0 24 0C32 20 20 4 20 4Z" fill="#23439B"/><path d="M14 27a6 6 0 0 0 5 6" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
+ anaximandro:'<path d="M20 20a3 3 0 1 1 6 0a6 6 0 1 1-12 0a9 9 0 1 1 18 0a12 12 0 1 1-24 0" stroke="#14202C" stroke-width="2.6" fill="none"/>',
+ anaximenes:'<g stroke="#23439B" stroke-width="3" fill="none" stroke-linecap="round"><path d="M6 15h20a5 5 0 1 0-5-5"/><path d="M4 23h28a6 6 0 1 1-6 6"/><path d="M9 31h12"/></g>',
+ heraclito:'<path d="M20 3C31 17 37 23 33 31C30 38 10 38 7 31C4 23 15 18 13 9C17 14 19 17 20 3Z" fill="#C98B2E"/><path d="M20 21C25 27 27 30 25 34C23 37 17 37 15 34C13 30 18 27 20 21Z" fill="#F6D27A"/>',
+ pitagoras:'<g fill="#23439B"><circle cx="20" cy="7" r="3.4"/><circle cx="15" cy="16" r="3.4"/><circle cx="25" cy="16" r="3.4"/><circle cx="10" cy="25" r="3.4"/><circle cx="20" cy="25" r="3.4"/><circle cx="30" cy="25" r="3.4"/><circle cx="5" cy="34" r="3.4"/><circle cx="15" cy="34" r="3.4"/><circle cx="25" cy="34" r="3.4"/><circle cx="35" cy="34" r="3.4"/></g>',
+ parmenides:'<circle cx="20" cy="20" r="15" fill="#8E5C0E"/><circle cx="15" cy="14" r="5" fill="#E3B45E"/><circle cx="20" cy="20" r="15" fill="none" stroke="#14202C" stroke-width="2"/>',
+ empedocles:'<path d="M20 20V5A15 15 0 0 1 35 20Z" fill="#23439B"/><path d="M20 20H35A15 15 0 0 1 20 35Z" fill="#C98B2E"/><path d="M20 20V35A15 15 0 0 1 5 20Z" fill="#7A5A2E"/><path d="M20 20H5A15 15 0 0 1 20 5Z" fill="#9DB5EE"/>',
+ democrito:'<g fill="#14202C"><circle cx="11" cy="11" r="5"/><circle cx="28" cy="9" r="3.5"/><circle cx="21" cy="22" r="6"/><circle cx="8" cy="30" r="3.5"/><circle cx="32" cy="27" r="4.5"/><circle cx="22" cy="35" r="2.5"/></g>'
+};
+const ICONS={};
+for(const k in ICON_SVG){ const im=new Image(); im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">'+ICON_SVG[k]+'</svg>'); ICONS[k]=im; }
+const RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cv=$('#cv'), ctx=cv.getContext('2d'), stage=$('#stage');
+let W=600,H=440,dpr=1, vessel={x:300,w:88}, items=[], parts=[], floats=[], stars=[];
+let order, round, lives, score, combo, clean, roundDirty, cleared, speed, spawnT, sinceCorrect, running=false, paused=false, frozen=0, shake=0, raf=0, last=0, dir=0, dragging=false;
+let best=0; try{ best=+(localStorage.getItem('arje-best')||0); }catch(e){}
+const MED={
+ rayo:'<path d="M11 2 4 12h5l-1 8 7-11h-5l1-7z" fill="currentColor"/>',
+ racha:'<path d="M10 2c4 5 6 7 5 11-1 4-9 4-10 0-1-3 2-5 1-8 2 2 3 3 4-3z" fill="currentColor"/>',
+ mitad:'<path d="M5 2v16M5 3h10l-2.5 3.5L15 10H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
+ intacto:'<path fill="currentColor" d="M10 17.5s-6.2-3.8-8-7.6C.8 7 2.5 3.8 5.6 3.8c1.8 0 3 1 4.4 2.6 1.4-1.6 2.6-2.6 4.4-2.6 3.1 0 4.8 3.2 3.6 6.1-1.8 3.8-8 7.6-8 7.6z"/>',
+ sabio:'<path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/>',
+ puntos:'<path d="M6 3h8v4a4 4 0 0 1-8 0zM6 5H3a3 3 0 0 0 3 3M14 5h3a3 3 0 0 1-3 3M10 11v4M7 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+};
+const CH=[
+ {id:'mitad',n:'Medio camino',d:'Supera la ronda 4'},
+ {id:'rayo',n:'Reflejos de rayo',d:'Atrapa un arjé en menos de 3 segundos'},
+ {id:'racha',n:'Racha imparable',d:'Llega a una racha ×4'},
+ {id:'sabio',n:'Sabio presocrático',d:'Completa las 8 rondas'},
+ {id:'intacto',n:'Sin un rasguño',d:'Termina sin perder ninguna vida'},
+ {id:'puntos',n:'Maestro del arjé',d:'Supera 1.500 puntos'}
+];
+let coll=new Set(); try{ coll=new Set(JSON.parse(localStorage.getItem('arje-insignias')||'[]')); }catch(e){}
+let gameBadges=new Set(), roundTime=0, toastT=0;
+function badgeHtml(c,on,isNew){ return '<div class="badge'+(on?' on':'')+(isNew?' new':'')+'"><span class="med"><svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true">'+MED[c.id]+'</svg></span><span><b>'+c.n+'</b><span>'+(on?'Ganada · ':'Bloqueada · ')+c.d+'</span></span></div>'; }
+function renderIntro(){
+  $('#introBadges').innerHTML=CH.map(c=>badgeHtml(c,coll.has(c.id),false)).join('');
+  $('#collTxt').textContent='Cumple los retos para ganar insignias. Tienes '+coll.size+' de '+CH.length+'. Tu colección se guarda en este celular.';
+}
+function unlock(id){
+  if(gameBadges.has(id)) return; gameBadges.add(id); coll.add(id);
+  try{ localStorage.setItem('arje-insignias',JSON.stringify([...coll])); }catch(e){}
+  const c=CH.find(x=>x.id===id); const t=$('#toast'); t.textContent='Insignia ganada: '+c.n; t.hidden=false; toastT=2.2;
+  if(soundOn){ setTimeout(()=>tone(true),120); }
+}
+function starsHtml(n){ let s=''; for(let i=0;i<3;i++) s+='<svg class="'+(i<n?'':'off')+'" width="40" height="40" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/></svg>'; return '<div class="stars" role="img" aria-label="'+n+' de 3 estrellas">'+s+'</div>'; }
+renderIntro();
+
+function resize(){
+  dpr=Math.min(2,window.devicePixelRatio||1); W=stage.clientWidth||600;
+  H=Math.round(Math.min(520,Math.max(380,window.innerHeight*0.56)));
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0);
+  vessel.w=W<420?78:92; vessel.x=Math.min(Math.max(vessel.x,vessel.w/2),W-vessel.w/2);
+  stars=Array.from({length:Math.round(W/14)},()=>({x:Math.random()*W,y:Math.random()*H*0.7,r:Math.random()*1.4+0.4,t:Math.random()*6}));
+}
+window.addEventListener('resize',()=>{ if(running) resize(); });
+
+function heart(){ return '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.2 0 3.6 1.2 5.3 3.2 1.7-2 3.1-3.2 5.3-3.2 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>'; }
+function hud(){
+  $('#lives').innerHTML=heart().repeat(Math.max(0,lives)); $('#lives').setAttribute('aria-label',lives+' vidas');
+  $('#score').textContent=score+' pts';
+  const m=mult(); $('#combo').textContent= m>1?'Racha ×'+m:'';
+  $('#round').textContent='Filósofo '+Math.min(round+1,8)+' de 8';
+  $('#best').textContent= best?'Tu récord: '+best+' pts':'';
+}
+function mult(){ return Math.min(4,1+Math.floor(combo/2)); }
+
+function start(){
+  cancelAnimationFrame(raf);
+  order=shuffle(PAIRS); round=0; lives=3; score=0; combo=0; clean=0; roundDirty=false; cleared=[];
+  speed=105; spawnT=0.4; sinceCorrect=0; items=[]; parts=[]; floats=[]; frozen=0; shake=0; paused=false; dir=0;
+  $('#pauseBtn').textContent='Pausa'; $('#fb').innerHTML=''; $('#banner').hidden=true;
+  gameBadges=new Set(); roundTime=0; toastT=0; $('#toast').hidden=true;
+  $('#who').textContent=order[0].who; hud();
+  running=true;
+  requestAnimationFrame(()=>{ resize(); vessel.x=W/2; last=performance.now(); banner('Ronda 1','Atrapa el arjé de '+order[0].who,1.3); raf=requestAnimationFrame(loop); });
+}
+function banner(title,text,secs){ const b=$('#banner'); b.innerHTML='<b>'+esc(title)+'</b>'+esc(text); b.hidden=false; frozen=secs; }
+
+function pillWidth(p){ ctx.font='700 15px "Atkinson Hyperlegible", system-ui, sans-serif'; return Math.ceil(ctx.measureText(p.what).width)+52; }
+function spawn(){
+  const tgt=order[round]; let p;
+  if(sinceCorrect>=2||Math.random()<0.3){ p=tgt; sinceCorrect=0; }
+  else { const others=PAIRS.filter(x=>x.id!==tgt.id); p=others[Math.floor(Math.random()*others.length)]; sinceCorrect++; }
+  const w=pillWidth(p); let x=w/2+8+Math.random()*(W-w-16);
+  const lastIt=items[items.length-1]; if(lastIt&&Math.abs(lastIt.x-x)<w*0.6&&lastIt.y<60) x=(x+W/2)%(W-w)+w/2;
+  items.push({p,x,y:-24,w,vy:speed*(0.85+Math.random()*0.35),wob:Math.random()*6});
+}
+function burst(x,y,color,n){ if(RM) return; for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=80+Math.random()*220; parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-90,life:0.7+Math.random()*0.4,c:color}); } }
+function float(x,y,text,color){ floats.push({x,y,text,color,life:1.1}); }
+
+function catchItem(it){
+  const tgt=order[round];
+  if(it.p.id===tgt.id){
+    combo++; const pts=100*mult(); score+=pts; tone(true);
+    if(!roundDirty) clean++; cleared.push({p:tgt,ok:!roundDirty});
+    if(roundTime<3) unlock('rayo');
+    if(mult()>=4) unlock('racha');
+    if(score>=1500) unlock('puntos');
+    if(round+1>=4) unlock('mitad');
+    roundTime=0;
+    burst(it.x,it.y,'#F6D27A',26); float(it.x,it.y-20,'+'+pts,'#F6D27A');
+    $('#fb').innerHTML='<div class="feedback ok"><strong>'+tgt.who+': '+tgt.what.toLowerCase()+'.</strong>'+tgt.why+'</div>';
+    items=[]; round++; roundDirty=false; sinceCorrect=0; hud();
+    if(round>=8){ endGame(true); return; }
+    speed+=17; $('#who').textContent=order[round].who; hud();
+    banner('¡Correcto!','Ahora: '+order[round].who,1.6);
+  } else {
+    lives--; combo=0; roundDirty=true; tone(false); shake=RM?0:0.35;
+    burst(it.x,it.y,'#F2A097',14); float(it.x,it.y-20,'−1 vida','#F2A097');
+    const owner=it.p;
+    $('#fb').innerHTML='<div class="feedback bad"><strong>Atrapaste «'+owner.what+'», el arjé de '+owner.who+'.</strong>Busca el principio de '+tgt.who+'.</div>';
+    hud();
+    if(lives<=0) endGame(false);
+  }
+}
+function endGame(won){
+  running=false; cancelAnimationFrame(raf);
+  if(won){ unlock('sabio'); if(lives===3) unlock('intacto'); }
+  const stars= won?(clean===8?3:clean>=6?2:1):0, wasBest=score>best&&score>0;
+  if(score>best){ best=score; try{ localStorage.setItem('arje-best',String(best)); }catch(e){} }
+  const review=order.map(p=>{ const c=cleared.find(x=>x.p.id===p.id); return {ok:!!(c&&c.ok),q:p.who,a:p.what,why:p.why}; });
+  setTimeout(()=>{ finish(clean,8,clean/8,review);
+    $('#endAciertos').textContent=(won?'¡Completaste las 8 rondas! ':'Te quedaste sin vidas. ')+clean+' de 8 rondas sin errores · '+score+' puntos';
+    let rw=$('#rewards'); if(!rw){ rw=document.createElement('div'); rw.id='rewards'; rw.className='rewards'; $('#end .score').after(rw); }
+    const earned=CH.filter(c=>gameBadges.has(c.id));
+    rw.innerHTML=starsHtml(stars)
+      +'<p><strong>'+(wasBest?'¡Nuevo récord personal! ':'')+(stars===3?'Partida perfecta.':stars===2?'¡Muy bien! Logra las 8 rondas sin errores para la tercera estrella.':stars===1?'Completaste el juego. Menos errores te dan más estrellas.':'Completa las 8 rondas para ganar estrellas.')+'</strong></p>'
+      +'<h3>'+(earned.length?'Insignias ganadas en esta partida':'Esta vez no ganaste insignias')+'</h3>'
+      +(earned.length?'<div class="badges">'+earned.map(c=>badgeHtml(c,true,true)).join('')+'</div>':'')
+      +'<p class="small">Tu colección: '+coll.size+' de '+CH.length+' insignias. '+(coll.size<CH.length?'Te faltan: '+CH.filter(c=>!coll.has(c.id)).map(c=>c.n).join(', ')+'.':'¡Las tienes todas!')+'</p>';
+    renderIntro();
+  }, won?900:1100);
+  draw();
+}
+
+function update(dt){
+  if(dir) vessel.x+=dir*560*dt;
+  vessel.x=Math.min(Math.max(vessel.x,vessel.w/2),W-vessel.w/2);
+  for(const s of stars) s.t+=dt;
+  if(shake>0) shake-=dt;
+  for(const p of parts){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; p.life-=dt; } parts=parts.filter(p=>p.life>0);
+  for(const f of floats){ f.y-=50*dt; f.life-=dt; } floats=floats.filter(f=>f.life>0);
+  if(toastT>0){ toastT-=dt; if(toastT<=0) $('#toast').hidden=true; }
+  if(frozen>0){ frozen-=dt; if(frozen<=0) $('#banner').hidden=true; return; }
+  roundTime+=dt;
+  spawnT-=dt; if(spawnT<=0){ spawn(); spawnT=Math.max(0.5,1.2-round*0.08); }
+  const vy=H-64;
+  for(const it of items){ it.y+=it.vy*dt; it.wob+=dt*3; }
+  for(const it of items.slice()){
+    if(it.y+16>=vy-8 && it.y-16<=vy+14 && Math.abs(it.x-vessel.x)<vessel.w/2+it.w*0.22){ items=items.filter(x=>x!==it); catchItem(it); if(!running) return; if(frozen>0) break; }
+  }
+  items=items.filter(it=>it.y<H+40);
+}
+
+function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawScene(){
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0E1836'); g.addColorStop(0.65,'#23439B'); g.addColorStop(1,'#3A5BB8');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(const s of stars){ ctx.globalAlpha=0.45+0.4*Math.sin(s.t*1.7); ctx.fillStyle='#FFFFFF'; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill(); } ctx.globalAlpha=1;
+  // templo griego en el horizonte
+  const base=H-22, tw=Math.min(260,W*0.5), tx=W-tw-18;
+  ctx.fillStyle='#16255A';
+  ctx.beginPath(); ctx.moveTo(tx-8,base-96); ctx.lineTo(tx+tw/2,base-128); ctx.lineTo(tx+tw+8,base-96); ctx.closePath(); ctx.fill();
+  ctx.fillRect(tx-6,base-98,tw+12,8);
+  const cols=6; for(let i=0;i<cols;i++){ ctx.fillRect(tx+4+i*(tw-18)/(cols-1),base-88,10,88); }
+  ctx.fillStyle='#0E1830'; ctx.fillRect(0,base,W,22);
+}
+function drawItem(it){
+  const x=it.x+(RM?0:Math.sin(it.wob)*3), y=it.y, w=it.w, h=36;
+  ctx.fillStyle='rgba(0,0,0,.25)'; roundRect(x-w/2+2,y-h/2+4,w,h,18); ctx.fill();
+  ctx.fillStyle='#F3E3C2'; roundRect(x-w/2,y-h/2,w,h,18); ctx.fill();
+  ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=1.5; ctx.stroke();
+  const im=ICONS[it.p.id]; if(im.complete) ctx.drawImage(im,x-w/2+6,y-14,28,28);
+  ctx.fillStyle='#14202C'; ctx.font='700 15px "Atkinson Hyperlegible", system-ui, sans-serif'; ctx.textBaseline='middle'; ctx.textAlign='left';
+  ctx.fillText(it.p.what,x-w/2+40,y+1);
+}
+function drawVessel(){
+  const x=vessel.x, y=H-64, w=vessel.w;
+  ctx.save(); ctx.translate(x,y);
+  ctx.fillStyle='#8E5C0E';
+  ctx.beginPath(); ctx.ellipse(-w*0.46,6,7,14,0.3,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(w*0.46,6,7,14,-0.3,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#C98B2E';
+  ctx.beginPath(); ctx.moveTo(-w*0.32,-10); ctx.lineTo(w*0.32,-10);
+  ctx.quadraticCurveTo(w*0.52,14,w*0.2,40); ctx.lineTo(-w*0.2,40); ctx.quadraticCurveTo(-w*0.52,14,-w*0.32,-10); ctx.fill();
+  ctx.fillStyle='#14202C'; ctx.fillRect(-w*0.4,8,w*0.8,7);
+  ctx.fillStyle='#F6D27A'; for(let i=-2;i<=2;i++){ ctx.fillRect(i*w*0.14-3,9.5,6,4); }
+  ctx.fillStyle='#E3B45E'; ctx.fillRect(-w*0.36,-16,w*0.72,8);
+  ctx.restore();
+}
+function draw(){
+  ctx.save();
+  if(shake>0){ ctx.translate((Math.random()-0.5)*12,(Math.random()-0.5)*8); }
+  drawScene();
+  for(const it of items) drawItem(it);
+  drawVessel();
+  for(const p of parts){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill(); }
+  ctx.globalAlpha=1;
+  for(const f of floats){ ctx.globalAlpha=Math.max(0,Math.min(1,f.life)); ctx.fillStyle=f.color; ctx.font='700 20px "Atkinson Hyperlegible", system-ui, sans-serif'; ctx.textAlign='center'; ctx.fillText(f.text,f.x,f.y); }
+  ctx.globalAlpha=1;
+  if(paused){ ctx.fillStyle='rgba(14,21,29,.6)'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#FFFFFF'; ctx.font='28px Marcellus, Georgia, serif'; ctx.textAlign='center'; ctx.fillText('En pausa',W/2,H/2); }
+  ctx.restore();
+}
+function loop(t){
+  const dt=Math.min(0.05,(t-last)/1000); last=t;
+  if(!paused) update(dt);
+  draw();
+  if(running) raf=requestAnimationFrame(loop);
+}
+function setPause(v){ if(!running) return; paused=v; $('#pauseBtn').textContent=paused?'Seguir':'Pausa'; }
+$('#pauseBtn').addEventListener('click',()=>setPause(!paused));
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) setPause(true); });
+function pointX(e){ const r=cv.getBoundingClientRect(); return (e.clientX-r.left)*(W/r.width); }
+cv.addEventListener('pointerdown',e=>{ dragging=true; try{cv.setPointerCapture(e.pointerId);}catch(_){} vessel.x=pointX(e); });
+cv.addEventListener('pointermove',e=>{ if(dragging||e.pointerType==='mouse') vessel.x=pointX(e); });
+cv.addEventListener('pointerup',()=>{ dragging=false; });
+cv.addEventListener('pointercancel',()=>{ dragging=false; });
+function holdBtn(id,d){ const b=$(id);
+  b.addEventListener('pointerdown',e=>{ e.preventDefault(); dir=d; });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{ if(dir===d) dir=0; })); }
+holdBtn('#leftBtn',-1); holdBtn('#rightBtn',1);
+window.addEventListener('keydown',e=>{ if(!running) return;
+  if(e.key==='ArrowLeft'){ dir=-1; e.preventDefault(); } else if(e.key==='ArrowRight'){ dir=1; e.preventDefault(); }
+  else if(e.key==='p'||e.key==='P'){ setPause(!paused); } });
+window.addEventListener('keyup',e=>{ if((e.key==='ArrowLeft'&&dir===-1)||(e.key==='ArrowRight'&&dir===1)) dir=0; });
+
+</script>
+
+</html>
