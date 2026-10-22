@@ -106,7 +106,8 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
 .stars{display:flex;gap:6px;color:var(--ochre)}
 .stars svg.off{color:var(--line)}
 .rewards{display:flex;flex-direction:column;gap:12px}
-.target b{font-size:1.2rem}
+#cv{cursor:crosshair}
+.keys{font-size:.85rem;color:var(--muted)}
 
 </style>
 
@@ -143,9 +144,10 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
 </svg></figure>
     <p class="eyebrow">Edad Media · siglos IV–XIV</p>
     <h1>Arquero del claustro</h1>
-    <p class="lead">En la Edad Media la filosofía discutió la relación entre fe y razón. Cuatro escudos con los nombres de Agustín, Anselmo, Tomás de Aquino y Ockham se mueven por el claustro. Lee cada frase y dispara al pensador que la sostuvo.</p>
+    <p class="lead">En la Edad Media la filosofía discutió la relación entre fe y razón. Lee cada frase y dispara una flecha al escudo del pensador que la sostuvo: Agustín, Anselmo, Tomás de Aquino u Ockham.</p>
     <div class="how"><strong>Cómo se juega</strong>
-      <ol><li>Arriba aparece una frase o idea medieval.</li><li>Mueve el arco deslizando el dedo, con ← → o con las flechas, y dispara con el botón, tocando el juego o con la barra espaciadora.</li><li>Acertar al autor correcto suma puntos. Si das en el escudo equivocado, pierdes una de tus 3 vidas.</li><li>Los escudos se mueven cada vez más rápido. Son 9 frases.</li></ol></div>
+      <ol><li>Arriba del juego aparece una frase.</li><li>Abajo pasan 4 escudos con nombres. <strong>Toca el escudo del autor</strong> y tu arco le dispara.</li><li>Cada frase tiene un reloj. Si fallas el autor o se acaba el tiempo, pierdes una de tus 3 vidas.</li><li>Responde rápido para ganar más puntos. Los escudos se mueven más rápido en cada frase. Son 9 frases.</li></ol>
+      <p class="small" style="margin-top:8px">En computador también puedes disparar con las teclas 1, 2, 3 y 4 (de izquierda a derecha).</p></div>
     <div class="stack" style="gap:10px">
       <h3>Retos e insignias</h3>
       <p class="small" id="collTxt">Cumple los retos para ganar insignias.</p>
@@ -165,16 +167,11 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
     </div>
     <div class="meta"><span id="round"></span><span id="best"></span></div>
     <div class="stage" id="stage">
-      <canvas id="cv" role="img" aria-label="Claustro con escudos móviles y un arco para disparar"></canvas>
+      <canvas id="cv" role="img" aria-label="Claustro: frase arriba, escudos con nombres y un arco"></canvas>
       <div class="overlay"><div class="banner" id="banner" hidden></div></div>
       <div class="toast" id="toast" hidden></div>
     </div>
-    <div class="ctrl">
-      <button class="btn" id="leftBtn" type="button" aria-label="Mover a la izquierda">←</button>
-      <button class="btn primary small-t" id="shootBtn" type="button">Disparar</button>
-      <button class="btn" id="rightBtn" type="button" aria-label="Mover a la derecha">→</button>
-    </div>
-    <div class="btn-row"><button class="btn" id="pauseBtn" type="button">Pausa</button></div>
+    <div class="btn-row" style="align-items:center"><button class="btn" id="pauseBtn" type="button">Pausa</button><span class="keys">Toca el escudo del autor de la frase.</span></div>
     <div id="fb" aria-live="polite"></div>
   </section>
 
@@ -231,6 +228,7 @@ const MED={
  mitad:'<path d="M5 2v16M5 3h10l-2.5 3.5L15 10H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
  intacto:'<path fill="currentColor" d="M10 17.5s-6.2-3.8-8-7.6C.8 7 2.5 3.8 5.6 3.8c1.8 0 3 1 4.4 2.6 1.4-1.6 2.6-2.6 4.4-2.6 3.1 0 4.8 3.2 3.6 6.1-1.8 3.8-8 7.6-8 7.6z"/>',
  sabio:'<path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/>',
+ pluma:'<path d="M16.5 3C10 3.5 6.5 8 5.5 14.5L4 17.5M5.5 14.5c3.5-.3 7-2.5 8.5-7" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
  puntos:'<path d="M6 3h8v4a4 4 0 0 1-8 0zM6 5H3a3 3 0 0 0 3 3M14 5h3a3 3 0 0 1-3 3M10 11v4M7 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
 };
 const A={key:'',ch:[],coll:new Set(),earned:new Set(),best:0,lives:3,maxLives:3,score:0,combo:0,goal:1500};
@@ -347,75 +345,91 @@ arcSetup('claustro',[
  {id:'racha',n:'Racha imparable',d:'Llega a una racha ×4'},
  {id:'sabio',n:'Doctor de la Iglesia',d:'Completa las 9 frases'},
  {id:'intacto',n:'Sin un rasguño',d:'Termina sin perder vidas'},
- {id:'puntos',n:'Maestro escolástico',d:'Supera 2.000 puntos'}
-],2000);
-let order,qi,bowX,dir,arrows,shields,speedK,clean,review,qT,missed,hits,cool;
+ {id:'puntos',n:'Maestro escolástico',d:'Supera 2.500 puntos'}
+],2500);
+let curQ=null,order,qi,shields,arrow,clean,review,qT,limit,missed,hits,offset,spd,locked,aimX,aimY;
 function start(){
-  arcReset(3); order=shuffle(QS); qi=0; clean=0; review=[]; arrows=[]; dir=0; speedK=1; hits=0; cool=0; FX=[]; FL=[];
-  requestAnimationFrame(()=>{ cvResize(400,520); bowX=C.W/2; makeShields(); nextQ(true); loopStart(step); });
+  arcReset(3); order=shuffle(QS); qi=0; clean=0; review=[]; hits=0; arrow=null; offset=0; spd=40; limit=12; locked=true; FX=[]; FL=[];
+  requestAnimationFrame(()=>{ cvResize(420,520); layout(); aimX=C.W/2; aimY=C.H*0.4; nextQ(true); loopStart(step); });
 }
-window.onArcResize=()=>{ cvResize(400,520); makeShields(); };
-function makeShields(){
-  const W=C.W, sw=Math.min(96,W*0.24);
-  shields=shuffle(WHO).map((w,i)=>({...w,w:sw,h:sw*0.8,x:(i%2? W*0.7:W*0.3)+(Math.random()-0.5)*40,y:i<2?70:170,vx:(i%2?-1:1)*(60+Math.random()*40),hit:0}));
-}
+window.onArcResize=()=>{ cvResize(420,520); layout(); };
+function layout(){ const W=C.W, sw=Math.min(118,(W-40)/4.3); shields=shuffle(WHO).map((w,i)=>({...w,w:sw,h:sw*0.9,base:i,hit:0})); }
+function shieldX(s){ const W=C.W, gap=W/4; let x=(s.base+0.5)*gap+offset; x=((x%W)+W)%W; return x; }
+function shieldY(){ return C.H*0.52; }
 function nextQ(first){
-  const it=order[qi]; $('#whoLbl').textContent='¿Quién lo sostuvo? · Frase '+(qi+1)+' de 9'; $('#who').textContent=it.q;
-  arcHud('Escudos más rápidos en cada frase'); missed=false; qT=0;
-  if(first) banner('¡Tensa el arco!','Dispara al autor de la frase',1300);
+  const it=order[qi]; curQ=it; $('#whoLbl').textContent='Frase '+(qi+1)+' de 9'; $('#who').textContent='Toca el escudo de su autor';
+  arcHud('Escudos más rápidos en cada frase'); missed=false; qT=0; locked=false;
+  if(first){ locked=true; banner('¡Tensa el arco!','Lee la frase y toca el escudo de su autor',1700,()=>{ locked=false; qT=0; }); }
 }
-function shoot(){ if(!RUN||PAUSED||cool>0) return; arrows.push({x:bowX,y:C.H-70}); cool=0.35; }
-function hitShield(s){
-  const it=order[qi]; s.hit=0.4;
-  if(s.k===it.a){ const p=arcHit(); if(qT<3) unlock('rayo'); if(!missed) clean++; hits++; if(hits>=5) unlock('mitad');
-    burst(s.x,s.y,'#F6D27A',26); floatTxt(s.x,s.y-30,'+'+p,'#F6D27A');
-    fbOk('¡Diana! '+FULL[it.a]+'.',it.why); review.push({ok:!missed,q:it.q,a:FULL[it.a],why:it.why});
-    qi++; arrows=[]; if(qi>=order.length){ arcEnd({won:true,clean,total:9,review}); return; }
-    speedK+=0.13; setTimeout(()=>{ if(RUN) nextQ(false); },300);
-  } else { missed=true; const dead=arcMiss(); burst(s.x,s.y,'#F2A097',12); floatTxt(s.x,s.y-30,'−1 vida','#F2A097');
-    fbBad('Le diste a '+FULL[s.k]+'.','Lee de nuevo la frase y busca a su autor.');
-    if(dead){ review.push({ok:false,q:it.q,a:FULL[it.a],why:it.why}); arcEnd({won:false,clean,total:9,review:review.concat(order.slice(qi+1).map(x=>({ok:false,q:x.q,a:FULL[x.a],why:x.why})))}); } }
+function shootAt(s){
+  if(!RUN||PAUSED||locked||arrow) return;
+  arrow={sx:C.W/2,sy:C.H-58,s,t:0}; aimX=shieldX(s); aimY=shieldY();
 }
+function land(s){
+  const it=order[qi]; s.hit=0.45; const x=shieldX(s), y=shieldY();
+  if(s.k===it.a){ const bonus=Math.max(0,Math.round((limit-qT)/limit*100)); const p=arcHit(100+bonus); if(qT<3) unlock('rayo'); if(!missed) clean++; hits++; if(hits>=5) unlock('mitad');
+    burst(x,y,'#F6D27A',26); floatTxt(x,y-50,'+'+p,'#F6D27A');
+    fbOk('¡Diana! '+FULL[it.a]+'.',it.why); review.push({ok:!missed,q:it.q,a:FULL[it.a],why:it.why}); advance();
+  } else { missed=true; burst(x,y,'#F2A097',12); floatTxt(x,y-50,'−1 vida','#F2A097');
+    fbBad('Esa frase no es de '+FULL[s.k]+'.','Vuelve a leerla y busca a su autor.');
+    if(arcMiss()) die(); }
+}
+function advance(){ qi++; locked=true; if(qi>=order.length){ arcEnd({won:true,clean,total:9,review}); return; }
+  spd+=12; limit=Math.max(6,limit-0.7); setTimeout(()=>{ if(RUN) nextQ(false); },700); }
+function die(){ const it=order[qi]; review.push({ok:false,q:it.q,a:FULL[it.a],why:it.why});
+  arcEnd({won:false,clean,total:9,review:review.concat(order.slice(qi+1).map(x=>({ok:false,q:x.q,a:FULL[x.a],why:x.why})))}); }
 function step(dt){
-  fxUpdate(dt); qT+=dt; if(cool>0) cool-=dt;
-  if(dir) bowX=Math.max(30,Math.min(C.W-30,bowX+dir*420*dt));
-  for(const s of shields){ s.x+=s.vx*speedK*dt; if(s.x<s.w/2+6){ s.x=s.w/2+6; s.vx*=-1; } if(s.x>C.W-s.w/2-6){ s.x=C.W-s.w/2-6; s.vx*=-1; } if(s.hit>0) s.hit-=dt; }
-  for(const a of arrows) a.y-=620*dt;
-  for(const a of arrows.slice()){ for(const s of shields){ if(Math.abs(a.x-s.x)<s.w/2&&Math.abs(a.y-s.y)<s.h/2){ arrows=arrows.filter(x=>x!==a); hitShield(s); if(!RUN) return; break; } } }
-  arrows=arrows.filter(a=>a.y>-20);
+  fxUpdate(dt); offset+=spd*dt;
+  for(const s of shields) if(s.hit>0) s.hit-=dt;
+  if(!locked&&!arrow){ qT+=dt; if(qT>=limit){ const it=order[qi]; fbBad('¡Se acabó el tiempo!','La frase era de '+FULL[it.a]+'. '+it.why);
+      review.push({ok:false,q:it.q,a:FULL[it.a],why:it.why}); if(arcMiss()){ arcEnd({won:false,clean,total:9,review:review.concat(order.slice(qi+1).map(x=>({ok:false,q:x.q,a:FULL[x.a],why:x.why})))}); return; } advance(); } }
+  if(arrow){ arrow.t+=dt/0.22; if(arrow.t>=1){ const s=arrow.s; arrow=null; land(s); if(!RUN){ draw(); return; } } }
   draw();
 }
 function draw(){
   const ctx=C.ctx, W=C.W, H=C.H;
   ctx.fillStyle='#E9EEF2'; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#C3CED8'; const n=Math.max(3,Math.round(W/140)), aw=W/n;
-  for(let i=0;i<n;i++){ const x=i*aw; ctx.fillStyle='#23439B'; ctx.beginPath(); ctx.moveTo(x+aw*0.12,H-30); ctx.lineTo(x+aw*0.12,H*0.42); ctx.arc(x+aw/2,H*0.42,aw*0.38,Math.PI,0); ctx.lineTo(x+aw*0.88,H-30); ctx.closePath(); ctx.globalAlpha=0.16; ctx.fill(); ctx.globalAlpha=1; }
-  ctx.fillStyle='#C3CED8'; ctx.fillRect(0,H-30,W,30);
-  for(const s of shields){
-    ctx.save(); ctx.translate(s.x,s.y); if(s.hit>0&&!RM) ctx.rotate(Math.sin(s.hit*40)*0.12);
-    ctx.fillStyle=s.c; ctx.beginPath(); ctx.moveTo(-s.w/2,-s.h/2); ctx.lineTo(s.w/2,-s.h/2); ctx.lineTo(s.w/2,s.h*0.1); ctx.quadraticCurveTo(s.w/2,s.h/2,0,s.h*0.62); ctx.quadraticCurveTo(-s.w/2,s.h/2,-s.w/2,s.h*0.1); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle='#F3E3C2'; ctx.lineWidth=3; ctx.stroke();
-    ctx.fillStyle='#FFFFFF'; ctx.font='700 '+(s.w<80?13:15)+'px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(s.n,0,-2);
-    ctx.restore();
-  }
-  ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=3;
-  for(const a of arrows){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(a.x,a.y+30); ctx.stroke(); ctx.fillStyle='#14202C'; ctx.beginPath(); ctx.moveTo(a.x,a.y-8); ctx.lineTo(a.x-5,a.y+2); ctx.lineTo(a.x+5,a.y+2); ctx.fill(); }
-  const by=H-56; ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(bowX,by+22,30,Math.PI*1.15,Math.PI*1.85); ctx.stroke();
-  ctx.strokeStyle='#14202C'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(bowX-25,by+7); ctx.lineTo(bowX,by+18); ctx.lineTo(bowX+25,by+7); ctx.stroke();
-  ctx.setLineDash([3,6]); ctx.strokeStyle='rgba(20,32,44,.25)'; ctx.beginPath(); ctx.moveTo(bowX,by); ctx.lineTo(bowX,20); ctx.stroke(); ctx.setLineDash([]);
+  const n=Math.max(3,Math.round(W/140)), aw=W/n; ctx.globalAlpha=0.14; ctx.fillStyle='#23439B';
+  for(let i=0;i<n;i++){ const x=i*aw; ctx.beginPath(); ctx.moveTo(x+aw*0.12,H); ctx.lineTo(x+aw*0.12,H*0.5); ctx.arc(x+aw/2,H*0.5,aw*0.38,Math.PI,0); ctx.lineTo(x+aw*0.88,H); ctx.closePath(); ctx.fill(); }
+  ctx.globalAlpha=1;
+  // pergamino con la frase
+  const it=curQ||order[0]; const pw=W-28, px=14, py=14;
+  ctx.font='700 '+(W<420?17:20)+'px '+FONT; const lines=wrap(ctx,it.q,pw-36).slice(0,4); const ph=40+lines.length*(W<420?22:26);
+  ctx.fillStyle='rgba(0,0,0,.15)'; rr(ctx,px+3,py+5,pw,ph,12); ctx.fill();
+  ctx.fillStyle='#F8F1E0'; rr(ctx,px,py,pw,ph,12); ctx.fill(); ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#8E5C0E'; ctx.font='700 11px '+FONT; ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText('¿QUIÉN LO SOSTUVO?',px+16,py+10);
+  ctx.fillStyle='#14202C'; ctx.font='700 '+(W<420?17:20)+'px '+FONT; ctx.textAlign='center'; ctx.textBaseline='top';
+  lines.forEach((l,k)=>ctx.fillText(l,W/2,py+30+k*(W<420?22:26)));
+  // reloj de la frase
+  if(!locked){ const pct=Math.max(0,1-qT/limit); ctx.fillStyle='#C3CED8'; rr(ctx,px+16,py+ph-12,pw-32,6,3); ctx.fill(); ctx.fillStyle=pct<0.35?'#A3271E':'#1D6E46'; rr(ctx,px+16,py+ph-12,(pw-32)*pct,6,3); ctx.fill(); }
+  // escudos
+  const y=shieldY();
+  for(const s of shields){ const x=shieldX(s);
+    for(const dx of [0,-W,W]){ const xx=x+dx; if(xx<-s.w||xx>W+s.w) continue;
+      ctx.save(); ctx.translate(xx,y); if(s.hit>0&&!RM) ctx.rotate(Math.sin(s.hit*40)*0.12);
+      ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0,s.h*0.72,s.w*0.4,6,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=s.c; ctx.beginPath(); ctx.moveTo(-s.w/2,-s.h/2); ctx.lineTo(s.w/2,-s.h/2); ctx.lineTo(s.w/2,s.h*0.1); ctx.quadraticCurveTo(s.w/2,s.h/2,0,s.h*0.62); ctx.quadraticCurveTo(-s.w/2,s.h/2,-s.w/2,s.h*0.1); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle='#F3E3C2'; ctx.lineWidth=3; ctx.stroke();
+      ctx.fillStyle='#FFFFFF'; ctx.font='700 '+(s.w<90?14:16)+'px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(s.n,0,-4);
+      ctx.restore(); } }
+  // arco que apunta
+  const bx=W/2, by=H-58; const tx=arrow?shieldX(arrow.s):aimX, ty=arrow?y:aimY; const ang=Math.atan2(ty-by,tx-bx);
+  ctx.save(); ctx.translate(bx,by); ctx.rotate(ang+Math.PI/2);
+  ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,26,34,Math.PI*1.15,Math.PI*1.85); ctx.stroke();
+  ctx.strokeStyle='#14202C'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-28,9); ctx.lineTo(0,22); ctx.lineTo(28,9); ctx.stroke(); ctx.restore();
+  if(arrow){ const t=Math.min(1,arrow.t), ax=bx+(tx-bx)*t, ay=by+(ty-by)*t; ctx.save(); ctx.translate(ax,ay); ctx.rotate(ang);
+    ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-30,0); ctx.lineTo(0,0); ctx.stroke(); ctx.fillStyle='#14202C'; ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(-2,-5); ctx.lineTo(-2,5); ctx.fill(); ctx.restore(); }
+  ctx.fillStyle='#C3CED8'; ctx.fillRect(0,H-22,W,22); ctx.fillStyle='#14202C'; ctx.font='700 12px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('Toca el escudo del autor',W/2,H-11);
   fxDraw(ctx); pausedOverlay(ctx);
 }
-holdBtn('#leftBtn',()=>{dir=-1;},()=>{ if(dir===-1) dir=0; }); holdBtn('#rightBtn',()=>{dir=1;},()=>{ if(dir===1) dir=0; });
-holdBtn('#shootBtn',()=>shoot());
-let drag=false;
-$('#cv').addEventListener('pointerdown',e=>{ const r=e.currentTarget.getBoundingClientRect(); bowX=(e.clientX-r.left)*(C.W/r.width); drag=true; });
-$('#cv').addEventListener('pointermove',e=>{ if(!drag) return; const r=e.currentTarget.getBoundingClientRect(); bowX=(e.clientX-r.left)*(C.W/r.width); });
-$('#cv').addEventListener('pointerup',()=>{ if(drag) shoot(); drag=false; });
-$('#cv').addEventListener('pointercancel',()=>{ drag=false; });
-window.addEventListener('keydown',e=>{ if(!RUN) return;
-  if(e.key==='ArrowLeft'){ dir=-1; e.preventDefault(); } else if(e.key==='ArrowRight'){ dir=1; e.preventDefault(); }
-  else if(e.key===' '){ shoot(); e.preventDefault(); } else if(e.key==='p'||e.key==='P') setPause(!PAUSED); });
-window.addEventListener('keyup',e=>{ if((e.key==='ArrowLeft'&&dir===-1)||(e.key==='ArrowRight'&&dir===1)) dir=0; });
+function pick(e){ const r=$('#cv').getBoundingClientRect(), x=(e.clientX-r.left)*(C.W/r.width), y=(e.clientY-r.top)*(C.H/r.height), sy=shieldY();
+  let best=null,bd=1e9; for(const s of shields){ for(const dx of [0,-C.W,C.W]){ const sx=shieldX(s)+dx, d=Math.abs(x-sx); if(d<s.w*0.6&&Math.abs(y-sy)<s.h*0.85&&d<bd){ bd=d; best=s; } } }
+  if(best) shootAt(best); else { aimX=x; aimY=y; } }
+$('#cv').addEventListener('pointerdown',pick);
+$('#cv').addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const r=$('#cv').getBoundingClientRect(); aimX=(e.clientX-r.left)*(C.W/r.width); aimY=(e.clientY-r.top)*(C.H/r.height); });
+window.addEventListener('keydown',e=>{ if(!RUN) return; const n='1234'.indexOf(e.key);
+  if(n>=0){ const sorted=shields.slice().sort((a,b)=>shieldX(a)-shieldX(b)); shootAt(sorted[n]); e.preventDefault(); }
+  else if(e.key==='p'||e.key==='P') setPause(!PAUSED); });
 
 </script>
 

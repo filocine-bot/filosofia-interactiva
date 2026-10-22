@@ -107,11 +107,17 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
 .stars svg.off{color:var(--line)}
 .rewards{display:flex;flex-direction:column;gap:12px}
 .bins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.bin{min-height:72px;padding:8px 6px;font:inherit;border-radius:12px;border:2px solid var(--lapis);background:var(--lapis-soft);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:manipulation}
-.bin b{font-family:var(--display);font-weight:400;font-size:1.05rem;line-height:1.1}
-.bin span{font-size:.72rem;color:var(--muted);line-height:1.2;text-align:center}
-.bin kbd{font:inherit;font-size:.7rem;color:var(--muted)}
-@media (max-width:420px){.bin span{display:none}}
+@media (max-width:560px){.bins{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bin{min-height:76px;padding:10px 8px;font:inherit;border-radius:12px;border:2px solid var(--lapis);background:var(--lapis-soft);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;touch-action:manipulation;transition:transform .1s}
+.bin:active{transform:scale(.97)}
+.bin b{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.1}
+.bin span{font-size:.86rem;font-weight:700;color:var(--ink);line-height:1.2;text-align:center}
+.bin.right{background:var(--ok-soft);border-color:var(--ok)}
+.bin.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.cheat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.cheat{grid-template-columns:minmax(0,1fr)}}
+.cheat div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.cheat b{font-family:var(--display);font-weight:400;font-size:1.1rem;display:block}
 
 </style>
 
@@ -152,9 +158,15 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
 </svg></figure>
     <p class="eyebrow">Filosofía clásica · siglo IV a. C.</p>
     <h1>Taller del escultor</h1>
-    <p class="lead">Para Aristóteles, conocer algo es conocer sus causas: de qué está hecho, qué forma tiene, quién lo produjo y para qué existe. En el taller caen piezas: envía cada una a su causa antes de que se rompa en el suelo.</p>
+    <p class="lead">Para Aristóteles, conocer algo es conocer sus <strong>cuatro causas</strong>. En el taller caen piezas que explican un objeto. Envía cada pieza a su causa antes de que toque el suelo.</p>
+    <div class="cheat">
+      <div><b>Causa material</b>¿De qué está hecho? <span class="small">Ej.: el mármol de la estatua.</span></div>
+      <div><b>Causa formal</b>¿Qué forma o diseño tiene? <span class="small">Ej.: la figura de la diosa.</span></div>
+      <div><b>Causa eficiente</b>¿Quién o qué lo produjo? <span class="small">Ej.: el escultor.</span></div>
+      <div><b>Causa final</b>¿Para qué existe? <span class="small">Ej.: honrar a la diosa.</span></div>
+    </div>
     <div class="how"><strong>Cómo se juega</strong>
-      <ol><li>Cae una tarjeta con una parte de un objeto, por ejemplo «El mármol» de una estatua.</li><li>Toca la causa correcta: <em>Material</em>, <em>Formal</em>, <em>Eficiente</em> o <em>Final</em> (o teclas 1 a 4).</li><li>Si te equivocas o la tarjeta toca el suelo, pierdes una de tus 3 vidas.</li><li>Las tarjetas caen cada vez más rápido. Son 16 piezas de 4 objetos.</li></ol></div>
+      <ol><li>Arriba verás el <strong>objeto</strong>, por ejemplo «Una casa». Cae una pieza, por ejemplo «Los albañiles».</li><li>Pregúntate qué responde esa pieza y toca la causa: «Los albañiles» responden <em>¿quién lo produjo?</em>, así que es la <strong>eficiente</strong>.</li><li>El primer objeto es de <strong>práctica</strong>: no pierdes vidas. Después, un error o una pieza en el suelo te quita una de tus 3 vidas.</li><li>Son 4 objetos con 4 piezas cada uno. Las piezas caen cada vez más rápido.</li></ol></div>
     <div class="stack" style="gap:10px">
       <h3>Retos e insignias</h3>
       <p class="small" id="collTxt">Cumple los retos para ganar insignias.</p>
@@ -174,15 +186,15 @@ input[type=text]{width:100%;min-height:48px;font:inherit;padding:10px 14px;borde
     </div>
     <div class="meta"><span id="round"></span><span id="best"></span></div>
     <div class="stage" id="stage">
-      <canvas id="cv" role="img" aria-label="Taller: cae una tarjeta que debes enviar a su causa"></canvas>
+      <canvas id="cv" role="img" aria-label="Taller: cae una pieza que debes enviar a su causa"></canvas>
       <div class="overlay"><div class="banner" id="banner" hidden></div></div>
       <div class="toast" id="toast" hidden></div>
     </div>
     <div class="bins" id="bins">
-      <button class="bin" type="button" data-c="mat"><b>Material</b><span>¿De qué está hecho?</span><kbd>1</kbd></button>
-      <button class="bin" type="button" data-c="for"><b>Formal</b><span>¿Qué forma tiene?</span><kbd>2</kbd></button>
-      <button class="bin" type="button" data-c="efi"><b>Eficiente</b><span>¿Quién lo produjo?</span><kbd>3</kbd></button>
-      <button class="bin" type="button" data-c="fin"><b>Final</b><span>¿Para qué existe?</span><kbd>4</kbd></button>
+      <button class="bin" type="button" data-c="mat"><b>Material</b><span>¿De qué está hecho?</span></button>
+      <button class="bin" type="button" data-c="for"><b>Formal</b><span>¿Qué forma o diseño tiene?</span></button>
+      <button class="bin" type="button" data-c="efi"><b>Eficiente</b><span>¿Quién o qué lo produjo?</span></button>
+      <button class="bin" type="button" data-c="fin"><b>Final</b><span>¿Para qué existe?</span></button>
     </div>
     <div class="btn-row"><button class="btn" id="pauseBtn" type="button">Pausa</button></div>
     <div id="fb" aria-live="polite"></div>
@@ -241,6 +253,7 @@ const MED={
  mitad:'<path d="M5 2v16M5 3h10l-2.5 3.5L15 10H5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>',
  intacto:'<path fill="currentColor" d="M10 17.5s-6.2-3.8-8-7.6C.8 7 2.5 3.8 5.6 3.8c1.8 0 3 1 4.4 2.6 1.4-1.6 2.6-2.6 4.4-2.6 3.1 0 4.8 3.2 3.6 6.1-1.8 3.8-8 7.6-8 7.6z"/>',
  sabio:'<path d="M10 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L10 14.2 5 17l1.2-5.6L2 7.6 7.6 7z" fill="currentColor"/>',
+ pluma:'<path d="M16.5 3C10 3.5 6.5 8 5.5 14.5L4 17.5M5.5 14.5c3.5-.3 7-2.5 8.5-7" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
  puntos:'<path d="M6 3h8v4a4 4 0 0 1-8 0zM6 5H3a3 3 0 0 0 3 3M14 5h3a3 3 0 0 1-3 3M10 11v4M7 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
 };
 const A={key:'',ch:[],coll:new Set(),earned:new Set(),best:0,lives:3,maxLives:3,score:0,combo:0,goal:1500};
@@ -337,6 +350,7 @@ function holdBtn(id,down,up){ const b=$(id); if(!b) return;
   if(up) ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,up)); }
 /* ===== fin del motor ===== */
 const CN={mat:'Causa material',for:'Causa formal',efi:'Causa eficiente',fin:'Causa final'};
+const CQ={mat:'¿de qué está hecho?',for:'¿qué forma o diseño tiene?',efi:'¿quién o qué lo produjo?',fin:'¿para qué existe?'};
 const KEYS=['mat','for','efi','fin'];
 const ROUNDS=[
  {o:'Una estatua de Atenea',c:{mat:'El mármol',for:'La figura de la diosa Atenea',efi:'El escultor que la talló',fin:'Honrar a la diosa en el templo'}},
@@ -345,67 +359,76 @@ const ROUNDS=[
  {o:'Un roble que nace de una bellota',c:{mat:'La materia de la bellota',for:'La estructura propia del roble',efi:'El roble que produjo la bellota',fin:'Llegar a ser un roble pleno'}}
 ];
 arcSetup('causas',[
- {id:'mitad',n:'Aprendiz del taller',d:'Clasifica 8 piezas'},
- {id:'rayo',n:'Mano rápida',d:'Clasifica una pieza en menos de 1,5 segundos'},
+ {id:'mitad',n:'Aprendiz del taller',d:'Clasifica bien 8 piezas'},
+ {id:'rayo',n:'Mano rápida',d:'Clasifica una pieza en menos de 2 segundos'},
  {id:'racha',n:'Racha imparable',d:'Llega a una racha ×4'},
- {id:'sabio',n:'Maestro escultor',d:'Clasifica las 16 piezas'},
+ {id:'sabio',n:'Maestro escultor',d:'Completa los 4 objetos'},
  {id:'intacto',n:'Sin un rasguño',d:'Termina sin perder vidas'},
  {id:'puntos',n:'Del acto a la gloria',d:'Supera 3.000 puntos'}
 ],3000);
-let deck,di,card,speed,clean,review,done,cardT;
+let deck,di,card,speed,clean,review,good,cardT;
+function practice(){ return di<4; }
 function start(){
   arcReset(3); deck=[]; ROUNDS.forEach(r=>{ shuffle(KEYS).forEach(k=>deck.push({o:r.o,t:r.c[k],k})); });
-  di=0; clean=0; review=[]; done=0; speed=48; card=null; FX=[]; FL=[];
-  requestAnimationFrame(()=>{ cvResize(360,460); banner('¡Al taller!','Envía cada pieza a su causa',1300,()=>spawn()); loopStart(step); });
+  di=0; clean=0; review=[]; good=0; speed=32; card=null; FX=[]; FL=[];
+  requestAnimationFrame(()=>{ cvResize(340,440); banner('Práctica','Objeto 1: '+deck[0].o+'. Aquí no pierdes vidas.',2000,()=>spawn()); loopStart(step); });
 }
-window.onArcResize=()=>{ cvResize(360,460); };
+window.onArcResize=()=>{ cvResize(340,440); };
 function spawn(){
-  if(!RUN) return; const d=deck[di]; card={...d,x:C.W/2,y:-60,vy:speed,fly:null}; cardT=0;
-  $('#whoLbl').textContent='Objeto'; $('#who').textContent=d.o; arcHud('Pieza '+(di+1)+' de 16');
+  if(!RUN) return; const d=deck[di]; card={...d,x:C.W/2,y:-50,vy:speed,fly:null}; cardT=0;
+  $('#whoLbl').textContent=practice()?'Práctica · objeto':'Objeto '+(Math.floor(di/4)+1)+' de 4'; $('#who').textContent=d.o;
+  arcHud('Pieza '+(di%4+1)+' de 4 de este objeto');
 }
+function flashBins(right,wrong){ document.querySelectorAll('.bin').forEach(b=>{ b.classList.toggle('right',b.dataset.c===right); b.classList.toggle('wrong',!!wrong&&b.dataset.c===wrong); });
+  setTimeout(()=>document.querySelectorAll('.bin').forEach(b=>b.classList.remove('right','wrong')),900); }
 function choose(k){
   if(!RUN||PAUSED||!card||card.fly) return;
-  const ok=k===card.k, idx=KEYS.indexOf(k);
-  card.fly={tx:C.W*(idx+0.5)/4,ty:C.H+40,ok};
-  resolve(ok,k);
+  const idx=KEYS.indexOf(k); card.fly={tx:C.W*(idx+0.5)/4,ty:C.H+40}; resolve(k===card.k,k);
 }
 function resolve(ok,k){
-  const d=card; done++;
-  if(ok){ const p=arcHit(); clean++; if(cardT<1.5) unlock('rayo'); burst(d.x,d.y,'#F6D27A',22); floatTxt(d.x,d.y-30,'+'+p,'#F6D27A');
-    fbOk(d.t+' → '+CN[d.k]+'.','Pieza de: '+d.o+'.'); review.push({ok:true,q:d.o+' · '+d.t,a:CN[d.k],why:'Correcto.'}); }
-  else { const dead=arcMiss(); burst(d.x,d.y,'#F2A097',12); floatTxt(d.x,d.y-30,k?'−1 vida':'¡Se rompió!','#F2A097');
-    fbBad(k?'No es la '+CN[k].toLowerCase()+'.':'La pieza tocó el suelo.','«'+d.t+'» es la '+CN[d.k].toLowerCase()+' de '+d.o.toLowerCase()+'.');
-    review.push({ok:false,q:d.o+' · '+d.t,a:CN[d.k],why:'Recuerda: material = materia; formal = forma; eficiente = quien produce; final = para qué.'});
-    if(dead){ endRun(false); return; } }
-  if(done>=8) unlock('mitad');
-  di++; speed+=7;
+  const d=card; flashBins(d.k,ok?null:k);
+  if(ok){ const p=arcHit(); good++; clean++; if(cardT<2) unlock('rayo'); if(good>=8) unlock('mitad'); burst(d.x,d.y,'#F6D27A',22); floatTxt(d.x,d.y-40,'+'+p,'#F6D27A');
+    fbOk('¡Bien! «'+d.t+'» es la '+CN[d.k].toLowerCase()+'.','Responde a la pregunta '+CQ[d.k]); review.push({ok:true,q:d.o+' · '+d.t,a:CN[d.k],why:'Responde '+CQ[d.k]}); }
+  else {
+    const msg=k?'No es la '+CN[k].toLowerCase()+'.':'La pieza tocó el suelo.';
+    const why='«'+d.t+'» responde '+CQ[d.k]+' Por eso es la '+CN[d.k].toLowerCase()+'.';
+    review.push({ok:false,q:d.o+' · '+d.t,a:CN[d.k],why});
+    if(practice()){ A.combo=0; tone(false); arcHud(); fbBad(msg+' (práctica, no pierdes vida)',why); floatTxt(d.x,d.y-40,'Práctica','#F6D27A'); }
+    else { fbBad(msg,why); floatTxt(d.x,d.y-40,'−1 vida','#F2A097'); burst(d.x,d.y,'#F2A097',12); if(arcMiss()){ endRun(false); return; } }
+  }
+  di++;
   if(di>=deck.length){ endRun(true); return; }
-  if(di%4===0) setTimeout(()=>banner('Nuevo objeto',deck[di].o,1200,()=>spawn()),500); else setTimeout(spawn,450);
+  if(di%4===0){ speed=Math.max(speed,44)+6; setTimeout(()=>banner(di===4?'¡Termina la práctica!':'Nuevo objeto',(di===4?'Ahora cuentan las vidas. ':'')+'Objeto: '+deck[di].o,1800,()=>spawn()),700); }
+  else { speed+=5; setTimeout(spawn,700); }
 }
-function endRun(won){ arcEnd({won,clean,total:16,review:review.concat(deck.slice(review.length).map(d=>({ok:false,q:d.o+' · '+d.t,a:CN[d.k],why:'No alcanzaste esta pieza.'})))}); }
+function endRun(won){ arcEnd({won,clean,total:16,review:review.concat(deck.slice(review.length).map(d=>({ok:false,q:d.o+' · '+d.t,a:CN[d.k],why:'Responde '+CQ[d.k]})))}); }
 function step(dt){
   fxUpdate(dt);
   if(card){
     if(card.fly){ card.x+=(card.fly.tx-card.x)*Math.min(1,dt*8); card.y+=(card.fly.ty-card.y)*Math.min(1,dt*8); if(Math.abs(card.y-card.fly.ty)<10) card=null; }
-    else { cardT+=dt; card.y+=card.vy*dt; if(card.y>C.H-110){ const c=card; card.fly={tx:c.x,ty:C.H+60,ok:false}; resolve(false,null); } }
+    else { cardT+=dt; card.y+=card.vy*dt; if(card.y>C.H-70){ card.fly={tx:card.x,ty:C.H+60}; resolve(false,null); } }
   }
   draw();
 }
 function draw(){
   const ctx=C.ctx, W=C.W, H=C.H;
   const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#E9EEF2'); g.addColorStop(1,'#C3CED8'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#DCE3F5'; for(let i=0;i<5;i++){ ctx.fillRect(20+i*(W-60)/4,30,20,H-150); }
-  ctx.fillStyle='#14202C'; ctx.fillRect(0,H-96,W,6);
-  KEYS.forEach((k,i)=>{ const x=W*i/4; ctx.fillStyle=i%2?'#DCE3F5':'#E9EEF2'; ctx.fillRect(x,H-90,W/4,90);
-    ctx.fillStyle='#23439B'; ctx.font='16px Marcellus, Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(CN[k].replace('Causa ',''),x+W/8,H-48); });
+  ctx.fillStyle='#DCE3F5'; for(let i=0;i<5;i++){ ctx.fillRect(20+i*(W-60)/4,60,18,H-120); }
+  // objeto fijo arriba
+  const it=card||deck[Math.min(di,deck.length-1)];
+  ctx.fillStyle='#14202C'; ctx.fillRect(0,0,W,46);
+  ctx.fillStyle='#F6D27A'; ctx.font='700 12px '+FONT; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(practice()?'PRÁCTICA · OBJETO':'OBJETO',14,16);
+  ctx.fillStyle='#FFFFFF'; ctx.font='19px Marcellus, Georgia, serif'; ctx.fillText(it.o,14,33);
+  // suelo
+  ctx.fillStyle='#8E5C0E'; ctx.fillRect(0,H-40,W,40); ctx.fillStyle='#F3E3C2'; ctx.font='700 12px '+FONT; ctx.textAlign='center'; ctx.fillText('SUELO DEL TALLER: ¡que no caiga aquí!',W/2,H-20);
   if(card){
-    const cw=Math.min(240,W*0.62), ch=92, x=card.x-cw/2, y=card.y-ch/2;
+    const cw=Math.min(280,W*0.78), ch=104, x=card.x-cw/2, y=card.y-ch/2;
     ctx.fillStyle='rgba(0,0,0,.18)'; rr(ctx,x+3,y+6,cw,ch,12); ctx.fill();
     ctx.fillStyle='#FFFFFF'; rr(ctx,x,y,cw,ch,12); ctx.fill(); ctx.strokeStyle='#8E5C0E'; ctx.lineWidth=2.5; ctx.stroke();
-    ctx.fillStyle='#8E5C0E'; ctx.font='700 11px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(card.o.toUpperCase().slice(0,32),card.x,y+16);
-    ctx.fillStyle='#14202C'; ctx.font='700 16px '+FONT;
-    const lines=wrap(ctx,card.t,cw-24).slice(0,3); lines.forEach((l,k)=>ctx.fillText(l,card.x,y+52+(k-(lines.length-1)/2)*19));
-    if(!card.fly){ const danger=Math.max(0,(card.y-(H-260))/150); if(danger>0){ ctx.strokeStyle='rgba(163,39,30,'+Math.min(1,danger)+')'; ctx.lineWidth=4; rr(ctx,x-4,y-4,cw+8,ch+8,14); ctx.stroke(); } }
+    ctx.fillStyle='#8E5C0E'; ctx.font='700 11px '+FONT; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('PIEZA · ¿QUÉ CAUSA ES?',card.x,y+16);
+    ctx.fillStyle='#14202C'; ctx.font='700 18px '+FONT;
+    const lines=wrap(ctx,card.t,cw-24).slice(0,3); lines.forEach((l,k)=>ctx.fillText(l,card.x,y+58+(k-(lines.length-1)/2)*21));
+    if(!card.fly){ const danger=Math.max(0,(card.y-(H-200))/130); if(danger>0){ ctx.strokeStyle='rgba(163,39,30,'+Math.min(1,danger)+')'; ctx.lineWidth=4; rr(ctx,x-4,y-4,cw+8,ch+8,14); ctx.stroke(); } }
   }
   fxDraw(ctx); pausedOverlay(ctx);
 }
